@@ -6,15 +6,8 @@ using System.Threading.Tasks;
 
 namespace EpicurAppData.Repositories
 {
-    /// <summary>
-    /// Interface pour accéder à la base de données des clients.
-    /// </summary>
     public interface IClientRepository
     {
-        /// <summary>
-        /// Ajoute un client dans la base de données.
-        /// </summary>
-        /// <param name="client">Le client à ajouter.</param>
         void AjouterClient(Client client);
     }
 }

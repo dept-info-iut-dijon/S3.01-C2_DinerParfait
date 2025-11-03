@@ -6,13 +6,4 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Microsoft.Data.Sqlite.Core" Version="9.0.10" />
-    <PackageReference Include="System.Data.SQLite.Linq" Version="1.0.119" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\EpicurAppData\EpicurAppData.csproj" />
-  </ItemGroup>
-
 </Project>
