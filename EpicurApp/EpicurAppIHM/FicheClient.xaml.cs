@@ -24,14 +24,26 @@ namespace EpicurAppIHM
     {
         private IClientService _clientService;
 
+        /// <summary>
+        /// Constructeur de la fenêtre.
+        /// </summary>
+        /// <param name="clientService">Service client injecté pour gérer l'enregistrement.</param>
         public FicheClient(IClientService clientService)
         {
             InitializeComponent();
             _clientService = clientService;
         }
 
-        // Méthode pour enregistrer un client (exemple, tu peux l'appeler depuis un bouton)
-        private void EnregistrerClient(string nom, string prenom, string email, string telephone)
+
+        /// <summary>
+        /// Enregistre un client en base et affiche un message de confirmation ou d'erreur.
+        /// </summary>
+        /// <param name="nom">Nom du client.</param>
+        /// <param name="prenom">Prénom du client.</param>
+        /// <param name="email">Email du client.</param>
+        /// <param name="telephone">Téléphone du client.</param>
+        /// <param name="telephone">Téléphone du client.</param>
+        private void EnregistrerClient(string nom, string prenom, string email, string telephone, string allergies, string note)
         {
             try
             {
@@ -40,7 +52,9 @@ namespace EpicurAppIHM
                     Nom = nom,
                     Prenom = prenom,
                     Email = email,
-                    Telephone = telephone
+                    Telephone = telephone,
+                    Allergies = allergies,
+                    Note = note
                 };
 
                 _clientService.AjouterClient(client);
