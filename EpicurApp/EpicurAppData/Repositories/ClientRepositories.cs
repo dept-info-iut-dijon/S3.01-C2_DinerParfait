@@ -7,6 +7,9 @@ using Microsoft.Data.Sqlite;
 
 namespace EpicurAppData.Repositories
 {
+    /// <summary>
+    /// Implémentation du repository client utilisant SQLite.
+    /// </summary>
     public class ClientRepository : IClientRepository
     {
         private string _connectionString = "Data Source=epicurapp.db";
