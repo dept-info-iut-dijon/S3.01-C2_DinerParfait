@@ -5,11 +5,13 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:EpicurAppIHM"
         mc:Ignorable="d"
-        Title="Fiche Client" Height="750" Width="700"
+        FontFamily="./Police/#Playfair Display"
+        Title="MainWindow" Height="750" Width="700" 
         WindowStartupLocation="CenterScreen"
-        Background="#E8DCCA">
+        Background="#FDF6E3">
+    
 
-    <Border BorderBrush="#D4AF37" 
+    <Border BorderBrush="#8B1538" 
             BorderThickness="3" 
             CornerRadius="10"
             Margin="15">
@@ -41,111 +43,78 @@
             <!-- Ligne de séparation -->
             <Rectangle Grid.Row="1" 
                        Height="2" 
-                       Fill="#D4AF37"
+                       Fill="#8B1538"
                        Margin="0,20,0,20"/>
 
             <!-- Formulaire -->
-            <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">
+            <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Hidden">
                 <StackPanel>
 
                     <!-- Prénom -->
-                    <Label Content="Prénom *" 
-                           Foreground="#D4AF37" 
-                           FontWeight="SemiBold"
-                           FontSize="13"/>
-                    <Border BorderBrush="#D4AF37" 
-                            BorderThickness="2" 
-                            CornerRadius="8"
-                            Background="#2a2a2a">
-                        <TextBox x:Name="txtPrenom" 
-                                 Height="40"
-                                 Padding="10"
-                                 FontSize="14"
-                                 Background="Transparent"
-                                 Foreground="White"
-                                 BorderThickness="0"/>
+                    <Label Content="Prénom *" Foreground="#D4AF37" FontWeight="SemiBold" FontSize="13" />
+                    <Border BorderBrush="#D4AF37" BorderThickness="2" CornerRadius="8" Background="#2a2a2a">
+                        <TextBox x:Name="txtPrenom"
+                     Height="40"
+                     Padding="10"
+                     FontSize="14"
+                     Background="Transparent"
+                     Foreground="White"
+                     BorderThickness="0"
+                     LostFocus="ValiderPrenom"/>
                     </Border>
+                    <TextBlock x:Name="erreurPrenom" Text="Le prénom ne doit contenir que des lettres"
+                   Foreground="#ff6b6b" FontSize="11" Visibility="Collapsed"/>
 
                     <!-- Nom -->
-                    <Label Content="Nom *" 
-                           Foreground="#D4AF37" 
-                           FontWeight="SemiBold"
-                           FontSize="13"
-                           Margin="0,15,0,0"/>
-                    <Border BorderBrush="#D4AF37" 
-                            BorderThickness="2" 
-                            CornerRadius="8"
-                            Background="#2a2a2a">
-                        <TextBox x:Name="txtNom" 
-                                 Height="40"
-                                 Padding="10"
-                                 FontSize="14"
-                                 Background="Transparent"
-                                 Foreground="White"
-                                 BorderThickness="0"/>
+                    <Label Content="Nom *" Foreground="#D4AF37" FontWeight="SemiBold" FontSize="13" Margin="0,15,0,0"/>
+                    <Border BorderBrush="#D4AF37" BorderThickness="2" CornerRadius="8" Background="#2a2a2a">
+                        <TextBox x:Name="txtNom"
+                     Height="40"
+                     Padding="10"
+                     FontSize="14"
+                     Background="Transparent"
+                     Foreground="White"
+                     BorderThickness="0"
+                     LostFocus="ValiderNom"/>
                     </Border>
+                    <TextBlock x:Name="erreurNom" Text="Le nom ne doit contenir que des lettres"
+                   Foreground="#ff6b6b" FontSize="11" Visibility="Collapsed"/>
 
                     <!-- Email -->
-                    <Label Content="Email *" 
-                           Foreground="#D4AF37" 
-                           FontWeight="SemiBold"
-                           FontSize="13"
-                           Margin="0,15,0,0"/>
-                    <Border BorderBrush="#D4AF37" 
-                            BorderThickness="2" 
-                            CornerRadius="8"
-                            Background="#2a2a2a">
-                        <TextBox x:Name="txtEmail" 
-                                 Height="40"
-                                 Padding="10"
-                                 FontSize="14"
-                                 Background="Transparent"
-                                 Foreground="White"
-                                 BorderThickness="0"/>
+                    <Label Content="Email *" Foreground="#D4AF37" FontWeight="SemiBold" FontSize="13" Margin="0,15,0,0"/>
+                    <Border BorderBrush="#D4AF37" BorderThickness="2" CornerRadius="8" Background="#2a2a2a">
+                        <TextBox x:Name="txtEmail"
+                     Height="40"
+                     Padding="10"
+                     FontSize="14"
+                     Background="Transparent"
+                     Foreground="White"
+                     BorderThickness="0"
+                     LostFocus="ValiderEmail"/>
                     </Border>
+                    <TextBlock x:Name="erreurEmail" Text="Email invalide"
+                   Foreground="#ff6b6b" FontSize="11" Visibility="Collapsed"/>
 
                     <!-- Téléphone -->
-                    <Label Content="Téléphone *" 
-                           Foreground="#D4AF37" 
-                           FontWeight="SemiBold"
-                           FontSize="13"
-                           Margin="0,15,0,0"/>
-                    <Border BorderBrush="#D4AF37" 
-                            BorderThickness="2" 
-                            CornerRadius="8"
-                            Background="#2a2a2a">
-                        <TextBox x:Name="txtTelephone" 
-                                 Height="40"
-                                 Padding="10"
-                                 FontSize="14"
-                                 Background="Transparent"
-                                 Foreground="White"
-                                 BorderThickness="0"/>
+                    <Label Content="Téléphone *" Foreground="#D4AF37" FontWeight="SemiBold" FontSize="13" Margin="0,15,0,0"/>
+                    <Border BorderBrush="#D4AF37" BorderThickness="2" CornerRadius="8" Background="#2a2a2a">
+                        <TextBox x:Name="txtTelephone"
+                     Height="40"
+                     Padding="10"
+                     FontSize="14"
+                     Background="Transparent"
+                     Foreground="White"
+                     BorderThickness="0"
+                     LostFocus="ValiderTelephone"/>
                     </Border>
+                    <TextBlock x:Name="erreurTelephone" Text="Téléphone invalide (10 chiffres)"
+                   Foreground="#ff6b6b" FontSize="11" Visibility="Collapsed"/>
 
-                    <!-- Carte Bancaire -->
-                    <Label Content="Carte Bancaire *" 
-                           Foreground="#D4AF37" 
-                           FontWeight="SemiBold"
-                           FontSize="13"
-                           Margin="0,15,0,0"/>
-                    <Border BorderBrush="#D4AF37" 
-                            BorderThickness="2" 
-                            CornerRadius="8"
-                            Background="#2a2a2a">
-                        <TextBox x:Name="txtCarte" 
-                                 Height="40"
-                                 Padding="10"
-                                 FontSize="14"
-                                 Background="Transparent"
-                                 Foreground="White"
-                                 BorderThickness="0"
-                                 MaxLength="19"/>
-                    </Border>
+                    
 
                     <!-- Ligne de séparation -->
                     <Rectangle Height="1" 
-                               Fill="#D4AF37"
+                               Fill="#8B1538"
                                Margin="0,25,0,15"/>
 
                     <!-- Allergies -->
@@ -166,9 +135,8 @@
                                  BorderThickness="0"/>
                     </Border>
 
-
-                    <!-- Plats non appréciés -->
-                    <Label Content="Plats non appréciés" 
+                    <!-- Plats non appréciés / Préférences -->
+                    <Label Content="Plats non appréciés/Préferences" 
                            Foreground="#D4AF37" 
                            FontWeight="SemiBold"
                            FontSize="13"
@@ -188,8 +156,10 @@
                                  AcceptsReturn="True"
                                  VerticalScrollBarVisibility="Auto"/>
                     </Border>
+                    
                 </StackPanel>
             </ScrollViewer>
+            
 
             <!-- Boutons -->
             <StackPanel Grid.Row="3" 
