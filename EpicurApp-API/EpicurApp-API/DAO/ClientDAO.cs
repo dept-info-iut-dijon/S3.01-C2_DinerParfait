@@ -1,13 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using EpicurApp_API.Models;
+using EpicurAPP_Partage.Interfaces;
 using Microsoft.Data.Sqlite;
 
-namespace EpicurAppData.Repositories
+namespace EpicurApp_API.DAO
 {
-    public class ClientRepository : IClientRepository
+    /// <summary>
+    /// Implémentation du repository client utilisant SQLite.
+    /// </summary>
+    public class ClientDAO : IClientDAO
     {
         private string _connectionString = "Data Source=epicurapp.db";
 
@@ -17,7 +17,7 @@ namespace EpicurAppData.Repositories
             {
                 connection.Open();
 
-                string query = "INSERT INTO Clients (Nom, Prenom, Email, Telephone) VALUES (@Nom, @Prenom, @Email, @Telephone)";
+                string query = "INSERT INTO Clients (Nom, Prenom, Email, Telephone, Allergies, Notes) VALUES (@Nom, @Prenom, @Email, @Telephone, @Allergies, @Notes)";
                 using (var command = new SqliteCommand(query, connection))
                 {
                     command.Parameters.AddWithValue("@Nom", client.Nom);
@@ -25,7 +25,7 @@ namespace EpicurAppData.Repositories
                     command.Parameters.AddWithValue("@Email", client.Email);
                     command.Parameters.AddWithValue("@Telephone", client.Telephone);
                     command.Parameters.AddWithValue("@Allergies", client.Allergies);
-                    command.Parameters.AddWithValue("@Note", client.Note);
+                    command.Parameters.AddWithValue("@Notes", client.Notes);
                     command.ExecuteNonQuery();
                 }
             }
