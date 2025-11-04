@@ -1,7 +1,7 @@
 ﻿using System.Windows;
+using EpicurApp_API.Models;
 using EpicurAPP_Partage.Exceptions;
 using EpicurAPP_Partage.Interfaces;
-using EpicurAPP_Partage.Models;
 
 namespace EpicurAppIHM
 {
@@ -42,7 +42,7 @@ namespace EpicurAppIHM
                     Email = txtEmail.Text,
                     Telephone = txtTelephone.Text,
                     Allergies = txtAllergies.Text,
-                    Note = txtPlats.Text
+                    Notes = txtPlats.Text
                 };
 
                 _clientService.AjouterClient(client);
