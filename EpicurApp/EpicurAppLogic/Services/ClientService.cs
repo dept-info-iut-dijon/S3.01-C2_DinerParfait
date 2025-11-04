@@ -1,17 +1,15 @@
-﻿using System.Data.SQLite;
-using EpicurAppData;
-using EpicurAppData.Repositories;
+﻿using EpicurApp_API.DAO;
+using EpicurApp_API.Models;
 using EpicurAppLogic.Exceptions;
 using EpicurAppLogic.Services;
-using Microsoft.Data.Sqlite;
 
 namespace EpicurApp.Logic.Services
 {
     public class ClientService : IClientService
     {
-        private IClientRepository _clientRepository;
+        private IClientDAO _clientRepository;
 
-        public ClientService(IClientRepository clientRepository)
+        public ClientService(IClientDAO clientRepository)
         {
             _clientRepository = clientRepository;
         }

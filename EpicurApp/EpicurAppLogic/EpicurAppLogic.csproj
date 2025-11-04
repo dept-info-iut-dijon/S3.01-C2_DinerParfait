@@ -12,6 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\..\EpicurApp-API\EpicurApp-API\EpicurApp-API.csproj" />
     <ProjectReference Include="..\EpicurAppData\EpicurAppData.csproj" />
   </ItemGroup>
 
