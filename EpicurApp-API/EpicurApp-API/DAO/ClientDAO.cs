@@ -21,7 +21,7 @@ namespace EpicurApp_API.DAO
             {
                 connection.Open();
 
-                string query = "INSERT INTO Clients (Nom, Prenom, Email, Telephone) VALUES (@Nom, @Prenom, @Email, @Telephone)";
+                string query = "INSERT INTO Clients (Nom, Prenom, Email, Telephone, Allergies, Note) VALUES (@Nom, @Prenom, @Email, @Telephone, @Allergies, @Note)";
                 using (var command = new SqliteCommand(query, connection))
                 {
                     command.Parameters.AddWithValue("@Nom", client.Nom);

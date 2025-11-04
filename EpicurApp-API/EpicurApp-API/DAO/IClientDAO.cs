@@ -10,7 +10,7 @@ namespace EpicurApp_API.DAO
     /// <summary>
     /// Interface pour accéder à la base de données des clients.
     /// </summary>
-    public interface IClientRepository
+    public interface IClientDAO
     {
         /// <summary>
         /// Ajoute un client dans la base de données.
