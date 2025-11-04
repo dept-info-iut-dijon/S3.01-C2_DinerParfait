@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using EpicurAppData;
+using EpicurApp_API.Models;
 
 namespace EpicurAppLogic.Services
 {

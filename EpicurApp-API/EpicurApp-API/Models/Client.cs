@@ -1,4 +1,4 @@
-﻿namespace EpicurAppData
+﻿namespace EpicurApp_API.Models
 {
     /// <summary>
     /// Représente un client.

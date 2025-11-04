@@ -3,14 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using EpicurApp_API.Models;
 using Microsoft.Data.Sqlite;
 
-namespace EpicurAppData.Repositories
+namespace EpicurApp_API.DAO
 {
     /// <summary>
     /// Implémentation du repository client utilisant SQLite.
     /// </summary>
-    public class ClientRepository : IClientRepository
+    public class ClientDAO : IClientDAO
     {
         private string _connectionString = "Data Source=epicurapp.db";
 
@@ -20,7 +21,7 @@ namespace EpicurAppData.Repositories
             {
                 connection.Open();
 
-                string query = "INSERT INTO Clients (Nom, Prenom, Email, Telephone) VALUES (@Nom, @Prenom, @Email, @Telephone)";
+                string query = "INSERT INTO Clients (Nom, Prenom, Email, Telephone, Allergies, Note) VALUES (@Nom, @Prenom, @Email, @Telephone, @Allergies, @Note)";
                 using (var command = new SqliteCommand(query, connection))
                 {
                     command.Parameters.AddWithValue("@Nom", client.Nom);
