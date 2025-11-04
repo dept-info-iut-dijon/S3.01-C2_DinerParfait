@@ -1,11 +1,13 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.14.36616.10
+VisualStudioVersion = 17.14.36616.10 d17.14
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EpicurAppIHM", "EpicurAppIHM\EpicurAppIHM.csproj", "{A129BB93-5C0B-41D9-B229-C92E2C4281C1}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EpicurAPP-Partage", "EpicurAPP-Partage\EpicurAPP-Partage\EpicurAPP-Partage.csproj", "{BCF9D7A0-2F32-0B07-F703-90AB0C33F0E4}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EpicurAppData", "EpicurAppData\EpicurAppData.csproj", "{6EFF9BFE-1A04-48DF-8EE0-F57DD1963C1C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EpicurAppLogic", "EpicurAppLogic\EpicurAppLogic.csproj", "{9CE0CC68-3B07-4576-936A-667EB70642A2}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -17,10 +19,14 @@ Global
 		{A129BB93-5C0B-41D9-B229-C92E2C4281C1}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A129BB93-5C0B-41D9-B229-C92E2C4281C1}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{A129BB93-5C0B-41D9-B229-C92E2C4281C1}.Release|Any CPU.Build.0 = Release|Any CPU
-		{BCF9D7A0-2F32-0B07-F703-90AB0C33F0E4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{BCF9D7A0-2F32-0B07-F703-90AB0C33F0E4}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{BCF9D7A0-2F32-0B07-F703-90AB0C33F0E4}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{BCF9D7A0-2F32-0B07-F703-90AB0C33F0E4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6EFF9BFE-1A04-48DF-8EE0-F57DD1963C1C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6EFF9BFE-1A04-48DF-8EE0-F57DD1963C1C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6EFF9BFE-1A04-48DF-8EE0-F57DD1963C1C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6EFF9BFE-1A04-48DF-8EE0-F57DD1963C1C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9CE0CC68-3B07-4576-936A-667EB70642A2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9CE0CC68-3B07-4576-936A-667EB70642A2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9CE0CC68-3B07-4576-936A-667EB70642A2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9CE0CC68-3B07-4576-936A-667EB70642A2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
