@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using EpicurApp_API.Models;
+using EpicurAPP_Partage.Models;
 
-namespace EpicurApp_API.DAO
+namespace EpicurAPP_Partage.Interfaces
 {
     /// <summary>
     /// Interface pour accéder à la base de données des clients.

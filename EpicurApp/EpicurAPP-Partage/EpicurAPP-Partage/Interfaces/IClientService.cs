@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using EpicurApp_API.Models;
+using EpicurAPP_Partage.Models;
 
-namespace EpicurAppLogic.Services
+namespace EpicurAPP_Partage.Interfaces
 {
     /// <summary>
     /// Interface pour la gestion des clients.

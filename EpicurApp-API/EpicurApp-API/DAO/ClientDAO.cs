@@ -1,9 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using EpicurApp_API.Models;
+﻿using EpicurAPP_Partage.Interfaces;
+using EpicurAPP_Partage.Models;
 using Microsoft.Data.Sqlite;
 
 namespace EpicurApp_API.DAO

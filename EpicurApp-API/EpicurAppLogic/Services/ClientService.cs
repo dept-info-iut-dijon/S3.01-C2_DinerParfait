@@ -1,7 +1,6 @@
-﻿using EpicurApp_API.DAO;
-using EpicurApp_API.Models;
-using EpicurAppLogic.Exceptions;
-using EpicurAppLogic.Services;
+﻿using EpicurAPP_Partage.Exceptions;
+using EpicurAPP_Partage.Interfaces;
+using EpicurAPP_Partage.Models;
 
 namespace EpicurApp.Logic.Services
 {
