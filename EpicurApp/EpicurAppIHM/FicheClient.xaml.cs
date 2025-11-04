@@ -13,7 +13,7 @@ using System.Windows.Shapes;
 namespace EpicurAppIHM
 {
     /// <summary>
-    /// Interaction logic for MainWindow.xaml
+    /// Interaction logic for FicheClient.xaml
     /// </summary>
     public partial class FicheClient : Window
     {
@@ -92,22 +92,7 @@ namespace EpicurAppIHM
             }
         }
 
-        // Valide la carte bancaire
-        private void ValiderCarte(object sender, RoutedEventArgs e)
-        {
-            string carte = txtCarte.Text.Trim().Replace(" ", "");
-
-            if (!string.IsNullOrEmpty(carte) && !Regex.IsMatch(carte, @"^\d{16}$"))
-            {
-                txtCarte.BorderBrush = Brushes.Red;
-                erreurCarte.Visibility = Visibility.Visible;
-            }
-            else
-            {
-                txtCarte.BorderBrush = Brushes.Gray;
-                erreurCarte.Visibility = Visibility.Collapsed;
-            }
-        }
+        
 
         // Vérifie tout
         private bool ToutEstValide()
@@ -126,8 +111,7 @@ namespace EpicurAppIHM
             if (string.IsNullOrWhiteSpace(txtTelephone.Text) || erreurTelephone.Visibility == Visibility.Visible)
                 ok = false;
 
-            if (string.IsNullOrWhiteSpace(txtCarte.Text) || erreurCarte.Visibility == Visibility.Visible)
-                ok = false;
+            
 
             return ok;
         }
@@ -139,7 +123,6 @@ namespace EpicurAppIHM
             txtNom.Clear();
             txtEmail.Clear();
             txtTelephone.Clear();
-            txtCarte.Clear();
             txtAllergies.Clear();
             txtPlats.Clear();
 
@@ -147,13 +130,11 @@ namespace EpicurAppIHM
             txtNom.BorderBrush = Brushes.Gray;
             txtEmail.BorderBrush = Brushes.Gray;
             txtTelephone.BorderBrush = Brushes.Gray;
-            txtCarte.BorderBrush = Brushes.Gray;
 
             erreurPrenom.Visibility = Visibility.Collapsed;
             erreurNom.Visibility = Visibility.Collapsed;
             erreurEmail.Visibility = Visibility.Collapsed;
             erreurTelephone.Visibility = Visibility.Collapsed;
-            erreurCarte.Visibility = Visibility.Collapsed;
         }
 
         // Bouton Créer client
@@ -161,7 +142,7 @@ namespace EpicurAppIHM
         {
             if (!ToutEstValide())
             {
-                MessageBox.Show("Vchamps non valide",
+                MessageBox.Show("champs non valide",
                                 "Champs invalides",
                                 MessageBoxButton.OK,
                                 MessageBoxImage.Warning);

@@ -7,9 +7,9 @@
         mc:Ignorable="d"
         Title="MainWindow" Height="750" Width="700"
         WindowStartupLocation="CenterScreen"
-        Background="#E8DCCA">
+        Background="#FDF6E3">
 
-    <Border BorderBrush="#D4AF37" 
+    <Border BorderBrush="#8B1538" 
             BorderThickness="3" 
             CornerRadius="10"
             Margin="15">
@@ -41,11 +41,11 @@
             <!-- Ligne de séparation -->
             <Rectangle Grid.Row="1" 
                        Height="2" 
-                       Fill="#D4AF37"
+                       Fill="#8B1538"
                        Margin="0,20,0,20"/>
 
             <!-- Formulaire -->
-            <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">
+            <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Hidden">
                 <StackPanel>
 
                     <!-- Prénom -->
@@ -108,25 +108,11 @@
                     <TextBlock x:Name="erreurTelephone" Text="Téléphone invalide (10 chiffres)"
                    Foreground="#ff6b6b" FontSize="11" Visibility="Collapsed"/>
 
-                    <!-- Carte Bancaire -->
-                    <Label Content="Carte Bancaire *" Foreground="#D4AF37" FontWeight="SemiBold" FontSize="13" Margin="0,15,0,0"/>
-                    <Border BorderBrush="#D4AF37" BorderThickness="2" CornerRadius="8" Background="#2a2a2a">
-                        <TextBox x:Name="txtCarte"
-                     Height="40"
-                     Padding="10"
-                     FontSize="14"
-                     Background="Transparent"
-                     Foreground="White"
-                     BorderThickness="0"
-                     MaxLength="19"
-                     LostFocus="ValiderCarte"/>
-                    </Border>
-                    <TextBlock x:Name="erreurCarte" Text="Carte invalide (16 chiffres)"
-                   Foreground="#ff6b6b" FontSize="11" Visibility="Collapsed"/>
+                    
 
                     <!-- Ligne de séparation -->
                     <Rectangle Height="1" 
-                               Fill="#D4AF37"
+                               Fill="#8B1538"
                                Margin="0,25,0,15"/>
 
                     <!-- Allergies -->
