@@ -1,5 +1,5 @@
-﻿using EpicurAPP_Partage.Interfaces;
-using EpicurAPP_Partage.Models;
+﻿using EpicurApp_API.Models;
+using EpicurAPP_Partage.Interfaces;
 using Microsoft.Data.Sqlite;
 
 namespace EpicurApp_API.DAO

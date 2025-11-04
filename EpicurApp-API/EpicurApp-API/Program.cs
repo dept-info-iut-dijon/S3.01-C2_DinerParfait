@@ -1,4 +1,5 @@
 using EpicurApp_API.DAO;
+using EpicurAPP_Partage.Interfaces;
 
 var builder = WebApplication.CreateBuilder(args);
 

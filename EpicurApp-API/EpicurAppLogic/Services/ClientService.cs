@@ -1,6 +1,6 @@
 ﻿using EpicurAPP_Partage.Exceptions;
 using EpicurAPP_Partage.Interfaces;
-using EpicurAPP_Partage.Models;
+using EpicurApp_API.Models;
 
 namespace EpicurApp.Logic.Services
 {
@@ -15,7 +15,6 @@ namespace EpicurApp.Logic.Services
 
         public void AjouterClient(Client client)
         {
-           
             if (string.IsNullOrWhiteSpace(client.Nom) || string.IsNullOrWhiteSpace(client.Prenom))
             {
                 throw new InvalidFieldException("Le nom et le prénom sont obligatoires.");
