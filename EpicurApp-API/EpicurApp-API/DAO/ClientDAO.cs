@@ -1,5 +1,5 @@
-﻿using EpicurAPP_Partage.Interfaces;
-using EpicurAPP_Partage.Models;
+﻿using EpicurApp_API.Models;
+using EpicurAPP_Partage.Interfaces;
 using Microsoft.Data.Sqlite;
 
 namespace EpicurApp_API.DAO
@@ -17,7 +17,7 @@ namespace EpicurApp_API.DAO
             {
                 connection.Open();
 
-                string query = "INSERT INTO Clients (Nom, Prenom, Email, Telephone, Allergies, Note) VALUES (@Nom, @Prenom, @Email, @Telephone, @Allergies, @Note)";
+                string query = "INSERT INTO Clients (Nom, Prenom, Email, Telephone, Allergies, Notes) VALUES (@Nom, @Prenom, @Email, @Telephone, @Allergies, @Notes)";
                 using (var command = new SqliteCommand(query, connection))
                 {
                     command.Parameters.AddWithValue("@Nom", client.Nom);
@@ -25,7 +25,7 @@ namespace EpicurApp_API.DAO
                     command.Parameters.AddWithValue("@Email", client.Email);
                     command.Parameters.AddWithValue("@Telephone", client.Telephone);
                     command.Parameters.AddWithValue("@Allergies", client.Allergies);
-                    command.Parameters.AddWithValue("@Note", client.Note);
+                    command.Parameters.AddWithValue("@Notes", client.Notes);
                     command.ExecuteNonQuery();
                 }
             }
