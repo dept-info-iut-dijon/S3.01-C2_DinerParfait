@@ -5,9 +5,11 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:EpicurAppIHM"
         mc:Ignorable="d"
-        Title="MainWindow" Height="750" Width="700"
+        FontFamily="./Police/#Playfair Display"
+        Title="MainWindow" Height="750" Width="700" 
         WindowStartupLocation="CenterScreen"
         Background="#FDF6E3">
+    
 
     <Border BorderBrush="#8B1538" 
             BorderThickness="3" 
@@ -49,7 +51,7 @@
                 <StackPanel>
 
                     <!-- Prénom -->
-                    <Label Content="Prénom *" Foreground="#D4AF37" FontWeight="SemiBold" FontSize="13"/>
+                    <Label Content="Prénom *" Foreground="#D4AF37" FontWeight="SemiBold" FontSize="13" />
                     <Border BorderBrush="#D4AF37" BorderThickness="2" CornerRadius="8" Background="#2a2a2a">
                         <TextBox x:Name="txtPrenom"
                      Height="40"
