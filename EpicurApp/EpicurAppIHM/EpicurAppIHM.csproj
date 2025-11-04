@@ -9,7 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\EpicurAppLogic\EpicurAppLogic.csproj" />
+    <ProjectReference Include="..\EpicurAPP-Partage\EpicurAPP-Partage\EpicurAPP-Partage.csproj" />
   </ItemGroup>
 
 </Project>

@@ -19,7 +19,7 @@
 	</ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Models\" />
+    <ProjectReference Include="..\..\EpicurApp\EpicurAPP-Partage\EpicurAPP-Partage\EpicurAPP-Partage.csproj" />
   </ItemGroup>
 
 </Project>

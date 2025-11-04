@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace EpicurAppLogic.Exceptions
+namespace EpicurAPP_Partage.Exceptions
 {
     //Exception levée en cas d'erreur de validation
     public class InvalidFieldException : Exception

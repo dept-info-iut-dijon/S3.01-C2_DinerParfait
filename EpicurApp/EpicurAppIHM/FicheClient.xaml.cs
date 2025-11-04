@@ -1,19 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
-using EpicurAppData;
-using EpicurAppLogic.Exceptions;
-using EpicurAppLogic.Services;
+﻿using System.Windows;
+using EpicurAPP_Partage.Exceptions;
+using EpicurAPP_Partage.Interfaces;
+using EpicurAPP_Partage.Models;
 
 namespace EpicurAppIHM
 {
@@ -24,50 +12,63 @@ namespace EpicurAppIHM
     {
         private IClientService _clientService;
 
-        /// <summary>
-        /// Constructeur de la fenêtre.
-        /// </summary>
-        /// <param name="clientService">Service client injecté pour gérer l'enregistrement.</param>
         public FicheClient(IClientService clientService)
         {
             InitializeComponent();
             _clientService = clientService;
         }
 
+        // Vide tous les champs
+        private void Annuler(object sender, RoutedEventArgs e)
+        {
+            txtPrenom.Clear();
+            txtNom.Clear();
+            txtEmail.Clear();
+            txtTelephone.Clear();
+            txtCarte.Clear();
+            txtAllergies.Clear();
+            txtPlats.Clear();
+        }
 
-        /// <summary>
-        /// Enregistre un client en base et affiche un message de confirmation ou d'erreur.
-        /// </summary>
-        /// <param name="nom">Nom du client.</param>
-        /// <param name="prenom">Prénom du client.</param>
-        /// <param name="email">Email du client.</param>
-        /// <param name="telephone">Téléphone du client.</param>
-        /// <param name="telephone">Téléphone du client.</param>
-        private void EnregistrerClient(string nom, string prenom, string email, string telephone, string allergies, string note)
+        // Crée le client en base via le service
+        private void CreerClient(object sender, RoutedEventArgs e)
         {
             try
             {
                 var client = new Client
                 {
-                    Nom = nom,
-                    Prenom = prenom,
-                    Email = email,
-                    Telephone = telephone,
-                    Allergies = allergies,
-                    Note = note
+                    Nom = txtNom.Text,
+                    Prenom = txtPrenom.Text,
+                    Email = txtEmail.Text,
+                    Telephone = txtTelephone.Text,
+                    Allergies = txtAllergies.Text,
+                    Note = txtPlats.Text
                 };
 
                 _clientService.AjouterClient(client);
-                MessageBox.Show("Client ajouté avec succès !");
+
+                MessageBox.Show("Client ajouté avec succès !",
+                                "Succès",
+                                MessageBoxButton.OK,
+                                MessageBoxImage.Information);
+
+                Annuler(sender, e);
             }
             catch (InvalidFieldException ex)
             {
-                MessageBox.Show($"Erreur de saisie : {ex.Message}");
+                MessageBox.Show($"Erreur de saisie : {ex.Message}",
+                                "Erreur",
+                                MessageBoxButton.OK,
+                                MessageBoxImage.Warning);
             }
             catch (ApplicationException ex)
             {
-                MessageBox.Show($"Erreur lors de l'enregistrement : {ex.Message}");
+                MessageBox.Show($"Erreur lors de l'enregistrement : {ex.Message}",
+                                "Erreur",
+                                MessageBoxButton.OK,
+                                MessageBoxImage.Error);
             }
         }
     }
 }
+
