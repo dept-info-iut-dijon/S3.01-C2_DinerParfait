@@ -2,91 +2,126 @@
 using Microsoft.Data.Sqlite;
 using System.Collections.Generic;
 using System;
-using System.Threading.Tasks;
 using EpicurAPP_Partage.Interfaces;
 
 namespace EpicurApp_API.DAO
 {
     public class PlatDAO : IPlatDAO
     {
-        private readonly string connexionString = "Data Source=epicurapp.db";
+        private string _connexionString = "Data Source=epicurapp.db";
 
-        public async Task<IEnumerable<Plat>> GetAllAsync()
+        public List<Plat> GetAll()
         {
-            var plats = new List <Plat>();
+            var plats = new List<Plat>();
+            const string query = "SELECT Id, Nom, Categorie, IngredientsPrincipaux FROM Plats ORDER BY Categorie, Nom;";
 
-            const string query = "SELECT Id, Nom, Categorie, IngredientsPrincipaux, Cout FROM Plats ORDER BY Categorie, Nom;";
-
-            using (var connexion = new SqliteConnection(connexionString))
+            using (var connexion = new SqliteConnection(_connexionString))
             {
-                await connexion.OpenAsync();
+                connexion.Open();
                 using (var cmd = new SqliteCommand(query, connexion))
+                using (var reader = cmd.ExecuteReader())
                 {
-                    using (var reader = await cmd.ExecuteReaderAsync())
+                    while (reader.Read())
                     {
-                        while (await reader.ReadAsync())
+                        plats.Add(new Plat
                         {
-                            plats.Add(new Plat
-                            {
-                                Id = reader.GetInt32(0),
-                                Nom = reader.GetString(1),
-                                Categorie = reader.GetString(2),
-                                IngredientsPrincipaux = reader.GetString(3),
-                                Cout = reader.GetDecimal(4)
-                            });
-                        }
+                            Id = reader.GetInt32(0),
+                            Nom = reader.GetString(1),
+                            Categorie = reader.GetString(2),
+                            IngredientsPrincipaux = reader.IsDBNull(3) ? string.Empty : reader.GetString(3) // ✅ Gestion des valeurs NULL
+                        });
                     }
                 }
             }
+
             return plats;
         }
 
-        public async Task<Plat> GetByIdAsync(int id)
+        public Plat? GetById(int id)
         {
-            Plat plat = null;
-            const string query = "SELECT Id, Nom, Categorie, IngredientsPrincipaux, Cout FROM Plats WHERE Id = @Id;";
+            Plat? plat = null;
+            const string query = "SELECT Id, Nom, Categorie, IngredientsPrincipaux FROM Plats WHERE Id = @Id;";
 
-            using (var connection = new SqliteConnection(connexionString))
+            using (var connection = new SqliteConnection(_connexionString))
             {
-                await connection.OpenAsync();
+                connection.Open();
                 using (var command = new SqliteCommand(query, connection))
                 {
                     command.Parameters.AddWithValue("@Id", id);
 
-                    using (var reader = await command.ExecuteReaderAsync())
+                    using (var reader = command.ExecuteReader())
                     {
-                        if (await reader.ReadAsync())
+                        if (reader.Read())
                         {
                             plat = new Plat
                             {
                                 Id = reader.GetInt32(0),
                                 Nom = reader.GetString(1),
                                 Categorie = reader.GetString(2),
-                                IngredientsPrincipaux = reader.GetString(3),
-                                Cout = reader.GetDecimal(4)
+                                IngredientsPrincipaux = reader.IsDBNull(3) ? string.Empty : reader.GetString(3) // ✅ Gestion des valeurs NULL
                             };
                         }
                     }
                 }
             }
+
             return plat;
         }
 
-        public async Task AddAsync(Plat plat)
+        public void Add(Plat plat)
         {
-            const string query= "INSERT INTO Plats (Nom, Categorie, IngredientsPrincipaux, Cout) VALUES (@Nom, @Categorie, @IngredientsPrincipaux, @Cout);";
+           
+            const string query = "INSERT INTO Plats (Nom, Categorie, IngredientsPrincipaux) VALUES (@Nom, @Categorie, @IngredientsPrincipaux);";
 
-            using (var connection = new SqliteConnection(connexionString))
+            using (var connection = new SqliteConnection(_connexionString))
             {
-                await connection.OpenAsync();
+                connection.Open();
                 using (var command = new SqliteCommand(query, connection))
                 {
-                    command.Parameters.AddWithValue("@Nom",plat.Nom);
+                    command.Parameters.AddWithValue("@Nom", plat.Nom);
                     command.Parameters.AddWithValue("@Categorie", plat.Categorie);
-                    command.Parameters.AddWithValue("@IngredientsPrincipaux", plat.IngredientsPrincipaux);
-                    command.Parameters.AddWithValue("@Cout", plat.Cout);
+                    command.Parameters.AddWithValue("@IngredientsPrincipaux", plat.IngredientsPrincipaux ?? string.Empty); // ✅ Gestion des valeurs NULL
 
-                    await command.ExecuteNonQueryAsync();
+                    command.ExecuteNonQuery();
+
+
+                    command.CommandText = "SELECT last_insert_rowid();";
+                    plat.Id = Convert.ToInt32(command.ExecuteScalar());
+                }
+            }
+        }
+
+       
+        public void Update(Plat plat)
+        {
+            const string query = "UPDATE Plats SET Nom = @Nom, Categorie = @Categorie, IngredientsPrincipaux = @IngredientsPrincipaux WHERE Id = @Id;";
+
+            using (var connection = new SqliteConnection(_connexionString))
+            {
+                connection.Open();
+                using (var command = new SqliteCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@Id", plat.Id);
+                    command.Parameters.AddWithValue("@Nom", plat.Nom);
+                    command.Parameters.AddWithValue("@Categorie", plat.Categorie);
+                    command.Parameters.AddWithValue("@IngredientsPrincipaux", plat.IngredientsPrincipaux ?? string.Empty);
+
+                    command.ExecuteNonQuery();
+                }
+            }
+        }
+
+        public void Delete(int id)
+        {
+            const string query = "DELETE FROM Plats WHERE Id = @Id;";
+
+            using (var connection = new SqliteConnection(_connexionString))
+            {
+                connection.Open();
+                using (var command = new SqliteCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@Id", id);
+                    command.ExecuteNonQuery();
                 }
             }
         }

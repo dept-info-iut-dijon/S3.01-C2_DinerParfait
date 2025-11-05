@@ -7,35 +7,77 @@ namespace EpicurApp_API.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class PlatsController : ControllerBase
+    public class PlatsController : Controller
     {
-        private readonly IPlatDAO platDAO;
-        private readonly ILogger<PlatsController> logger;
+        private readonly IPlatDAO _platDAO;
 
-        public PlatsController(IPlatDAO platDAO, ILogger<PlatsController> logger)
+        public PlatsController(IPlatDAO platDAO)
         {
-            this.platDAO=platDAO;
-            this.logger=logger;
+            _platDAO = platDAO;
         }
 
-        //GET: api/plats
+        // GET: api/plats
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Plat>>> GetAllPlats()
+        public ActionResult<IEnumerable<Plat>> GetAllPlats()
         {
             try
             {
-                var plats = await platDAO.GetAllAsync();
+                var plats = _platDAO.GetAll();
+
+
+                if (plats == null || !plats.Any())
+                {
+                    return Ok(new List<Plat>()); 
+                }
 
                 return Ok(plats);
             }
             catch (Exception e)
             {
-                return StatusCode(500, $"Erreur interne du serveur lors de l'accès aux données : {e.Message}");
+                return StatusCode(500, $"Erreur interne du serveur : {e.Message}");
             }
         }
 
+        // GET: api/plats/5
+        [HttpGet("{id}")]
+        public ActionResult<Plat> GetPlatById(int id)
+        {
+            try
+            {
+                var plat = _platDAO.GetById(id);
+                if (plat == null)
+                {
+                    return NotFound($"Aucun plat trouvé avec l'ID {id}");
+                }
+                return Ok(plat);
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500, $"Erreur interne du serveur : {e.Message}");
+            }
+        }
+
+        // GET: api/plats/categorie/{categorie}
+        [HttpGet("categorie/{categorie}")]
+        public ActionResult<IEnumerable<Plat>> GetPlatsByCategorie(string categorie)
+        {
+            try
+            {
+                var plats = _platDAO.GetAll()
+                    .Where(p => p.Categorie.Equals(categorie, StringComparison.OrdinalIgnoreCase))
+                    .ToList();
+
+                return Ok(plats);
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500, $"Erreur interne du serveur : {e.Message}");
+            }
+        }
+
+        // POST: api/plats
         [HttpPost]
-        public async Task<ActionResult<Plat>> CreatePlat([FromBody]Plat plat)
+        public ActionResult<Plat> CreatePlat([FromBody] Plat plat)
         {
             if (plat == null || !ModelState.IsValid)
             {
@@ -44,34 +86,12 @@ namespace EpicurApp_API.Controllers
 
             try
             {
-                await platDAO.AddAsync(plat);
-
-                return Ok(plat);
+                _platDAO.Add(plat);
+                return CreatedAtAction(nameof(GetPlatById), new { id = plat.Id }, plat);
             }
             catch (Exception e)
             {
-                return StatusCode(500, e.Message);
-            }
-        }
-
-        // GET: api/plats/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Plat>> GetPlatById(int id)
-        {
-            try
-            {
-                var plat = await platDAO.GetByIdAsync(id);
-
-                if (plat == null)
-                {
-                    return NotFound();
-                }
-
-                return Ok(plat);
-            }
-            catch (Exception e)
-            {
-                return StatusCode(500, e.Message);
+                return StatusCode(500, $"Erreur lors de la création : {e.Message}");
             }
         }
     }
