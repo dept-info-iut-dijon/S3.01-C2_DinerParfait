@@ -14,15 +14,13 @@ namespace EpicurApp_API.DAO
             {
                 connection.Open();
 
-                string query = "INSERT INTO Menus (Nom, Date, Statut, CoutGlobal, TempsPreparationMinutes) " +
-                               "VALUES (@Nom, @Date, @Statut, @CoutGlobal, @TempsPreparationMinutes);";
+                string query = "INSERT INTO Menus (Nom, Date, Statut) " +
+                               "VALUES (@Nom, @Date, @Statut);";
                 using (var command = new SqliteCommand(query, connection))
                 {
                     command.Parameters.AddWithValue("@Nom", menu.Nom);
                     command.Parameters.AddWithValue("@Date", menu.Date);
                     command.Parameters.AddWithValue("@Statut", menu.Statut);
-                    command.Parameters.AddWithValue("@CoutGlobal", menu.CoutGlobal);
-                    command.Parameters.AddWithValue("@TempsPreparationMinutes", menu.TempsPreparationMinutes);
                     command.ExecuteNonQuery();
                 }
             }
@@ -34,7 +32,7 @@ namespace EpicurApp_API.DAO
             {
                 connection.Open();
 
-                string query = "SELECT Id, Nom, Date, Statut, CoutGlobal, TempsPreparationMinutes FROM Menus WHERE Id=@Id";
+                string query = "SELECT Id, Nom, Date, Statut FROM Menus WHERE Id=@Id";
                 using (var command = new SqliteCommand(query, connection))
                 {
                     command.Parameters.AddWithValue("@Id", id);
@@ -48,8 +46,6 @@ namespace EpicurApp_API.DAO
                                 Nom = reader.GetString(1),
                                 Date = reader.GetDateTime(2),
                                 Statut = reader.GetString(3),
-                                CoutGlobal = reader.GetDecimal(4),
-                                TempsPreparationMinutes = reader.GetInt32(5)
                             };
                         }
                     }
@@ -65,7 +61,7 @@ namespace EpicurApp_API.DAO
             {
                 connection.Open();
 
-                string query = "SELECT Id, Nom, Date, Statut, CoutGlobal, TempsPreparationMinutes FROM Menus";
+                string query = "SELECT Id, Nom, Date, Statut FROM Menus";
                 using (var command = new SqliteCommand(query, connection))
                 using (var reader = command.ExecuteReader())
                 {
@@ -77,8 +73,6 @@ namespace EpicurApp_API.DAO
                             Nom = reader.GetString(1),
                             Date = reader.GetDateTime(2),
                             Statut = reader.GetString(3),
-                            CoutGlobal = reader.GetDecimal(4),
-                            TempsPreparationMinutes = reader.GetInt32(5)
                         });
                     }
                 }
