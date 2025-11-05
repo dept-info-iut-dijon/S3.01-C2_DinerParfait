@@ -8,4 +8,20 @@
     <UseWPF>true</UseWPF>
   </PropertyGroup>
 
+  <ItemGroup>
+    <None Remove="Police\PlayfairDisplay-Bold.ttf" />
+    <None Remove="Police\PlayfairDisplay-Italic.ttf" />
+    <None Remove="Police\PlayfairDisplay-Regular.ttf" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\EpicurAPP-Partage\EpicurAPP-Partage\EpicurAPP-Partage.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Police\PlayfairDisplay-Bold.ttf" />
+    <Resource Include="Police\PlayfairDisplay-Italic.ttf" />
+    <Resource Include="Police\PlayfairDisplay-Regular.ttf" />
+  </ItemGroup>
+
 </Project>
