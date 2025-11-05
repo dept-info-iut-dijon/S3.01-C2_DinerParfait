@@ -1,4 +1,6 @@
-﻿namespace EpicurApp_API.Models
+﻿using System.Text.Json.Serialization;
+
+namespace EpicurApp_API.Models
 {
     public class Plat
     {
@@ -8,6 +10,7 @@
         public string IngredientsPrincipaux { get; set; } //Essentiel à l'alerte alergene
         public decimal Cout {  get; set; } //Coût unitaire
 
+        [JsonIgnore]
         public ICollection<Menu> Menus { get; set; } = new List<Menu>();
     }
 }
