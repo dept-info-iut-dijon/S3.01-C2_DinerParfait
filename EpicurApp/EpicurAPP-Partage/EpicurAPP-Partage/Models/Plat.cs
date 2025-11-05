@@ -1,6 +1,4 @@
-﻿using System.Text.Json.Serialization;
-
-namespace EpicurApp_API.Models
+﻿namespace EpicurApp_API.Models
 {
     public class Plat
     {
@@ -8,9 +6,5 @@ namespace EpicurApp_API.Models
         public string Nom { get; set; }
         public string Categorie { get; set; } //Entrée, Plat, Dessert
         public string IngredientsPrincipaux { get; set; } //Essentiel à l'alerte alergene
-        public decimal Cout {  get; set; } //Coût unitaire
-
-        [JsonIgnore]
-        public ICollection<Menu> Menus { get; set; } = new List<Menu>();
     }
 }
