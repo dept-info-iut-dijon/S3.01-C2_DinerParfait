@@ -1,7 +1,6 @@
 ﻿using EpicurApp_API.Models;
-using EpicurAppData;
 
-namespace EpicurApp_API.DAO
+namespace EpicurAPP_Partage.Interfaces
 {
     public interface IPlatDAO
     {
