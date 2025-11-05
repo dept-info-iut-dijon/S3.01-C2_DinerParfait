@@ -24,4 +24,8 @@
     <Resource Include="Police\PlayfairDisplay-Regular.ttf" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Page Include="App.xaml" />
+  </ItemGroup>
+
 </Project>
