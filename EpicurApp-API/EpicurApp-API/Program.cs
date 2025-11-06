@@ -1,3 +1,4 @@
+using EpicurApp.Logic.Services;
 using EpicurApp_API.DAO;
 using EpicurAPP_Partage.Interfaces;
 
@@ -11,6 +12,9 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddScoped<IClientDAO, ClientDAO>();
+builder.Services.AddScoped<IMenuDAO, MenuDAO>();
+builder.Services.AddScoped<IClientService, ClientService>();
+builder.Services.AddScoped<IMenuService, MenuService>();
 
 var app = builder.Build();
 
