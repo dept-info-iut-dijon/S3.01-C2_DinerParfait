@@ -20,7 +20,7 @@ namespace EpicurApp_API.Controllers
         {
             try
             {
-                var allergenes = _allergeneDAO.GetAll();
+                List<Allergene> allergenes = _allergeneDAO.GetAll();
                 return Ok(allergenes);
             }
             catch (Exception ex)
