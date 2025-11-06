@@ -10,7 +10,7 @@ namespace EpicurApp_API.DAO
 
         public void AjouterMenu(Menu menu)
         {
-            using (var connection = new SqliteConnection(_connectionString))
+            using (SqliteConnection connection = new SqliteConnection(_connectionString))
             {
                 connection.Open();
 
@@ -21,7 +21,7 @@ namespace EpicurApp_API.DAO
                     (@Nom, @Date, @Statut, @AmuseBoucheId, @BoissonAperitifId, @EntreeId, 
                      @PlatPrincipalId, @VinId, @FromageId, @DessertId)";
 
-                using (var command = new SqliteCommand(query, connection))
+                using (SqliteCommand command = new SqliteCommand(query, connection))
                 {
                     command.Parameters.AddWithValue("@Nom", menu.Nom);
                     command.Parameters.AddWithValue("@Date", menu.Date);
@@ -69,7 +69,7 @@ namespace EpicurApp_API.DAO
 
         public Menu? GetById(int id)
         {
-            using (var connection = new SqliteConnection(_connectionString))
+            using (SqliteConnection connection = new SqliteConnection(_connectionString))
             {
                 connection.Open();
 
@@ -78,10 +78,10 @@ namespace EpicurApp_API.DAO
                     PlatPrincipalId, VinId, FromageId, DessertId 
                     FROM Menus WHERE Id=@Id";
 
-                using (var command = new SqliteCommand(query, connection))
+                using (SqliteCommand command = new SqliteCommand(query, connection))
                 {
                     command.Parameters.AddWithValue("@Id", id);
-                    using (var reader = command.ExecuteReader())
+                    using (SqliteDataReader reader = command.ExecuteReader())
                     {
                         if (reader.Read())
                         {
@@ -137,8 +137,8 @@ namespace EpicurApp_API.DAO
 
         public List<Menu> GetAll()
         {
-            var menus = new List<Menu>();
-            using (var connection = new SqliteConnection(_connectionString))
+            List<Menu> menus = new List<Menu>();
+            using (SqliteConnection connection = new SqliteConnection(_connectionString))
             {
                 connection.Open();
 
@@ -147,8 +147,8 @@ namespace EpicurApp_API.DAO
                     PlatPrincipalId, VinId, FromageId, DessertId 
                     FROM Menus";
 
-                using (var command = new SqliteCommand(query, connection))
-                using (var reader = command.ExecuteReader())
+                using (SqliteCommand command = new SqliteCommand(query, connection))
+                using (SqliteDataReader reader = command.ExecuteReader())
                 {
                     while (reader.Read())
                     {
@@ -203,21 +203,21 @@ namespace EpicurApp_API.DAO
 
         public void AjouterPlatsAuMenu(int menuId, List<int> platIds)
         {
-            using (var connection = new SqliteConnection(_connectionString))
+            using (SqliteConnection connection = new SqliteConnection(_connectionString))
             {
                 connection.Open();
 
                 string deleteQuery = "DELETE FROM MenuPlat WHERE MenuId=@MenuId";
-                using (var command = new SqliteCommand(deleteQuery, connection))
+                using (SqliteCommand command = new SqliteCommand(deleteQuery, connection))
                 {
                     command.Parameters.AddWithValue("@MenuId", menuId);
                     command.ExecuteNonQuery();
                 }
 
-                foreach (var platId in platIds)
+                foreach (int platId in platIds)
                 {
                     string insertQuery = "INSERT INTO MenuPlat (MenuId, PlatId) VALUES (@MenuId, @PlatId)";
-                    using (var command = new SqliteCommand(insertQuery, connection))
+                    using (SqliteCommand command = new SqliteCommand(insertQuery, connection))
                     {
                         command.Parameters.AddWithValue("@MenuId", menuId);
                         command.Parameters.AddWithValue("@PlatId", platId);

@@ -66,14 +66,32 @@ namespace EpicurAppIHM.Views
 
         private void ConfigurerComboBox(ComboBox comboBox, string categorie)
         {
-            comboBox.ItemsSource = tousLesPlats
-                .Where(p => p.Categorie == categorie)
-                .OrderBy(p => p.Nom)
-                .ToList();
+            List<Plat> platsClasse = new List<Plat>();
+
+            foreach (Plat plat in tousLesPlats)
+            {
+                if (plat.Categorie == categorie)
+                {
+                    platsClasse.Add(plat);
+                }
+            }
+
+            platsClasse.Sort(ComparerPlatsParNom);
+
+            comboBox.ItemsSource = platsClasse;
 
             comboBox.DisplayMemberPath = "Nom"; 
             comboBox.SelectedValuePath = "Id"; // ce que SelectedValue renverra
             comboBox.SelectedIndex = -1;
+        }
+
+        private int ComparerPlatsParNom(Plat p1, Plat p2)
+        {
+            if (p1?.Nom == null && p2?.Nom == null) return 0;
+            if (p1?.Nom == null) return -1;
+            if (p2?.Nom == null) return 1;
+
+            return p1.Nom.CompareTo(p2.Nom);
         }
 
         private void Annuler(object sender, RoutedEventArgs e)

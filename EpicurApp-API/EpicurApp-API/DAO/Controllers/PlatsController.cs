@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 namespace EpicurApp_API.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
+    [Route("[controller]")]
     public class PlatsController : Controller
     {
         private readonly IPlatDAO _platDAO;
@@ -16,13 +16,13 @@ namespace EpicurApp_API.Controllers
             _platDAO = platDAO;
         }
 
-        // GET: api/plats
+        // GET: plats
         [HttpGet]
         public ActionResult<IEnumerable<Plat>> GetAllPlats()
         {
             try
             {
-                var plats = _platDAO.GetAll();
+                List<Plat> plats = _platDAO.GetAll();
 
 
                 if (plats == null || !plats.Any())
@@ -38,13 +38,13 @@ namespace EpicurApp_API.Controllers
             }
         }
 
-        // GET: api/plats/5
+        // GET: plats
         [HttpGet("{id}")]
         public ActionResult<Plat> GetPlatById(int id)
         {
             try
             {
-                var plat = _platDAO.GetById(id);
+                Plat plat = _platDAO.GetById(id);
                 if (plat == null)
                 {
                     return NotFound($"Aucun plat trouvé avec l'ID {id}");
@@ -57,13 +57,13 @@ namespace EpicurApp_API.Controllers
             }
         }
 
-        // GET: api/plats/categorie/{categorie}
+        // GET: plats/categorie/{categorie}
         [HttpGet("categorie/{categorie}")]
         public ActionResult<IEnumerable<Plat>> GetPlatsByCategorie(string categorie)
         {
             try
             {
-                var plats = _platDAO.GetAll()
+                List<Plat> plats = _platDAO.GetAll()
                     .Where(p => p.Categorie.Equals(categorie, StringComparison.OrdinalIgnoreCase))
                     .ToList();
 
@@ -75,7 +75,7 @@ namespace EpicurApp_API.Controllers
             }
         }
 
-        // POST: api/plats
+        // POST: plats
         [HttpPost]
         public ActionResult<Plat> CreatePlat([FromBody] Plat plat)
         {

@@ -49,7 +49,7 @@ namespace EpicurApp_API.DAO.Controllers
         {
             try
             {
-                var menu = _menuService.GetById(id);
+                Menu menu = _menuService.GetById(id);
                 if (menu == null)
                     return NotFound($"Menu avec Id {id} non trouvé.");
 
@@ -71,7 +71,7 @@ namespace EpicurApp_API.DAO.Controllers
         {
             try
             {
-                var menus = _menuService.GetAll();
+                List<Menu> menus = _menuService.GetAll();
                 return Ok(menus);
             }
             catch (Exception ex)
