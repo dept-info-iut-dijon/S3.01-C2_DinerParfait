@@ -17,7 +17,8 @@ namespace EpicurAppIHM
 
         private void AffichageMenu(object sender, RoutedEventArgs e)
         {
-            throw new System.NotImplementedException();
+            Views.MenusView menusView = new Views.MenusView();
+            menusView.Show();
         }
     }
 }

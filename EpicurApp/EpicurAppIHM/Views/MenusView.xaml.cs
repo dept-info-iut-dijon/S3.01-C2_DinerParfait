@@ -1,9 +1,9 @@
-﻿using System.Windows.Controls;
+﻿using System.Windows;
 
 
 namespace EpicurAppIHM.Views
 {
-    public partial class MenusView : UserControl
+    public partial class MenusView : Window
     {
         //private MenuVM _menuVM;
 

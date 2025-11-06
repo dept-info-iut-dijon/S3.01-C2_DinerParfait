@@ -5,7 +5,9 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:EpicurAppIHM" xmlns:views="clr-namespace:EpicurAppIHM.Views"
         mc:Ignorable="d"
-        Title="Window1" Height="1080" Width="1920" WindowState="Maximized">
+        Title="Window1" Height="1080" Width="1920" WindowState="Maximized"
+        Background="#E8DCCA"
+        FontFamily="./Police/#Playfair Display">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -16,13 +18,13 @@
         <Border Grid.Row="0" 
                 Background="#8B1538" 
                 BorderThickness="0,0,0,3"
-                BorderBrush="#34495E">
+                BorderBrush="#D4AF37">
             <StackPanel Orientation="Horizontal" Height="65" Margin="15,0">
 
                 <!-- Bouton Clients -->
                 <Button Content="Clients" 
                         Width="150" Height="45" Margin="5"
-                        Background="#3498DB" Foreground="White" 
+                        Background="#D4AF37" Foreground="White" 
                         FontSize="16" FontWeight="SemiBold"
                         BorderThickness="0" Cursor="Hand" Click="FicheClient">
                     <Button.Style>
@@ -51,7 +53,7 @@
                 <!-- Bouton Menus -->
                 <Button Content="Menus" 
                         Width="150" Height="45" Margin="5"
-                        Background="#27AE60" Foreground="White" 
+                        Background="#C0C0C0" Foreground="White" 
                         FontSize="16" FontWeight="SemiBold"
                         BorderThickness="0" Cursor="Hand" Click="AffichageMenu">
                     <Button.Style>
@@ -85,8 +87,7 @@
             <!-- Vue Clients -->
             <views:ClientsView x:Name="ClientsViewControl" Visibility="Visible"/>
 
-            <!-- Vue Menus -->
-            <views:MenusView x:Name="MenusViewControl" Visibility="Collapsed"/>
+       
         </Grid>
     </Grid>
 </Window>
