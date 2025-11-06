@@ -5,7 +5,7 @@ using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Media;
 
-namespace EpicurAppIHM
+namespace EpicurAppIHM.Views
 {
     /// <summary>
     /// Fenêtre de création d'un nouveau client

@@ -13,12 +13,12 @@ namespace EpicurApp_API.DAO
 
         public void AjouterClient(Client client)
         {
-            using (var connection = new SqliteConnection(_connectionString))
+            using (SqliteConnection connection = new SqliteConnection(_connectionString))
             {
                 connection.Open();
 
                 string query = "INSERT INTO Clients (Nom, Prenom, Email, Telephone, Allergies, Notes) VALUES (@Nom, @Prenom, @Email, @Telephone, @Allergies, @Notes)";
-                using (var command = new SqliteCommand(query, connection))
+                using (SqliteCommand command = new SqliteCommand(query, connection))
                 {
                     command.Parameters.AddWithValue("@Nom", client.Nom);
                     command.Parameters.AddWithValue("@Prenom", client.Prenom);
