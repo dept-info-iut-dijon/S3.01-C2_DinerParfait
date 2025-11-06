@@ -11,7 +11,7 @@ namespace EpicurAppIHM.Views
 {
     public partial class CreationMenu : Window
     {
-        private readonly HttpClient _httpClient;
+        private HttpClient _httpClient;
         private List<Plat> tousLesPlats;
 
         public CreationMenu()
@@ -33,7 +33,7 @@ namespace EpicurAppIHM.Views
         {
             try
             {
-                var response = _httpClient.GetAsync("api/plats").Result;
+                var response = _httpClient.GetAsync("plats").Result;
                 response.EnsureSuccessStatusCode();
 
                 tousLesPlats = response.Content.ReadFromJsonAsync<List<Plat>>().Result;
