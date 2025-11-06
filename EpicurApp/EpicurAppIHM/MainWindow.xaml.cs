@@ -8,5 +8,16 @@ namespace EpicurAppIHM
         {
             InitializeComponent();
         }
+
+        private void FicheClient(object sender, RoutedEventArgs e)
+        {
+            FicheClient ficheClient = new FicheClient();
+            ficheClient.Show();
+        }
+
+        private void AffichageMenu(object sender, RoutedEventArgs e)
+        {
+            throw new System.NotImplementedException();
+        }
     }
 }
