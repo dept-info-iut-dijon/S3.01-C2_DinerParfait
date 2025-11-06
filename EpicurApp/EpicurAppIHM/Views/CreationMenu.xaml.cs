@@ -112,21 +112,29 @@ namespace EpicurAppIHM.Views
 
             try
             {
-                var menuData = new EpicurApp_API.Models.Menu
+                var menuData = new
                 {
-                    Nom = "Nouveau menu",
-                    Date = DateTime.Now,
-                    Statut = "Brouillon",
-                    AmuseBoucheId = cmbAmuseGueule.SelectedValue as int?,
-                    BoissonAperitifId = cmbBoissonAperitif.SelectedValue as int?,
-                    EntreeId = cmbEntree.SelectedValue as int?,
-                    PlatPrincipalId = cmbPlat.SelectedValue as int?,
-                    VinId = cmbVin.SelectedValue as int?,
-                    FromageId = cmbFromage.SelectedValue as int?,
-                    DessertId = cmbDessert.SelectedValue as int?
+                    nom = "Nouveau menu",
+                    date = DateTime.Now,
+                    statut = "Brouillon",
+                    amuseBoucheId = cmbAmuseGueule.SelectedValue as int?,
+                    boissonAperitifId = cmbBoissonAperitif.SelectedValue as int?,
+                    entreeId = cmbEntree.SelectedValue as int?,
+                    platPrincipalId = cmbPlat.SelectedValue as int?,
+                    vinId = cmbVin.SelectedValue as int?,
+                    fromageId = cmbFromage.SelectedValue as int?,
+                    dessertId = cmbDessert.SelectedValue as int?,
+
+                    amuseBouche = (object)null,
+                    boissonAperitif = (object)null,
+                    entree = (object)null,
+                    platPrincipal = (object)null,
+                    vin = (object)null,
+                    fromage = (object)null,
+                    dessert = (object)null
                 };
 
-                var response = _httpClient.PostAsJsonAsync("api/menus", menuData).Result;
+                var response = _httpClient.PostAsJsonAsync("Menu", menuData).Result;
 
                 if (response.IsSuccessStatusCode)
                 {
@@ -135,12 +143,19 @@ namespace EpicurAppIHM.Views
                 }
                 else
                 {
-                    MessageBox.Show($"Erreur lors de la création :\n{response.Content.ReadAsStringAsync().Result}", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
+                    string errorDetails = response.Content.ReadAsStringAsync().Result;
+                    MessageBox.Show($"Erreur {(int)response.StatusCode} ({response.StatusCode}):\n\n{errorDetails}",
+                                    "Erreur détaillée",
+                                    MessageBoxButton.OK,
+                                    MessageBoxImage.Error);
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                MessageBox.Show("Erreur lors de la création du menu.", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Exception lors de la création :\n\n{ex.Message}\n\nInner: {ex.InnerException?.Message}",
+                       "Erreur",
+                       MessageBoxButton.OK,
+                       MessageBoxImage.Error);
             }
             finally
             {
