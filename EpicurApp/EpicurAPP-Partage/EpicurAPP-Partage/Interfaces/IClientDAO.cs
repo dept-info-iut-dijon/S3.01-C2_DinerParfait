@@ -17,5 +17,12 @@ namespace EpicurAPP_Partage.Interfaces
         /// </summary>
         /// <param name="client">Le client à ajouter.</param>
         void AjouterClient(Client client);
+
+        /// <summary>
+        /// Recherche un client par son ID
+        /// </summary>
+        /// <param name="id">ID du client</param>
+        /// <returns>Le client avec l'ID correspodant</returns>
+        public Client rechercherClientParId(int id);
     }
 }
