@@ -137,7 +137,8 @@ namespace EpicurAppIHM
             txtEmail.Clear();
             txtTelephone.Clear();
             txtAllergies.Clear();
-            txtPlats.Clear();
+            txtPlatsNonApprecies.Clear();
+            txtPreferences.Clear();
 
             // Réinitialiser les bordures
             borderPrenom.BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#D4AF37"));
@@ -182,7 +183,8 @@ namespace EpicurAppIHM
                     telephone = txtTelephone.Text.Trim().Replace(" ", "").Replace("-", ""),
                     email = txtEmail.Text.Trim(),
                     allergies = txtAllergies.Text.Trim(),
-                    notes = txtPlats.Text.Trim()
+                    platsNonApprecies = txtPlatsNonApprecies.Text.Trim(),
+                    preferences = txtPreferences.Text.Trim()
                 };
 
                 // Envoi de la requête POST à l'API
