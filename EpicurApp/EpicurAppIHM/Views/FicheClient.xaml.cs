@@ -4,6 +4,7 @@ using System.Net.Http.Json;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Media;
+using EpicurAPP_Partage.Models;
 
 namespace EpicurAppIHM.Views
 {
@@ -12,7 +13,7 @@ namespace EpicurAppIHM.Views
     /// </summary>
     public partial class FicheClient : Window
     {
-        private readonly HttpClient _httpClient;
+        private HttpClient _httpClient;
 
         public FicheClient()
         {
@@ -22,11 +23,26 @@ namespace EpicurAppIHM.Views
             {
                 BaseAddress = new Uri("https://localhost:7068/")
             };
+
+            // Charger la liste des allergènes depuis l'API
+            ChargerAllergenes();
         }
 
-        /// <summary>
-        /// Valide le prénom en temps réel
-        /// </summary>
+        private async void ChargerAllergenes()
+        {
+            try
+            {
+                var allergenes = await _httpClient.GetFromJsonAsync<Allergene[]>("Allergenes");
+                cmbAllergenes.ItemsSource = allergenes;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Impossible de charger les allergènes : {ex.Message}", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+        }
+
+        #region Validation champs
+
         private void ValiderPrenom(object sender, RoutedEventArgs e)
         {
             string prenom = txtPrenom.Text.Trim();
@@ -43,9 +59,6 @@ namespace EpicurAppIHM.Views
             }
         }
 
-        /// <summary>
-        /// Valide le nom en temps réel
-        /// </summary>
         private void ValiderNom(object sender, RoutedEventArgs e)
         {
             string nom = txtNom.Text.Trim();
@@ -62,9 +75,6 @@ namespace EpicurAppIHM.Views
             }
         }
 
-        /// <summary>
-        /// Valide l'email en temps réel
-        /// </summary>
         private void ValiderEmail(object sender, RoutedEventArgs e)
         {
             string email = txtEmail.Text.Trim();
@@ -81,9 +91,6 @@ namespace EpicurAppIHM.Views
             }
         }
 
-        /// <summary>
-        /// Valide le téléphone en temps réel
-        /// </summary>
         private void ValiderTelephone(object sender, RoutedEventArgs e)
         {
             string telephone = txtTelephone.Text.Trim().Replace(" ", "").Replace("-", "");
@@ -100,35 +107,27 @@ namespace EpicurAppIHM.Views
             }
         }
 
-        /// <summary>
-        /// Vérifie que tous les champs sont valides
-        /// </summary>
         private bool ToutEstValide()
         {
             bool valide = true;
 
-            // Vérifier prénom
             if (string.IsNullOrWhiteSpace(txtPrenom.Text) || erreurPrenom.Visibility == Visibility.Visible)
                 valide = false;
 
-            // Vérifier nom
             if (string.IsNullOrWhiteSpace(txtNom.Text) || erreurNom.Visibility == Visibility.Visible)
                 valide = false;
 
-            // Vérifier email
             if (string.IsNullOrWhiteSpace(txtEmail.Text) || erreurEmail.Visibility == Visibility.Visible)
                 valide = false;
 
-            // Vérifier téléphone
             if (string.IsNullOrWhiteSpace(txtTelephone.Text) || erreurTelephone.Visibility == Visibility.Visible)
                 valide = false;
 
             return valide;
         }
 
-        /// <summary>
-        /// Réinitialise tous les champs du formulaire
-        /// </summary>
+        #endregion
+
         private void Annuler(object sender, RoutedEventArgs e)
         {
             // Vider les champs
@@ -136,7 +135,7 @@ namespace EpicurAppIHM.Views
             txtNom.Clear();
             txtEmail.Clear();
             txtTelephone.Clear();
-            txtAllergies.Clear();
+            cmbAllergenes.SelectedIndex = -1;
             txtPlats.Clear();
 
             // Réinitialiser les bordures
@@ -152,12 +151,8 @@ namespace EpicurAppIHM.Views
             erreurTelephone.Visibility = Visibility.Collapsed;
         }
 
-        /// <summary>
-        /// Crée un nouveau client en appelant l'API
-        /// </summary>
         private async void CreerClient(object sender, RoutedEventArgs e)
         {
-            // Validation globale du formulaire
             if (!ToutEstValide())
             {
                 MessageBox.Show("Veuillez corriger les erreurs dans le formulaire",
@@ -167,13 +162,13 @@ namespace EpicurAppIHM.Views
                 return;
             }
 
-            // Désactivation du bouton pendant la requête
             btnCreer.IsEnabled = false;
             btnCreer.Content = "Création en cours...";
 
             try
             {
-                // Préparation des données à envoyer à l'API
+                string selectedAllergene = cmbAllergenes.SelectedItem is Allergene a ? a.Nom : "";
+
                 var clientData = new
                 {
                     id = 0,
@@ -181,11 +176,10 @@ namespace EpicurAppIHM.Views
                     prenom = txtPrenom.Text.Trim(),
                     telephone = txtTelephone.Text.Trim().Replace(" ", "").Replace("-", ""),
                     email = txtEmail.Text.Trim(),
-                    allergies = txtAllergies.Text.Trim(),
+                    allergies = selectedAllergene,
                     notes = txtPlats.Text.Trim()
                 };
 
-                // Envoi de la requête POST à l'API
                 var response = await _httpClient.PostAsJsonAsync("Client", clientData);
 
                 if (response.IsSuccessStatusCode)
@@ -195,12 +189,10 @@ namespace EpicurAppIHM.Views
                                     MessageBoxButton.OK,
                                     MessageBoxImage.Information);
 
-                    // Réinitialisation du formulaire
                     Annuler(sender, e);
                 }
                 else
                 {
-                    // Lecture du message d'erreur de l'API
                     string errorContent = await response.Content.ReadAsStringAsync();
                     MessageBox.Show($"Erreur lors de la création :\n{errorContent}",
                                     "Erreur",
@@ -224,10 +216,14 @@ namespace EpicurAppIHM.Views
             }
             finally
             {
-                // Réactivation du bouton
                 btnCreer.IsEnabled = true;
                 btnCreer.Content = "Créer le client";
             }
+        }
+
+        private void cmbAllergenes_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
+        {
+            // Ici, tu peux gérer des actions si tu veux à la sélection
         }
     }
 }
