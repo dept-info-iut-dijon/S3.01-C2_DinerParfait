@@ -47,6 +47,28 @@ namespace EpicurApp_API.DAO.Controllers
             }
         }
 
+
+        [HttpGet("{id}")]
+        public async Task<ActionResult<Client>> GetClientById(int id)
+        {
+            try
+            {
+                var client = await clientDAO.GetByIdWithHistoryAsync(id);
+
+                if (client == null)
+                {
+                    return NotFound(); // Renvoie 404
+                }
+
+                // Renvoie 200 avec le client et sa liste HistoriqueRepas
+                return Ok(client);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+
     }
 
 
