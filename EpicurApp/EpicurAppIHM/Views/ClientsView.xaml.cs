@@ -1,6 +1,6 @@
-﻿using System.Windows;
+﻿using System;
+using System.Windows;
 using System.Windows.Controls;
-
 
 namespace EpicurAppIHM.Views
 {
@@ -12,5 +12,5 @@ namespace EpicurAppIHM.Views
         {
             InitializeComponent();
         }
-        }
+       }
 }

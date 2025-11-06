@@ -77,7 +77,7 @@
                       Background="#F8FAFC"
                       BorderBrush="#475569" 
                       BorderThickness="1"
-                      Margin="0,0,20,0" >
+                      Margin="0,0,10,0" Grid.ColumnSpan="2" >
 
                 <DataGrid.Columns>
                     <DataGridTemplateColumn Header="Nom" Width="*" >
@@ -99,6 +99,7 @@
                     <DataGridTemplateColumn Header="Allergies" Width="*">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
+                                
                                 <ItemsControl ItemsSource="{Binding Allergies}" VerticalAlignment="Center" Margin="5,0,0,0">
                                     <ItemsControl.ItemsPanel>
                                         <ItemsPanelTemplate>
@@ -147,46 +148,6 @@
                 </DataGrid.RowStyle>
 
             </DataGrid>
-
-            <Border Grid.Column="1" 
-                    Background="#F8FAFC" 
-                    BorderBrush="#475569" 
-                    BorderThickness="1" 
-                    CornerRadius="8" 
-                    Padding="20">
-
-                <ScrollViewer VerticalScrollBarVisibility="Auto">
-                    <StackPanel>
-                        <TextBlock Text="Formulaire Client" 
-                                   FontSize="22" 
-                                   FontWeight="Bold" 
-                                   Foreground="#8B1538"
-                                   Margin="0,0,0,20"
-                                   FontFamily="/Police/#Playfair Display"/>
-
-                        <Button Content="Ajouter" 
-                                Margin="0,25,0,8"
-                                Background="#9CAF88" 
-                                Foreground="#FDF6E3"
-                                Style="{StaticResource EpicurAppButtonStyle}"/>
-
-                        <Button x:Name="BtnModifier"
-                                Content="Modifier" 
-                                Margin="0,0,0,8"
-                                Background="#D4AF37" 
-                                Foreground="#2C3E50"
-                                IsEnabled="False"
-                                Style="{StaticResource EpicurAppButtonStyle}"/>
-
-                        <Button x:Name="BtnSupprimer"
-                                Content="Supprimer" 
-                                Background="#EF4444" 
-                                Foreground="#FDF6E3"
-                                IsEnabled="False"
-                                Style="{StaticResource EpicurAppButtonStyle}"/>
-                    </StackPanel>
-                </ScrollViewer>
-            </Border>
         </Grid>
     </Grid>
 </UserControl>
