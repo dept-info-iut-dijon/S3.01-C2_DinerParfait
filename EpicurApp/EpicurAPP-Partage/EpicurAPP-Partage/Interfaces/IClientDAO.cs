@@ -29,5 +29,6 @@ namespace EpicurAPP_Partage.Interfaces
         /// <param name="id">ID du client</param>
         /// <returns>Le client avec l'ID correspodant</returns>
         public Client rechercherClientParId(int id);
+        List<Client> ObtenirTousLesClients(); ///////
     }
 }

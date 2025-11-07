@@ -3,10 +3,109 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:EpicurAppIHM"
+        xmlns:local="clr-namespace:EpicurAppIHM" xmlns:views="clr-namespace:EpicurAppIHM.Views"
         mc:Ignorable="d"
-        Title="Window1" Height="450" Width="800">
+        Title="Window1" Height="1080" Width="1920" WindowState="Maximized"
+        Background="#E8DCCA"
+        FontFamily="./Police/#Playfair Display">
     <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
 
+        <!-- BARRE DE NAVIGATION -->
+        <Border Grid.Row="0" 
+                Background="#8B1538" 
+                BorderThickness="0,0,0,3"
+                BorderBrush="#D4AF37">
+
+            <Grid Height="65" Margin="15,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" Orientation="Horizontal">
+
+                    <!-- Bouton Clients -->
+                    <Button Content="Clients" 
+                        Width="150" Height="45" Margin="5"
+                        Background="#D4AF37" Foreground="White" 
+                        FontSize="16" FontWeight="SemiBold"
+                        BorderThickness="0" Cursor="Hand" Click="FicheClient">
+                        <Button.Style>
+                            <Style TargetType="Button">
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border Background="{TemplateBinding Background}" 
+                                                CornerRadius="8"
+                                                Padding="15,10">
+                                                <ContentPresenter HorizontalAlignment="Center" 
+                                                              VerticalAlignment="Center"/>
+                                            </Border>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Background" Value="#2980B9"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+
+                    <!-- Bouton Menus -->
+                    <Button Content="Menus" 
+                        Width="150" Height="45" Margin="5"
+                        Background="#C0C0C0" Foreground="White" 
+                        FontSize="16" FontWeight="SemiBold"
+                        BorderThickness="0" Cursor="Hand" Click="AffichageMenu">
+                        <Button.Style>
+                            <Style TargetType="Button">
+                                <Setter Property="Template">
+                                    <Setter.Value>
+                                        <ControlTemplate TargetType="Button">
+                                            <Border Background="{TemplateBinding Background}" 
+                                                CornerRadius="8"
+                                                Padding="15,10">
+                                                <ContentPresenter HorizontalAlignment="Center" 
+                                                              VerticalAlignment="Center"/>
+                                            </Border>
+                                        </ControlTemplate>
+                                    </Setter.Value>
+                                </Setter>
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Background" Value="#229954"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Button.Style>
+                    </Button>
+
+                </StackPanel>
+
+                <TextBlock Grid.Column="1"
+                           Text="Epicur'app"
+                           FontSize="32"
+                           FontWeight="Bold"
+                           Foreground="#D4AF37"
+                           HorizontalAlignment="Left"
+                           VerticalAlignment="Center" Height="45" Width="320" Margin="305,0,0,0"/>
+
+
+            </Grid>
+        </Border>
+
+        <!-- ZONE DE CONTENU DYNAMIQUE -->
+        <Grid Grid.Row="1">
+            <!-- Vue Clients -->
+            <views:ClientsView x:Name="ClientsViewControl" Visibility="Visible"/>
+
+
+        </Grid>
     </Grid>
 </Window>
