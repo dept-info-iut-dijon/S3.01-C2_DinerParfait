@@ -1,12 +1,19 @@
 ﻿using EpicurApp_API.Models;
 using EpicurAPP_Partage.Interfaces;
 using Microsoft.Data.Sqlite;
+using Microsoft.Extensions.Configuration;
 
 namespace EpicurApp_API.DAO
 {
     public class MenuDAO : IMenuDAO
     {
-        private string _connectionString = "Data Source=epicurapp.db";
+        private string _connectionString;
+
+        public MenuDAO(IConfiguration configuration)
+        {
+            _connectionString = configuration.GetConnectionString("DefaultConnection") 
+                ?? "Data Source=epicurapp.db";
+        }
 
         public void AjouterMenu(Menu menu)
         {

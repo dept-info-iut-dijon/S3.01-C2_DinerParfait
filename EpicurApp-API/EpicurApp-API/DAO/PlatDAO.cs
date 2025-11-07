@@ -3,12 +3,19 @@ using Microsoft.Data.Sqlite;
 using System.Collections.Generic;
 using System;
 using EpicurAPP_Partage.Interfaces;
+using Microsoft.Extensions.Configuration;
 
 namespace EpicurApp_API.DAO
 {
     public class PlatDAO : IPlatDAO
     {
-        private string _connexionString = "Data Source=epicurapp.db";
+        private string _connexionString;
+
+        public PlatDAO(IConfiguration configuration)
+        {
+            _connexionString = configuration.GetConnectionString("DefaultConnection") 
+                ?? "Data Source=epicurapp.db";
+        }
 
         public List<Plat> GetAll()
         {

@@ -10,9 +10,9 @@ namespace EpicurApp_API.Controllers
     {
         private AllergeneDAO _allergeneDAO;
 
-        public AllergenesController()
+        public AllergenesController(AllergeneDAO allergeneDAO)
         {
-            _allergeneDAO = new AllergeneDAO();
+            _allergeneDAO = allergeneDAO;
         }
 
         [HttpGet]

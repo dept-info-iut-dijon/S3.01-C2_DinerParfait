@@ -1,11 +1,18 @@
 ﻿using EpicurAPP_Partage.Models;
 using Microsoft.Data.Sqlite;
+using Microsoft.Extensions.Configuration;
 
 namespace EpicurApp_API.DAO
 {
     public class AllergeneDAO
     {
-        private string _connectionString = "Data Source=epicurapp.db";
+        private readonly string _connectionString;
+
+        public AllergeneDAO(IConfiguration configuration)
+        {
+            _connectionString = configuration.GetConnectionString("DefaultConnection") 
+                ?? "Data Source=epicurapp.db";
+        }
 
         public List<Allergene> GetAll()
         {

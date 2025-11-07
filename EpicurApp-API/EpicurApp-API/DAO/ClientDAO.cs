@@ -1,6 +1,7 @@
 ﻿using EpicurApp_API.Models;
 using EpicurAPP_Partage.Interfaces;
 using Microsoft.Data.Sqlite;
+using Microsoft.Extensions.Configuration;
 
 namespace EpicurApp_API.DAO
 {
@@ -9,7 +10,13 @@ namespace EpicurApp_API.DAO
     /// </summary>
     public class ClientDAO : IClientDAO
     {
-        private string _connectionString = "Data Source=epicurapp.db";
+        private readonly string _connectionString;
+
+        public ClientDAO(IConfiguration configuration)
+        {
+            _connectionString = configuration.GetConnectionString("DefaultConnection") 
+                ?? "Data Source=epicurapp.db";
+        }
 
         public void AjouterClient(Client client)
         {

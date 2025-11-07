@@ -6,6 +6,7 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddScoped<IPlatDAO, PlatDAO>();
+builder.Services.AddScoped<AllergeneDAO>();
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -18,6 +19,16 @@ builder.Services.AddScoped<IMenuService, MenuService>();
 
 var app = builder.Build();
 
+try
+{
+    DatabaseInitializer.Initialize(app.Configuration);
+    app.Logger.LogInformation("Base de données initialisée avec succès");
+}
+catch (Exception ex)
+{
+    app.Logger.LogError(ex, "Erreur lors de l'initialisation de la base de données");
+}
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -25,7 +36,11 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+
+if (app.Environment.IsDevelopment())
+{
+    app.UseHttpsRedirection();
+}
 
 app.UseAuthorization();
 

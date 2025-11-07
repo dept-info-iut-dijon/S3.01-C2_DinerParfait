@@ -6,6 +6,7 @@ using System.Windows;
 using System.Windows.Media;
 using EpicurApp_API.Models;
 using EpicurAPP_Partage.Models;
+using EpicurAppIHM.Services;
 
 namespace EpicurAppIHM.Views
 {
@@ -20,8 +21,7 @@ namespace EpicurAppIHM.Views
         {
             InitializeComponent();
 
-            _httpClient = new HttpClient();
-            _httpClient.BaseAddress = new Uri("https://localhost:7068/");
+            _httpClient = ApiClient.Instance;
 
             ChargerAllergenes();
         }
@@ -213,7 +213,7 @@ namespace EpicurAppIHM.Views
             }
             catch (HttpRequestException)
             {
-                MessageBox.Show("Impossible de contacter l'API.\nVérifiez qu'elle est bien lancée (https://localhost:7068)",
+                MessageBox.Show("Impossible de contacter l'API.\nVérifiez qu'elle est bien lancée (ex: http://localhost:8080)",
                                 "Erreur de connexion",
                                 MessageBoxButton.OK,
                                 MessageBoxImage.Error);

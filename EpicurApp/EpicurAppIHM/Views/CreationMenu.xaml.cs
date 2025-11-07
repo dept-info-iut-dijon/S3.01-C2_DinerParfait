@@ -5,6 +5,7 @@ using System.Net.Http;
 using System.Net.Http.Json;
 using System.Windows;
 using System.Windows.Controls;
+using EpicurAppIHM.Services;
 
 namespace EpicurAppIHM.Views
 {
@@ -17,8 +18,7 @@ namespace EpicurAppIHM.Views
         {
             InitializeComponent();
 
-            _httpClient = new HttpClient();
-            _httpClient.BaseAddress = new Uri("https://localhost:7068/");
+            _httpClient = ApiClient.Instance;
 
             ChargerPlats();
 
@@ -30,7 +30,7 @@ namespace EpicurAppIHM.Views
         {
             try
             {
-                HttpResponseMessage response = _httpClient.GetAsync("plats").Result;
+                HttpResponseMessage response = _httpClient.GetAsync("Plats").Result;
                 response.EnsureSuccessStatusCode();
 
                 tousLesPlats = response.Content.ReadFromJsonAsync<List<Plat>>().Result;
@@ -46,7 +46,7 @@ namespace EpicurAppIHM.Views
             }
             catch
             {
-                MessageBox.Show("Impossible de contacter l'API.\nVérifiez qu'elle est bien lancée (https://localhost:7068)", "Erreur de connexion", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("Impossible de contacter l'API.\nVérifiez qu'elle est bien lancée (ex: http://localhost:8080)", "Erreur de connexion", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
