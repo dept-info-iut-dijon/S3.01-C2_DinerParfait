@@ -3,29 +3,33 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Json;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Input;
 
 namespace EpicurAppIHM.Views
 {
     public partial class ClientsView : UserControl
     {
-        private HttpClient _httpClient;
+        private readonly HttpClient _httpClient;
 
         public ClientsView()
         {
             InitializeComponent();
 
-            // Configurer HttpClient pour appeler l'API
-            _httpClient = new HttpClient();
-            _httpClient.BaseAddress = new Uri("https://localhost:7068/");
+            // Configuration de l'accès à l'API
+            _httpClient = new HttpClient
+            {
+                BaseAddress = new Uri("https://localhost:7068/")
+            };
 
-            // Charger les clients quand la vue est affichée
+            // Charger les clients au démarrage de la vue
             this.Loaded += ClientsView_Loaded;
         }
 
         /// <summary>
-        /// Événement déclenché quand la vue est chargée
+        /// Charge les clients quand la vue s'affiche
         /// </summary>
         private async void ClientsView_Loaded(object sender, RoutedEventArgs e)
         {
@@ -33,25 +37,27 @@ namespace EpicurAppIHM.Views
         }
 
         /// <summary>
-        /// Charge la liste des clients depuis l'API
+        /// Récupère tous les clients depuis l'API et les affiche
         /// </summary>
-        public async System.Threading.Tasks.Task ChargerClients()
+        public async Task ChargerClients()
         {
             try
             {
-                // Appel GET à l'API pour récupérer tous les clients
+                // Appel à l'API pour récupérer la liste des clients
                 var clients = await _httpClient.GetFromJsonAsync<List<ClientDto>>("Client");
 
-                // Afficher dans le DataGrid
+                // Affichage dans le tableau
                 DataGridClients.ItemsSource = clients;
             }
             catch (HttpRequestException)
             {
+                // Si l'API est inaccessible, afficher un tableau vide
                 DataGridClients.ItemsSource = new List<ClientDto>();
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Erreur lors du chargement des clients :\n{ex.Message}",
+                // Erreur inattendue
+                MessageBox.Show($"Erreur : {ex.Message}",
                                 "Erreur",
                                 MessageBoxButton.OK,
                                 MessageBoxImage.Error);
@@ -59,20 +65,37 @@ namespace EpicurAppIHM.Views
         }
 
         /// <summary>
-        /// Ouvre le formulaire de création d'un client
+        /// Ouvre le formulaire de création de client
         /// </summary>
         private async void OuvrirFicheClient(object sender, RoutedEventArgs e)
         {
-            FicheClient ficheClient = new FicheClient();
-            ficheClient.ShowDialog();
+            FicheClient formulaire = new FicheClient();
+            formulaire.ShowDialog();
 
-            // IMPORTANT : Recharger les clients après création
+            // Recharger la liste après fermeture du formulaire
+            await ChargerClients();
+        }
+
+        /// <summary>
+        /// Double-clic sur une ligne pour ouvrir la fiche client
+        /// </summary>
+        private async void DataGridClients_MouseDoubleClick(object sender, MouseButtonEventArgs e)
+        {
+            var clientSelectionne = DataGridClients.SelectedItem as ClientDto;
+
+            if (clientSelectionne == null) return;
+
+            // Ouvrir la fiche avec les infos du client
+            FicheClient formulaire = new FicheClient(clientSelectionne);
+            formulaire.ShowDialog();
+
+            // Recharger après modification
             await ChargerClients();
         }
     }
 
     /// <summary>
-    /// Classe représentant un client (correspond à ce que l'API renvoie)
+    /// Représente un client (données reçues de l'API)
     /// </summary>
     public class ClientDto
     {
@@ -85,14 +108,16 @@ namespace EpicurAppIHM.Views
         public string? Notes { get; set; }
 
         /// <summary>
-        /// Transforme la chaîne d'allergies en liste pour l'affichage
+        /// Transforme les allergies (séparées par des virgules) en liste
         /// </summary>
         public List<string> AllergiesList
         {
             get
             {
                 if (string.IsNullOrWhiteSpace(Allergies))
+                {
                     return new List<string>();
+                }
 
                 return Allergies.Split(',')
                                 .Select(a => a.Trim())

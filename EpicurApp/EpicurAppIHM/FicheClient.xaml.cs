@@ -4,33 +4,64 @@ using System.Net.Http.Json;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Media;
+using EpicurAppIHM.Views;
 
 namespace EpicurAppIHM
 {
     /// <summary>
-    /// Fenêtre de création d'un nouveau client
+    /// Fenêtre de création d'un client
     /// </summary>
     public partial class FicheClient : Window
     {
+        // Pour faire les appels à l'API
         private readonly HttpClient _httpClient;
 
+        //créer un nouveau client
         public FicheClient()
         {
             InitializeComponent();
 
+            // Configuration de l'adresse de l'API
             _httpClient = new HttpClient
             {
                 BaseAddress = new Uri("https://localhost:7068/")
             };
         }
 
-        /// <summary>
-        /// Valide le prénom en temps réel
-        /// </summary>
+        // Constructeur pour afficher les infos d'un client existant
+        public FicheClient(ClientDto client) : this()
+        {
+            // On remplit les champs avec les données du client
+            txtPrenom.Text = client.Prenom;
+            txtNom.Text = client.Nom;
+            txtEmail.Text = client.Email;
+            txtTelephone.Text = client.Telephone;
+            txtAllergies.Text = client.Allergies ?? "";
+
+            
+            if (!string.IsNullOrWhiteSpace(client.Notes))
+            {
+                if (client.Notes.Contains("|"))
+                {
+                    var parts = client.Notes.Split('|');
+                    if (parts.Length >= 1)
+                        txtPlatsNonApprecies.Text = parts[0].Trim();
+                    if (parts.Length >= 2)
+                        txtPreferences.Text = parts[1].Trim();
+                }
+                else
+                {
+                    txtPreferences.Text = client.Notes;
+                }
+            }
+        }
+
+        // Vérifie que le prénom contient que des lettres
         private void ValiderPrenom(object sender, RoutedEventArgs e)
         {
             string prenom = txtPrenom.Text.Trim();
 
+            // Si le prénom contient des caractères interdits
             if (!string.IsNullOrEmpty(prenom) && !Regex.IsMatch(prenom, @"^[a-zA-ZÀ-ÿ\s'-]+$"))
             {
                 borderPrenom.BorderBrush = Brushes.Red;
@@ -43,9 +74,7 @@ namespace EpicurAppIHM
             }
         }
 
-        /// <summary>
-        /// Valide le nom en temps réel
-        /// </summary>
+        // Vérifie que le nom contient que des lettres
         private void ValiderNom(object sender, RoutedEventArgs e)
         {
             string nom = txtNom.Text.Trim();
@@ -62,13 +91,12 @@ namespace EpicurAppIHM
             }
         }
 
-        /// <summary>
-        /// Valide l'email en temps réel
-        /// </summary>
+        // Vérifie que l'email est au bon format
         private void ValiderEmail(object sender, RoutedEventArgs e)
         {
             string email = txtEmail.Text.Trim();
 
+            // Vérification du format email ( @ et un point)
             if (!string.IsNullOrEmpty(email) && !Regex.IsMatch(email, @"^[^@\s]+@[^@\s]+\.[^@\s]+$"))
             {
                 borderEmail.BorderBrush = Brushes.Red;
@@ -81,13 +109,13 @@ namespace EpicurAppIHM
             }
         }
 
-        /// <summary>
-        /// Valide le téléphone en temps réel
-        /// </summary>
+        // Vérifie que le téléphone a 10 chiffres et commence par 0
         private void ValiderTelephone(object sender, RoutedEventArgs e)
         {
+            // espaces tirets
             string telephone = txtTelephone.Text.Trim().Replace(" ", "").Replace("-", "");
 
+            // Le numéro doit commencer par 0 et avoir 10 chiffres
             if (!string.IsNullOrEmpty(telephone) && !Regex.IsMatch(telephone, @"^0[1-9]\d{8}$"))
             {
                 borderTelephone.BorderBrush = Brushes.Red;
@@ -100,38 +128,31 @@ namespace EpicurAppIHM
             }
         }
 
-        /// <summary>
-        /// Vérifie que tous les champs sont valides
-        /// </summary>
+        // verifie que tous les champs obligatoires sont remplis
         private bool ToutEstValide()
         {
             bool valide = true;
 
-            // Vérifier prénom
+          
             if (string.IsNullOrWhiteSpace(txtPrenom.Text) || erreurPrenom.Visibility == Visibility.Visible)
                 valide = false;
 
-            // Vérifier nom
             if (string.IsNullOrWhiteSpace(txtNom.Text) || erreurNom.Visibility == Visibility.Visible)
                 valide = false;
 
-            // Vérifier email
             if (string.IsNullOrWhiteSpace(txtEmail.Text) || erreurEmail.Visibility == Visibility.Visible)
                 valide = false;
 
-            // Vérifier téléphone
             if (string.IsNullOrWhiteSpace(txtTelephone.Text) || erreurTelephone.Visibility == Visibility.Visible)
                 valide = false;
 
             return valide;
         }
 
-        /// <summary>
-        /// Réinitialise tous les champs du formulaire
-        /// </summary>
+        // Bouton Annuler 
         private void Annuler(object sender, RoutedEventArgs e)
         {
-            // Vider les champs
+            // Vider tous les champs
             txtPrenom.Clear();
             txtNom.Clear();
             txtEmail.Clear();
@@ -140,25 +161,23 @@ namespace EpicurAppIHM
             txtPlatsNonApprecies.Clear();
             txtPreferences.Clear();
 
-            // Réinitialiser les bordures
+            // Remettre les bordures en doré
             borderPrenom.BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#D4AF37"));
             borderNom.BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#D4AF37"));
             borderEmail.BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#D4AF37"));
             borderTelephone.BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#D4AF37"));
 
-            // Masquer les messages d'erreur
+            // Cacher les messages d'erreur
             erreurPrenom.Visibility = Visibility.Collapsed;
             erreurNom.Visibility = Visibility.Collapsed;
             erreurEmail.Visibility = Visibility.Collapsed;
             erreurTelephone.Visibility = Visibility.Collapsed;
         }
 
-        /// <summary>
-        /// Crée un nouveau client en appelant l'API
-        /// </summary>
+        // Bouton Créer : envoie les données à l'API pour créer le client
         private async void CreerClient(object sender, RoutedEventArgs e)
         {
-            // Validation globale du formulaire
+            // verifier que tout est bon avant d envoyer
             if (!ToutEstValide())
             {
                 MessageBox.Show("Veuillez corriger les erreurs dans le formulaire",
@@ -168,13 +187,13 @@ namespace EpicurAppIHM
                 return;
             }
 
-            // Désactivation du bouton pendant la requête
+          
             btnCreer.IsEnabled = false;
             btnCreer.Content = "Création en cours...";
 
             try
             {
-                // Préparation des données à envoyer à l'API
+                
                 var clientData = new
                 {
                     id = 0,
@@ -186,9 +205,9 @@ namespace EpicurAppIHM
                     notes = (txtPlatsNonApprecies.Text + " " + txtPreferences.Text).Trim()
                 };
 
-                // Envoi de la requête POST à l'API
                 var response = await _httpClient.PostAsJsonAsync("Client", clientData);
 
+                // Si marche
                 if (response.IsSuccessStatusCode)
                 {
                     MessageBox.Show($"Client {clientData.prenom} {clientData.nom} créé avec succès !",
@@ -196,14 +215,14 @@ namespace EpicurAppIHM
                                     MessageBoxButton.OK,
                                     MessageBoxImage.Information);
 
-                    // Réinitialisation du formulaire
-                    Annuler(sender, e);
+                    // Fermer la fenêtre
+                    this.Close();
                 }
                 else
                 {
-                    // Lecture du message d'erreur de l'API
+                    // Si API renvoie une erreur
                     string errorContent = await response.Content.ReadAsStringAsync();
-                    MessageBox.Show($"Erreur lors de la création :\n{errorContent}",
+                    MessageBox.Show($"Erreur : {errorContent}",
                                     "Erreur",
                                     MessageBoxButton.OK,
                                     MessageBoxImage.Error);
@@ -211,21 +230,23 @@ namespace EpicurAppIHM
             }
             catch (HttpRequestException)
             {
-                MessageBox.Show("Impossible de contacter l'API.\nVérifiez qu'elle est bien lancée (https://localhost:7068)",
+                // arrive pas à contacter API
+                MessageBox.Show("Impossible de contacter l'API.\nVérifiez qu'elle est bien lancée.",
                                 "Erreur de connexion",
                                 MessageBoxButton.OK,
                                 MessageBoxImage.Error);
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Erreur inattendue :\n{ex.Message}",
+                // Autre erreur
+                MessageBox.Show($"Erreur : {ex.Message}",
                                 "Erreur",
                                 MessageBoxButton.OK,
                                 MessageBoxImage.Error);
             }
             finally
             {
-                // Réactivation du bouton
+                // Reactiver bouton
                 btnCreer.IsEnabled = true;
                 btnCreer.Content = "Créer le client";
             }
