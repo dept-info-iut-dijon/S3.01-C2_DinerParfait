@@ -8,9 +8,9 @@ namespace EpicurApp_API.DAO.Controllers
     [ApiController]
     [Route("[controller]")]
     public class ClientController : Controller
-    {       
-       
-        private  IClientDAO clientDAO;
+    {
+
+        private IClientDAO clientDAO;
 
         public ClientController(IClientDAO clientDAO)
         {
@@ -18,10 +18,10 @@ namespace EpicurApp_API.DAO.Controllers
         }
 
         /// <summary>
-        /// Crée un nouveau client.
+        /// Crée un nouveau client
         /// </summary>
-        /// <param name="client">Les données du client à créer.</param>
-        /// <returns>Une réponse HTTP.</returns>
+        /// <param name="client">Les données du client à créer</param>
+        /// <returns>Une réponse HTTP</returns>
         [HttpPost]
         public IActionResult CreateClient(Client client)
         {
@@ -31,8 +31,6 @@ namespace EpicurApp_API.DAO.Controllers
                 // Si invalide erreur 400 Bad Request
                 return BadRequest(ModelState);
             }
-            
-            
 
             try
             {
@@ -41,7 +39,6 @@ namespace EpicurApp_API.DAO.Controllers
             }
             catch (Exception ex)
             {
-                Debug.WriteLine(ex.ToString());
                 // Sinon renvoie une erreur 500 Internal Server Error
                 return StatusCode(StatusCodes.Status500InternalServerError,"Une erreur est survenue lors de la création du client.");
             }
@@ -72,5 +69,6 @@ namespace EpicurApp_API.DAO.Controllers
     }
 
 
+    }
 }
 

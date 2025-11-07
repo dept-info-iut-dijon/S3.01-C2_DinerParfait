@@ -22,5 +22,12 @@ namespace EpicurAPP_Partage.Interfaces
         /// </summary>
         /// <param name="id">Id du client</param>
         Task<Client> GetByIdWithHistoryAsync(int id);
+
+        /// <summary>
+        /// Recherche un client par son ID
+        /// </summary>
+        /// <param name="id">ID du client</param>
+        /// <returns>Le client avec l'ID correspodant</returns>
+        public Client rechercherClientParId(int id);
     }
 }
