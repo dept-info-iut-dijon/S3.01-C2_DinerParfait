@@ -106,6 +106,63 @@ namespace EpicurApp_API.DAO
                     command.CommandText = createMenuPlatTable;
                     command.ExecuteNonQuery();
                 }
+
+                SeedPlats(connection);
+            }
+        }
+
+        /// <summary>
+        /// Met les plats par défaut dans la base de données
+        /// </summary>
+        /// <param name="connection"></param>
+        private static void SeedPlats(SqliteConnection connection)
+        {
+            using (var transaction = connection.BeginTransaction())
+            {
+                using (var countCommand = new SqliteCommand("SELECT COUNT(*) FROM Plats;", connection, transaction))
+                {
+                    long count = (long)(countCommand.ExecuteScalar() ?? 0);
+                    if (count > 0)
+                    {
+                        transaction.Commit();
+                        return;
+                    }
+                }
+
+                var plats = new (string Nom, string Categorie, string Ingredients)[]
+                {
+                    ("Bruschetta aux tomates", "AmuseBouche", "Tomates, basilic, huile d'olive"),
+                    ("Verrine saumon-avocat", "AmuseBouche", "Saumon fumé, avocat, citron vert"),
+                    ("Spritz maison", "BoissonAperitif", "Prosecco, Aperol, eau pétillante"),
+                    ("Mocktail fruits rouges", "BoissonAperitif", "Framboise, myrtille, citron"),
+                    ("Velouté de potiron", "Entree", "Potiron, crème fraîche, muscade"),
+                    ("Tartare de dorade", "Entree", "Dorade, agrumes, ciboulette"),
+                    ("Magret de canard sauce miel", "PlatPrincipal", "Magret, miel, romarin"),
+                    ("Risotto aux champignons", "PlatPrincipal", "Riz arborio, cèpes, parmesan"),
+                    ("Pinot noir de Bourgogne", "Vin", "Rouge, notes de fruits rouges"),
+                    ("Chardonnay réserve", "Vin", "Blanc, arômes de fleurs blanches"),
+                    ("Assortiment de fromages affinés", "Fromage", "Comté, Brie, Roquefort"),
+                    ("Chèvre frais miel-noix", "Fromage", "Chèvre, miel d'acacia, noix"),
+                    ("Tartelette citron meringuée", "Dessert", "Citron, meringue italienne"),
+                    ("Mousse au chocolat grand cru", "Dessert", "Chocolat noir, crème, œufs"),
+                };
+
+                using (var insertCommand = new SqliteCommand("INSERT INTO Plats (Nom, Categorie, IngredientsPrincipaux) VALUES (@Nom, @Categorie, @Ingredients);", connection, transaction))
+                {
+                    insertCommand.Parameters.Add(new SqliteParameter("@Nom", SqliteType.Text));
+                    insertCommand.Parameters.Add(new SqliteParameter("@Categorie", SqliteType.Text));
+                    insertCommand.Parameters.Add(new SqliteParameter("@Ingredients", SqliteType.Text));
+
+                    foreach (var plat in plats)
+                    {
+                        insertCommand.Parameters["@Nom"].Value = plat.Nom;
+                        insertCommand.Parameters["@Categorie"].Value = plat.Categorie;
+                        insertCommand.Parameters["@Ingredients"].Value = plat.Ingredients;
+                        insertCommand.ExecuteNonQuery();
+                    }
+                }
+
+                transaction.Commit();
             }
         }
     }

@@ -4,7 +4,7 @@ using System.Net.Http;
 namespace EpicurAppIHM.Services
 {
     /// <summary>
-    /// Classe singleton pour gérer l'instance HttpClient 
+    /// Classe singleton pour gÃ©rer l'instance HttpClient 
     /// </summary>
     public static class ApiClient
     {
@@ -21,10 +21,13 @@ namespace EpicurAppIHM.Services
             string? baseUrl = Environment.GetEnvironmentVariable("EPICURAPP_API_BASEURL");
             if (string.IsNullOrWhiteSpace(baseUrl))
             {
-                baseUrl = "http://localhost:8080/";
+                baseUrl = "https://localhost:8081/";
             }
 
-            _instance = new HttpClient();
+            HttpClientHandler handler = new HttpClientHandler();
+            handler.ServerCertificateCustomValidationCallback = (message, cert, chain, sslPolicyErrors) => true;
+
+            _instance = new HttpClient(handler, disposeHandler: true);
             _instance.BaseAddress = new Uri(baseUrl);
         }
     }

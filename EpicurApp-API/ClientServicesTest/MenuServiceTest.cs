@@ -21,7 +21,7 @@ public class MenuServiceTests
     [Fact]
     public void AjouterMenuExeptionNom()
     {
-        Menu menuInvalide = new Menu { Nom = "   " }; 
+        Menu menuInvalide = new Menu { Nom = "   " };
         InvalidFieldException exceptionVoulue = null;
 
         try
@@ -35,6 +35,25 @@ public class MenuServiceTests
 
         Assert.NotNull(exceptionVoulue);
         Assert.Equal("Le nom du menu est obligatoire.", exceptionVoulue.Message);
+    }
+
+    [Fact]
+    public void AjouterMenu_StatutInvalide_DoitLeverException()
+    {
+        Menu menuInvalide = new Menu { Nom = "Menu test", Statut = "En cours" };
+        InvalidFieldException exceptionVoulue = null;
+
+        try
+        {
+            _menuService.AjouterMenu(menuInvalide);
+        }
+        catch (InvalidFieldException ex)
+        {
+            exceptionVoulue = ex;
+        }
+
+        Assert.NotNull(exceptionVoulue);
+        Assert.Equal("Le statut du menu doit être 'Brouillon' ou 'Validé'.", exceptionVoulue.Message);
     }
 
     [Fact]
@@ -106,17 +125,65 @@ public class MenuServiceTests
         MenuService menuService = new MenuService(mockDAO.Object);
         ApplicationException exceptionVoulue = null;
 
-        try 
+        try
         {
-            menuService.GetAll(); 
+            menuService.GetAll();
         }
         catch (ApplicationException ex)
         {
-            exceptionVoulue = ex; 
+            exceptionVoulue = ex;
         }
 
         Assert.NotNull(exceptionVoulue);
         Assert.Equal("Erreur lors de la récupération des menus.", exceptionVoulue.Message);
     }
 
+    [Fact]
+    public void GetDernierBrouillon_DoitRetournerMenu()
+    {
+        Menu brouillon = new Menu { Id = 2, Nom = "Brouillon" };
+        _mockMenuDAO.Setup(dao => dao.GetDernierBrouillon()).Returns(brouillon);
+
+        Menu resultat = _menuService.GetDernierBrouillon();
+
+        Assert.Equal(brouillon, resultat);
+    }
+
+    [Fact]
+    public void MettreAJourMenu_SansId_DoitLeverException()
+    {
+        Menu menu = new Menu { Nom = "Menu test", Statut = "Brouillon" };
+        InvalidFieldException exceptionVoulue = null;
+
+        try
+        {
+            _menuService.MettreAJourMenu(menu);
+        }
+        catch (InvalidFieldException ex)
+        {
+            exceptionVoulue = ex;
+        }
+
+        Assert.NotNull(exceptionVoulue);
+        Assert.Equal("L'identifiant du menu est obligatoire pour la mise à jour.", exceptionVoulue.Message);
+    }
+
+    [Fact]
+    public void MettreAJourMenu_StatutInvalide_DoitLeverException()
+    {
+        Menu menu = new Menu { Id = 3, Nom = "Menu test", Statut = "EnAttente" };
+        InvalidFieldException exceptionVoulue = null;
+
+        try
+        {
+            _menuService.MettreAJourMenu(menu);
+        }
+        catch (InvalidFieldException ex)
+        {
+            exceptionVoulue = ex;
+        }
+
+        Assert.NotNull(exceptionVoulue);
+        Assert.Equal("Le statut du menu doit être 'Brouillon' ou 'Validé'.", exceptionVoulue.Message);
+    }
 }
