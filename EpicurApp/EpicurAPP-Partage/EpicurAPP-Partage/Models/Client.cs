@@ -32,6 +32,9 @@ namespace EpicurApp_API.Models
         public string Notes { get; set; }
         //Identifiant unique du client
         public int Id { get;  set; }
+
+        //Historique des repas du client
+        public List<Menu> HistoriqueRepas { get; set; } = new List<Menu>();
     }
 }
 

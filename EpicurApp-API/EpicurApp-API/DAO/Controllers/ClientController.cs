@@ -40,28 +40,33 @@ namespace EpicurApp_API.DAO.Controllers
             catch (Exception ex)
             {
                 // Sinon renvoie une erreur 500 Internal Server Error
-                return StatusCode(StatusCodes.Status500InternalServerError, "Une erreur est survenue lors de la création du client.");
+                return StatusCode(StatusCodes.Status500InternalServerError,"Une erreur est survenue lors de la création du client.");
             }
         }
 
+
         [HttpGet("{id}")]
-        public IActionResult GetClient(int id)
+        public async Task<ActionResult<Client>> GetClientById(int id)
         {
             try
             {
-                Client retrievedClient = clientDAO.rechercherClientParId(id);
-                if (retrievedClient == null)
+                var client = await clientDAO.GetByIdWithHistoryAsync(id);
+
+                if (client == null)
                 {
-                    return NotFound($"Client avec l'ID {id} non trouvé.");
+                    return NotFound(); // Renvoie 404
                 }
-                return Ok(retrievedClient);
+
+                // Renvoie 200 avec le client et sa liste HistoriqueRepas
+                return Ok(client);
             }
             catch (Exception ex)
             {
-                return StatusCode(StatusCodes.Status500InternalServerError, "Une erreur est survenue lors de la récupération du client.");
+                return StatusCode(500, ex.Message);
             }
-
         }
+
+    }
 
 
     }
