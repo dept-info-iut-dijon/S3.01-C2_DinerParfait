@@ -100,7 +100,7 @@
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
                                 
-                                <ItemsControl ItemsSource="{Binding Allergies}" VerticalAlignment="Center" Margin="5,0,0,0">
+                                <ItemsControl ItemsSource="{Binding AllergiesList}" VerticalAlignment="Center" Margin="5,0,0,0">
                                     <ItemsControl.ItemsPanel>
                                         <ItemsPanelTemplate>
                                             <StackPanel Orientation="Horizontal"/>

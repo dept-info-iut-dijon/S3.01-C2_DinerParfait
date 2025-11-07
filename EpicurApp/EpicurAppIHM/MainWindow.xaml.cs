@@ -9,10 +9,12 @@ namespace EpicurAppIHM
             InitializeComponent();
         }
 
-        private void FicheClient(object sender, RoutedEventArgs e)
+        private async void FicheClient(object sender, RoutedEventArgs e)
         {
             FicheClient ficheClient = new FicheClient();
-            ficheClient.Show();
+            ficheClient.ShowDialog();
+
+            await ClientsViewControl.ChargerClients();
         }
 
         private void AffichageMenu(object sender, RoutedEventArgs e)

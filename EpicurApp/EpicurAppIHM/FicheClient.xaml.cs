@@ -183,8 +183,7 @@ namespace EpicurAppIHM
                     telephone = txtTelephone.Text.Trim().Replace(" ", "").Replace("-", ""),
                     email = txtEmail.Text.Trim(),
                     allergies = txtAllergies.Text.Trim(),
-                    platsNonApprecies = txtPlatsNonApprecies.Text.Trim(),
-                    preferences = txtPreferences.Text.Trim()
+                    notes = (txtPlatsNonApprecies.Text + " " + txtPreferences.Text).Trim()
                 };
 
                 // Envoi de la requête POST à l'API
