@@ -40,10 +40,10 @@ namespace EpicurApp_API.DAO
                 await connection.OpenAsync();
 
                 const string clientQuery = "SELECT Id, Nom, Prenom, Email,Telephone, Allergies, Notes FROM Clients WHERE Id=@Id";
-                using(var cmdClient=new SqliteCommand(clientQuery, connection))
+                using (var cmdClient = new SqliteCommand(clientQuery, connection))
                 {
                     cmdClient.Parameters.AddWithValue("@Id", id);
-                    using(var reader = await cmdClient.ExecuteReaderAsync())
+                    using (var reader = await cmdClient.ExecuteReaderAsync())
                     {
                         if (await reader.ReadAsync())
                         {
@@ -67,10 +67,10 @@ namespace EpicurApp_API.DAO
 
                 using (var cmdHistory = new SqliteCommand(historyQuery, connection))
                 {
-                    cmdHistory.Parameters.AddWithValue("@ClientId",id);
-                    using(var reader = await cmdHistory.ExecuteReaderAsync())
+                    cmdHistory.Parameters.AddWithValue("@ClientId", id);
+                    using (var reader = await cmdHistory.ExecuteReaderAsync())
                     {
-                        while(await reader.ReadAsync())
+                        while (await reader.ReadAsync())
                         {
                             client.HistoriqueRepas.Add(new Menu
                             {
@@ -84,6 +84,38 @@ namespace EpicurApp_API.DAO
                 }
             }
             return client;
+        }
+
+        public async Task<IEnumerable<Client>> GetAllAsync()
+        {
+            var clients = new List<Client>();
+
+            const string query = "SELECT Id, Nom, Prenom, Email, Telephone, Allergies, Notes FROM Clients ORDER BY Nom, Prenom;";
+
+            using (var connection = new SqliteConnection(_connectionString))
+            {
+                await connection.OpenAsync();
+                using (var command = new SqliteCommand(query, connection))
+                {
+                    using (var reader = await command.ExecuteReaderAsync())
+                    {
+                        while (await reader.ReadAsync())
+                        {
+                            clients.Add(new Client
+                            {
+                                Id = reader.GetInt32(0),
+                                Nom = reader.GetString(1),
+                                Prenom = reader.GetString(2),
+                                Email = reader.IsDBNull(3) ? null : reader.GetString(3),
+                                Telephone = reader.IsDBNull(4) ? null : reader.GetString(4),
+                                Allergies = reader.IsDBNull(5) ? null : reader.GetString(5),
+                                Notes = reader.IsDBNull(6) ? null : reader.GetString(6)
+                            });
+                        }
+                    }
+                }
+            }
+            return clients;
         }
 
         public Client rechercherClientParId(int id)
