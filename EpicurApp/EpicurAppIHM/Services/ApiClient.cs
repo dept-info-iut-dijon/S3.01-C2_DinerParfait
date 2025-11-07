@@ -21,7 +21,7 @@ namespace EpicurAppIHM.Services
             string? baseUrl = Environment.GetEnvironmentVariable("EPICURAPP_API_BASEURL");
             if (string.IsNullOrWhiteSpace(baseUrl))
             {
-                baseUrl = "https://localhost:8081/";
+                baseUrl = "https://10.128.207.45:8081/";
             }
 
             HttpClientHandler handler = new HttpClientHandler();
