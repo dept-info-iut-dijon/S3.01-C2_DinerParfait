@@ -1,0 +1,174 @@
+﻿<Window x:Class="EpicurAppIHM.Views.FicheClient"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:EpicurAppIHM.Views"
+        mc:Ignorable="d"
+        Title="Fiche Client" Height="800" Width="700"
+        WindowStartupLocation="CenterScreen"
+        Background="#E8DCCA"
+        FontFamily="./Police/#Playfair Display">
+
+    <Window.Resources>
+        <!-- Style pour ComboBox sombre -->
+        <Style x:Key="DarkComboBoxItemStyle" TargetType="ComboBoxItem">
+            <Setter Property="Background" Value="#2a2a2a"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Style.Triggers>
+                <Trigger Property="IsHighlighted" Value="True">
+                    <Setter Property="Background" Value="#D4AF37"/>
+                    <Setter Property="Foreground" Value="#2a2a2a"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="DarkRoundedComboBoxStyle" TargetType="ComboBox">
+            <Setter Property="Height" Value="40"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Padding" Value="10,0,0,0"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="ItemContainerStyle" Value="{StaticResource DarkComboBoxItemStyle}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ComboBox">
+                        <Grid>
+                            <Border x:Name="MainBorder"
+                                    Background="#2a2a2a"
+                                    BorderBrush="#D4AF37"
+                                    BorderThickness="2"
+                                    CornerRadius="8">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="30"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <ContentPresenter Grid.Column="0"
+                                                      Content="{TemplateBinding SelectionBoxItem}"
+                                                      ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
+                                                      VerticalAlignment="Center"
+                                                      HorizontalAlignment="Left"
+                                                      Margin="10,0,0,0"/>
+                                </Grid>
+                            </Border>
+
+                            <ToggleButton Grid.Column="1"
+                                          HorizontalAlignment="Right"
+                                          BorderThickness="0"
+                                          Background="Transparent"
+                                          IsChecked="{Binding IsDropDownOpen, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"
+                                          ClickMode="Press">
+                                <Path Fill="#D4AF37"
+                                      Data="M 0 0 L 4 4 L 8 0 Z"
+                                      Width="10" Height="6"
+                                      VerticalAlignment="Center"
+                                      HorizontalAlignment="Center"/>
+                            </ToggleButton>
+
+                            <Popup x:Name="PART_Popup"
+                                   AllowsTransparency="True"
+                                   Placement="Bottom"
+                                   IsOpen="{Binding IsDropDownOpen, RelativeSource={RelativeSource TemplatedParent}}"
+                                   PopupAnimation="Slide">
+                                <Border Background="#2a2a2a"
+                                        BorderBrush="#D4AF37"
+                                        BorderThickness="1"
+                                        CornerRadius="4"
+                                        MaxHeight="{TemplateBinding MaxDropDownHeight}">
+                                    <ScrollViewer>
+                                        <ItemsPresenter KeyboardNavigation.DirectionalNavigation="Contained" />
+                                    </ScrollViewer>
+                                </Border>
+                            </Popup>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <Border BorderBrush="#8B1538" BorderThickness="3" CornerRadius="10" Margin="15">
+        <Grid Margin="30">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <!-- Titre -->
+            <StackPanel Grid.Row="0" HorizontalAlignment="Center">
+                <TextBlock Text="Epicur'app" FontSize="24" FontWeight="Bold" Foreground="#D4AF37" HorizontalAlignment="Center" Margin="0,5,0,0"/>
+                <TextBlock Text="Nouvelle Fiche Client" FontSize="14" Foreground="#B8860B" HorizontalAlignment="Center" FontStyle="Italic" Margin="0,5,0,0"/>
+            </StackPanel>
+
+            <!-- Ligne de séparation -->
+            <Rectangle Grid.Row="1" Height="2" Fill="#8B1538" Margin="0,20,0,20"/>
+
+            <!-- Formulaire -->
+            <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Hidden">
+                <StackPanel>
+
+                    <!-- Prénom -->
+                    <Label Content="Prénom *" Foreground="#D4AF37" FontWeight="SemiBold" FontSize="13"/>
+                    <Border x:Name="borderPrenom" BorderBrush="#D4AF37" BorderThickness="2" CornerRadius="8" Background="#2a2a2a">
+                        <TextBox x:Name="txtPrenom" Height="40" Padding="10" FontSize="14" Background="Transparent" Foreground="White" BorderThickness="0" LostFocus="ValiderPrenom"/>
+                    </Border>
+                    <TextBlock x:Name="erreurPrenom" Text="Le prénom ne doit contenir que des lettres" Foreground="#ff6b6b" FontSize="11" Visibility="Collapsed" Margin="5,2,0,0"/>
+
+                    <!-- Nom -->
+                    <Label Content="Nom *" Foreground="#D4AF37" FontWeight="SemiBold" FontSize="13" Margin="0,10,0,0"/>
+                    <Border x:Name="borderNom" BorderBrush="#D4AF37" BorderThickness="2" CornerRadius="8" Background="#2a2a2a">
+                        <TextBox x:Name="txtNom" Height="40" Padding="10" FontSize="14" Background="Transparent" Foreground="White" BorderThickness="0" LostFocus="ValiderNom"/>
+                    </Border>
+                    <TextBlock x:Name="erreurNom" Text="Le nom ne doit contenir que des lettres" Foreground="#ff6b6b" FontSize="11" Visibility="Collapsed" Margin="5,2,0,0"/>
+
+                    <!-- Email -->
+                    <Label Content="Email *" Foreground="#D4AF37" FontWeight="SemiBold" FontSize="13" Margin="0,10,0,0"/>
+                    <Border x:Name="borderEmail" BorderBrush="#D4AF37" BorderThickness="2" CornerRadius="8" Background="#2a2a2a">
+                        <TextBox x:Name="txtEmail" Height="40" Padding="10" FontSize="14" Background="Transparent" Foreground="White" BorderThickness="0" LostFocus="ValiderEmail"/>
+                    </Border>
+                    <TextBlock x:Name="erreurEmail" Text="Format d'email invalide (exemple: nom@domaine.com)" Foreground="#ff6b6b" FontSize="11" Visibility="Collapsed" Margin="5,2,0,0"/>
+
+                    <!-- Téléphone -->
+                    <Label Content="Téléphone * (10 chiffres)" Foreground="#D4AF37" FontWeight="SemiBold" FontSize="13" Margin="0,10,0,0"/>
+                    <Border x:Name="borderTelephone" BorderBrush="#D4AF37" BorderThickness="2" CornerRadius="8" Background="#2a2a2a">
+                        <TextBox x:Name="txtTelephone" Height="40" Padding="10" FontSize="14" Background="Transparent" Foreground="White" BorderThickness="0" MaxLength="14" LostFocus="ValiderTelephone"/>
+                    </Border>
+                    <TextBlock x:Name="erreurTelephone" Text="Le téléphone doit contenir 10 chiffres (ex: 0612345678)" Foreground="#ff6b6b" FontSize="11" Visibility="Collapsed" Margin="5,2,0,0"/>
+
+                    <!-- Ligne de séparation -->
+                    <Rectangle Height="1" Fill="#8B1538" Margin="0,20,0,15"/>
+
+                    <!-- Allergènes (ComboBox) -->
+                    <Label Content="Allergènes" Foreground="#D4AF37" FontWeight="SemiBold" FontSize="13"/>
+                    <Border BorderBrush="#D4AF37" BorderThickness="2" CornerRadius="8" Background="#2a2a2a">
+                        <ComboBox x:Name="cmbAllergenes"
+                                  Style="{StaticResource DarkRoundedComboBoxStyle}"
+                                  DisplayMemberPath="Nom"/>
+                    </Border>
+
+                    <!-- Notes / Préférences -->
+                    <Label Content="Notes / Préférences alimentaires" Foreground="#D4AF37" FontWeight="SemiBold" FontSize="13" Margin="0,10,0,0"/>
+                    <Border BorderBrush="#D4AF37" BorderThickness="2" CornerRadius="8" Background="#2a2a2a">
+                        <TextBox x:Name="txtPlats" Height="90" Padding="10" FontSize="14" Background="Transparent" Foreground="White" BorderThickness="0" TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Auto"/>
+                    </Border>
+                </StackPanel>
+            </ScrollViewer>
+
+            <!-- Boutons -->
+            <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,20,0,0">
+                <Button x:Name="btnAnnuler" Content="Annuler" Width="130" Height="45" Margin="0,0,15,0"
+                        Background="Transparent" Foreground="#D4AF37" BorderBrush="#D4AF37" BorderThickness="2"
+                        FontSize="15" FontWeight="SemiBold" Cursor="Hand"
+                        Click="Annuler"/>
+                <Button x:Name="btnCreer" Content="Créer le client" Width="180" Height="45"
+                        Background="#D4AF37" Foreground="#1a1a1a" BorderThickness="0"
+                        FontSize="15" FontWeight="Bold" Cursor="Hand"
+                        Click="CreerClient"/>
+            </StackPanel>
+        </Grid>
+    </Border>
+</Window>

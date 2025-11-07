@@ -1,0 +1,194 @@
+﻿<Window x:Class="EpicurAppIHM.Views.CreationMenu"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:EpicurAppIHM.Views"
+        mc:Ignorable="d"
+        Title="CreationMenu" Height="800" Width="700"
+        WindowStartupLocation="CenterScreen"
+        Background="#E8DCCA"
+        FontFamily="./Police/#Playfair Display">
+
+    <Window.Resources>
+
+        <Style x:Key="DarkComboBoxItemStyle" TargetType="ComboBoxItem">
+            <Setter Property="Background" Value="#2a2a2a"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Style.Triggers>
+                <Trigger Property="IsHighlighted" Value="True">
+                    <Setter Property="Background" Value="#D4AF37"/>
+                    <Setter Property="Foreground" Value="#2a2a2a"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style x:Key="DarkRoundedComboBoxStyle" TargetType="ComboBox">
+            <Setter Property="Height" Value="40"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Padding" Value="10,0,0,0"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="ItemContainerStyle" Value="{StaticResource DarkComboBoxItemStyle}"/>
+
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ComboBox">
+                        <Grid>
+                            <Border x:Name="MainBorder"
+                                    Background="#2a2a2a"
+                                    BorderBrush="#D4AF37"
+                                    BorderThickness="2"
+                                    CornerRadius="8">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="30"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <ContentPresenter Grid.Column="0"
+                                                      Content="{TemplateBinding SelectionBoxItem}"
+                                                      ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
+                                                      VerticalAlignment="Center"
+                                                      HorizontalAlignment="Left"
+                                                      Margin="10,0,0,0"/>
+                                </Grid>
+                            </Border>
+
+                            <ToggleButton Grid.Column="1"
+                                          HorizontalAlignment="Right"
+                                          BorderThickness="0"
+                                          Background="Transparent"
+                                          IsChecked="{Binding IsDropDownOpen, RelativeSource={RelativeSource TemplatedParent}, Mode=TwoWay}"
+                                          ClickMode="Press">
+                                <Path Fill="#D4AF37"
+                                      Data="M 0 0 L 4 4 L 8 0 Z"
+                                      Width="10" Height="6"
+                                      VerticalAlignment="Center"
+                                      HorizontalAlignment="Center"/>
+                            </ToggleButton>
+
+                            <Popup x:Name="PART_Popup"
+                                   AllowsTransparency="True"
+                                   Placement="Bottom"
+                                   IsOpen="{Binding IsDropDownOpen, RelativeSource={RelativeSource TemplatedParent}}"
+                                   PopupAnimation="Slide">
+                                <Border Background="#2a2a2a"
+                                        BorderBrush="#D4AF37"
+                                        BorderThickness="1"
+                                        CornerRadius="4"
+                                        MaxHeight="{TemplateBinding MaxDropDownHeight}">
+                                    <ScrollViewer>
+                                        <ItemsPresenter KeyboardNavigation.DirectionalNavigation="Contained" />
+                                    </ScrollViewer>
+                                </Border>
+                            </Popup>
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+    </Window.Resources>
+
+    <Border BorderBrush="#8B1538" 
+            BorderThickness="3" 
+            CornerRadius="10"
+            Margin="15">
+
+        <Grid Margin="30">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+
+            <StackPanel Grid.Row="0" HorizontalAlignment="Center">
+                <TextBlock Text="Epicur'app" FontSize="24" FontWeight="Bold" Foreground="#D4AF37" HorizontalAlignment="Center" Margin="0,5,0,0"/>
+                <TextBlock FontSize="14" Foreground="#B8860B" HorizontalAlignment="Center" FontStyle="Italic" Margin="0,5,0,0"><Run Text="Nouv"/><Run Language="fr-fr" Text="eau Menu"/></TextBlock>
+            </StackPanel>
+
+            <Rectangle Grid.Row="1" Height="2" Fill="#8B1538" Margin="0,20,0,20"/>
+
+            <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Hidden" Padding="5">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <TextBlock Grid.Row="0" Grid.ColumnSpan="2" Text="Apéritif" FontSize="16" FontWeight="Bold" Foreground="#8B1538" Margin="0,15,0,5" TextAlignment="Center"/>
+
+                    <Label Grid.Row="1" Grid.Column="0" Content="Amuse Bouche" Foreground="#D4AF37" FontWeight="SemiBold" FontSize="13" VerticalAlignment="Center" Margin="0,0,10,0"/>
+
+                    <ComboBox Grid.Row="1" Grid.Column="1" Margin="0,5"
+                              x:Name="cmbAmuseGueule"
+                              Style="{StaticResource DarkRoundedComboBoxStyle}"/>
+
+                    <Label Grid.Row="2" Grid.Column="0" Content="Boisson Apéritif" Foreground="#D4AF37" FontWeight="SemiBold" FontSize="13" VerticalAlignment="Center" Margin="0,0,10,0"/>
+
+                    <ComboBox Grid.Row="2" Grid.Column="1" Margin="0,5"
+                              x:Name="cmbBoissonAperitif"
+                              Style="{StaticResource DarkRoundedComboBoxStyle}"/>
+
+                    <TextBlock Grid.Row="3" Grid.ColumnSpan="2" Text="Repas" FontSize="16" FontWeight="Bold" Foreground="#8B1538" Margin="0,20,0,5" TextAlignment="Center"/>
+
+                    <Label Grid.Row="4" Grid.Column="0" Content="Entrée" Foreground="#D4AF37" FontWeight="SemiBold" FontSize="13" VerticalAlignment="Center" Margin="0,0,10,0"/>
+
+                    <ComboBox Grid.Row="4" Grid.Column="1" Margin="0,5"
+                              x:Name="cmbEntree"
+                              Style="{StaticResource DarkRoundedComboBoxStyle}"/>
+
+                    <Label Grid.Row="5" Grid.Column="0" Content="Plat Pricnipal" Foreground="#D4AF37" FontWeight="SemiBold" FontSize="13" VerticalAlignment="Center" Margin="0,0,10,0"/>
+
+                    <ComboBox Grid.Row="5" Grid.Column="1" Margin="0,5"
+                              x:Name="cmbPlat"
+                              Style="{StaticResource DarkRoundedComboBoxStyle}"/>
+
+                    <Label Grid.Row="6" Grid.Column="0" Content="Vin" Foreground="#D4AF37" FontWeight="SemiBold" FontSize="13" VerticalAlignment="Center" Margin="0,0,10,0"/>
+
+                    <ComboBox Grid.Row="6" Grid.Column="1" Margin="0,5"
+                              x:Name="cmbVin"
+                              Style="{StaticResource DarkRoundedComboBoxStyle}"/>
+
+                    <TextBlock Grid.Row="7" Grid.ColumnSpan="2" Text="Fin du Repas" FontSize="16" FontWeight="Bold" Foreground="#8B1538" Margin="0,20,0,5" TextAlignment="Center"/>
+
+                    <Label Grid.Row="8" Grid.Column="0" Content="Fromage" Foreground="#D4AF37" FontWeight="SemiBold" FontSize="13" VerticalAlignment="Center" Margin="0,0,10,0"/>
+
+                    <ComboBox Grid.Row="8" Grid.Column="1" Margin="0,5"
+                              x:Name="cmbFromage"
+                              Style="{StaticResource DarkRoundedComboBoxStyle}"/>
+
+                    <Label Grid.Row="9" Grid.Column="0" Content="Dessert" Foreground="#D4AF37" FontWeight="SemiBold" FontSize="13" VerticalAlignment="Center" Margin="0,0,10,0"/>
+
+                    <ComboBox Grid.Row="9" Grid.Column="1" Margin="0,5"
+                              x:Name="cmbDessert"
+                              Style="{StaticResource DarkRoundedComboBoxStyle}"/>
+                </Grid>
+            </ScrollViewer>
+
+            <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,20,0,0">
+                <Button x:Name="btnAnnuler" Content="Annuler" Width="130" Height="45" Margin="0,0,15,0"
+                        Background="Transparent" Foreground="#D4AF37" BorderBrush="#D4AF37" BorderThickness="2"
+                        FontSize="15" FontWeight="SemiBold" Cursor="Hand" />
+                <Button x:Name="btnCreer" Content="Créer le Menu" Width="180" Height="45"
+                        Background="#D4AF37" Foreground="#1a1a1a" BorderThickness="0"
+                        FontSize="15" FontWeight="Bold" Cursor="Hand" />
+            </StackPanel>
+        </Grid>
+    </Border>
+</Window>
