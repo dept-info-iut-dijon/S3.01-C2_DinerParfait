@@ -17,6 +17,11 @@ namespace EpicurAPP_Partage.Interfaces
         /// </summary>
         /// <param name="client">Le client à ajouter.</param>
         void AjouterClient(Client client);
+        /// <summary>
+        /// Récupère l'historique de repas du client
+        /// </summary>
+        /// <param name="id">Id du client</param>
+        Task<Client> GetByIdWithHistoryAsync(int id);
 
         /// <summary>
         /// Recherche un client par son ID
