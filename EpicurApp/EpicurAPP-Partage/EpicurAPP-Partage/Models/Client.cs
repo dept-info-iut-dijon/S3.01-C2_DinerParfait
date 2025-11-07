@@ -1,6 +1,7 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using EpicurApp_API.Models;
+using System.ComponentModel.DataAnnotations;
 
-namespace EpicurApp_API.Models
+namespace EpicurAPP_Partage.Models
 {
     /// <summary>
     /// Représente un client.
@@ -25,13 +26,17 @@ namespace EpicurApp_API.Models
         [EmailAddress(ErrorMessage = "L'email n'est pas valide.")]
         public string Email { get; set; }
 
-        //Allergies du client
-        public string Allergies { get; set; }
+        //Allergenes du client
+        public List<Allergene> Allergenes { get; set; } = new List<Allergene>();
 
-        //Note supplementaire a propos du client (Préféreces, ...)
-        public string Notes { get; set; }
         //Identifiant unique du client
         public int Id { get;  set; }
+
+        public string PlatsNonApprecies { get; set; }
+        public string Preferences { get; set; }
+
+        //Historique des repas du client
+        public List<Menu> HistoriqueRepas { get; set; } = new List<Menu>();
     }
 }
 

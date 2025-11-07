@@ -1,11 +1,8 @@
-﻿using Xunit;
-using Moq;
+﻿using Moq;
 using EpicurApp.Logic.Services;
 using EpicurAPP_Partage.Interfaces;
 using EpicurApp_API.Models;
 using EpicurAPP_Partage.Exceptions;
-using System;
-using System.Collections.Generic;
 
 public class MenuServiceTests
 {

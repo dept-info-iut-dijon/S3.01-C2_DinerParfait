@@ -7,14 +7,14 @@ namespace EpicurApp_API.DAO
     {
         public static void Initialize(IConfiguration configuration)
         {
-            var connectionString = configuration.GetConnectionString("DefaultConnection") 
+            var connectionString = configuration.GetConnectionString("DefaultConnection")
                 ?? "Data Source=epicurapp.db";
 
             using (var connection = new SqliteConnection(connectionString))
             {
                 connection.Open();
 
-                // Créer la table Allergenes
+                // Table Allergenes
                 var createAllergenesTable = @"
                     CREATE TABLE IF NOT EXISTS Allergenes (
                         Id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -22,7 +22,7 @@ namespace EpicurApp_API.DAO
                         Description TEXT
                     );";
 
-                // Créer la table Clients
+                // Table Clients 
                 var createClientsTable = @"
                     CREATE TABLE IF NOT EXISTS Clients (
                         Id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -30,21 +30,21 @@ namespace EpicurApp_API.DAO
                         Prenom TEXT NOT NULL,
                         Email TEXT,
                         Telephone TEXT,
-                        Allergies TEXT,
-                        Notes TEXT
+                        platsNonApprecies TEXT,
+                        preferences TEXT
                     );";
 
-                //table ClientAllergene
+                // Table de liaison ClientAllergene 
                 var createClientAllergeneTable = @"
                     CREATE TABLE IF NOT EXISTS ClientAllergene (
                         ClientId INTEGER NOT NULL,
                         AllergeneId INTEGER NOT NULL,
                         PRIMARY KEY (ClientId, AllergeneId),
-                        FOREIGN KEY (ClientId) REFERENCES Clients(Id),
-                        FOREIGN KEY (AllergeneId) REFERENCES Allergenes(Id)
+                        FOREIGN KEY (ClientId) REFERENCES Clients(Id) ON DELETE CASCADE,
+                        FOREIGN KEY (AllergeneId) REFERENCES Allergenes(Id) ON DELETE CASCADE
                     );";
 
-                // table Plats
+                // Table Plats
                 var createPlatsTable = @"
                     CREATE TABLE IF NOT EXISTS Plats (
                         Id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -53,7 +53,7 @@ namespace EpicurApp_API.DAO
                         IngredientsPrincipaux TEXT
                     );";
 
-                //la table Menus
+                // Table Menus
                 var createMenusTable = @"
                     CREATE TABLE IF NOT EXISTS Menus (
                         Id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -76,7 +76,7 @@ namespace EpicurApp_API.DAO
                         FOREIGN KEY (DessertId) REFERENCES Plats(Id)
                     );";
 
-                // table MenuPlat
+                // Table MenuPlat
                 var createMenuPlatTable = @"
                     CREATE TABLE IF NOT EXISTS MenuPlat (
                         MenuId INTEGER NOT NULL,
@@ -84,6 +84,16 @@ namespace EpicurApp_API.DAO
                         PRIMARY KEY (MenuId, PlatId),
                         FOREIGN KEY (MenuId) REFERENCES Menus(Id),
                         FOREIGN KEY (PlatId) REFERENCES Plats(Id)
+                    );";
+
+                // Table ClientMenu (pour l'historique)
+                var createClientMenuTable = @"
+                    CREATE TABLE IF NOT EXISTS ClientMenu (
+                        ClientId INTEGER NOT NULL,
+                        MenuId INTEGER NOT NULL,
+                        PRIMARY KEY (ClientId, MenuId),
+                        FOREIGN KEY (ClientId) REFERENCES Clients(Id),
+                        FOREIGN KEY (MenuId) REFERENCES Menus(Id)
                     );";
 
                 using (var command = connection.CreateCommand())
@@ -105,16 +115,65 @@ namespace EpicurApp_API.DAO
 
                     command.CommandText = createMenuPlatTable;
                     command.ExecuteNonQuery();
+
+                    command.CommandText = createClientMenuTable;
+                    command.ExecuteNonQuery();
                 }
 
+                SeedAllergenes(connection);
                 SeedPlats(connection);
             }
         }
 
-        /// <summary>
-        /// Met les plats par défaut dans la base de données
-        /// </summary>
-        /// <param name="connection"></param>
+        private static void SeedAllergenes(SqliteConnection connection)
+        {
+            using (var transaction = connection.BeginTransaction())
+            {
+                using (var countCommand = new SqliteCommand("SELECT COUNT(*) FROM Allergenes;", connection, transaction))
+                {
+                    long count = (long)(countCommand.ExecuteScalar() ?? 0);
+                    if (count > 0)
+                    {
+                        transaction.Commit();
+                        return;
+                    }
+                }
+
+                var allergenes = new (string Nom, string Description)[]
+                {
+                    ("Gluten", "Céréales contenant du gluten (blé, seigle, orge, avoine)"),
+                    ("Crustacés", "Crustacés et produits à base de crustacés"),
+                    ("Œufs", "Œufs et produits à base d'œufs"),
+                    ("Poissons", "Poissons et produits à base de poissons"),
+                    ("Arachides", "Arachides et produits à base d'arachides"),
+                    ("Soja", "Soja et produits à base de soja"),
+                    ("Lait", "Lait et produits à base de lait (lactose inclus)"),
+                    ("Fruits à coque", "Amandes, noisettes, noix, noix de cajou, etc."),
+                    ("Céleri", "Céleri et produits à base de céleri"),
+                    ("Moutarde", "Moutarde et produits à base de moutarde"),
+                    ("Graines de sésame", "Graines de sésame et produits dérivés"),
+                    ("Sulfites", "Anhydride sulfureux et sulfites (>10mg/kg)"),
+                    ("Lupin", "Lupin et produits à base de lupin"),
+                    ("Mollusques", "Mollusques et produits à base de mollusques")
+                };
+
+                using (var insertCommand = new SqliteCommand("INSERT INTO Allergenes (Nom, Description) VALUES (@Nom, @Description);", connection, transaction))
+                {
+                    insertCommand.Parameters.Add(new SqliteParameter("@Nom", SqliteType.Text));
+                    insertCommand.Parameters.Add(new SqliteParameter("@Description", SqliteType.Text));
+
+                    foreach (var allergene in allergenes)
+                    {
+                        insertCommand.Parameters["@Nom"].Value = allergene.Nom;
+                        insertCommand.Parameters["@Description"].Value = allergene.Description;
+                        insertCommand.ExecuteNonQuery();
+                    }
+                }
+
+                transaction.Commit();
+            }
+        }
+
         private static void SeedPlats(SqliteConnection connection)
         {
             using (var transaction = connection.BeginTransaction())
@@ -167,4 +226,3 @@ namespace EpicurApp_API.DAO
         }
     }
 }
-

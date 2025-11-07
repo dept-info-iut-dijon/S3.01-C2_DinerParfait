@@ -1,10 +1,8 @@
-using Xunit;
 using Moq;
-using EpicurApp.Logic.Services;       
-using EpicurAPP_Partage.Interfaces;  
-using EpicurApp_API.Models;          
-using EpicurAPP_Partage.Exceptions;  
-using System;
+using EpicurAPP_Partage.Interfaces;
+using EpicurAPP_Partage.Exceptions;
+using EpicurAPP_Partage.Models;
+using EpicurAppLogic.Services;
 
 public class ClientServiceTests
 {

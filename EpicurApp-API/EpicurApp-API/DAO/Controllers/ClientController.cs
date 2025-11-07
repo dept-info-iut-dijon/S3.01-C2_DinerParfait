@@ -1,54 +1,89 @@
-﻿using EpicurApp_API.Models;
+﻿using EpicurAPP_Partage.Exceptions;
 using EpicurAPP_Partage.Interfaces;
+using EpicurAPP_Partage.Models;
 using Microsoft.AspNetCore.Mvc;
-using System.Diagnostics;
 
-namespace EpicurApp_API.DAO.Controllers
+[ApiController]
+[Route("[controller]")]
+public class ClientController : ControllerBase
 {
-    [ApiController]
-    [Route("[controller]")]
-    public class ClientController : Controller
-    {       
-       
-        private  IClientDAO clientDAO;
+    private readonly IClientService _clientService;
 
-        public ClientController(IClientDAO clientDAO)
+    public ClientController(IClientService clientService)
+    {
+        _clientService = clientService;
+    }
+
+    [HttpGet]
+    public IActionResult GetAllClients()
+    {
+        try
         {
-            this.clientDAO = clientDAO;
+            var clients = _clientService.ObtenirTousLesClients();
+            return Ok(clients);
         }
-
-        /// <summary>
-        /// Crée un nouveau client.
-        /// </summary>
-        /// <param name="client">Les données du client à créer.</param>
-        /// <returns>Une réponse HTTP.</returns>
-        [HttpPost]
-        public IActionResult CreateClient(Client client)
+        catch (Exception ex)
         {
-            // On verifie que les données rentrées soient valides.
+            return StatusCode(500, "Erreur lors de la récupération des clients.");
+        }
+    }
+
+    [HttpGet("{id}")]
+    public IActionResult GetClient(int id)
+    {
+        try
+        {
+            var client = _clientService.ObtenirClientParId(id);
+            return Ok(client);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, "Erreur lors de la récupération du client.");
+        }
+    }
+
+    [HttpPost]
+    public IActionResult CreerClient([FromBody] Client client)
+    {
+        try
+        {
             if (!ModelState.IsValid)
             {
-                // Si invalide erreur 400 Bad Request
                 return BadRequest(ModelState);
             }
-            
-            
 
-            try
-            {
-                clientDAO.AjouterClient(client);
-                return StatusCode(StatusCodes.Status201Created, client);
-            }
-            catch (Exception ex)
-            {
-                Debug.WriteLine(ex.ToString());
-                // Sinon renvoie une erreur 500 Internal Server Error
-                return StatusCode(StatusCodes.Status500InternalServerError,"Une erreur est survenue lors de la création du client.");
-            }
+            _clientService.AjouterClient(client);
+
+            return Ok(client);
         }
+        catch (InvalidFieldException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+        catch (ApplicationException ex)
+        {
+            return StatusCode(500, ex.Message);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, "Erreur interne : " + ex.Message);
+        }
+    }
 
+
+    [HttpPost("{id}/allergenes")]
+    public IActionResult AssocierAllergenes(int id, [FromBody] List<int> allergeneIds)
+    {
+        try
+        {
+            _clientService.AjouterAllergenesAuClient(id, allergeneIds);
+            return Ok();
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, "Erreur lors de l'association des allergènes au client : " + ex.Message);
+        }
     }
 
 
 }
-

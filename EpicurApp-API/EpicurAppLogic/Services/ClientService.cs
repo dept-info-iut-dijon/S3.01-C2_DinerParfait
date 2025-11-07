@@ -1,8 +1,8 @@
 ﻿using EpicurAPP_Partage.Exceptions;
 using EpicurAPP_Partage.Interfaces;
-using EpicurApp_API.Models;
+using EpicurAPP_Partage.Models;
 
-namespace EpicurApp.Logic.Services
+namespace EpicurAppLogic.Services
 {
     public class ClientService : IClientService
     {
@@ -29,5 +29,54 @@ namespace EpicurApp.Logic.Services
                 throw new ApplicationException("Erreur lors de l'enregistrement du client.", ex);
             }
         }
+
+        public List<Client> ObtenirTousLesClients()
+        {
+            try
+            {
+                return _clientRepository.GetAll();
+            }
+            catch (Exception ex)
+            {
+                throw new ApplicationException("Erreur lors de la récupération des clients.", ex);
+            }
+        }
+
+        public Client ObtenirClientParId(int id)
+        {
+            try
+            {
+                var client = _clientRepository.RechercherClientParId(id);
+                if (client == null)
+                    throw new Exception($"Client avec l'id {id} introuvable.");
+                return client;
+            }
+            catch (Exception ex)
+            {
+                throw new ApplicationException("Erreur lors de la récupération du client.", ex);
+            }
+        }
+
+
+        public async Task<Client> ObtenirClientAvecHistoriqueAsync(int id)
+        {
+            try
+            {
+                var client = await _clientRepository.GetByIdWithHistoryAsync(id);
+                if (client == null)
+                    throw new Exception($"Client avec l'id {id} introuvable.");
+                return client;
+            }
+            catch (Exception ex)
+            {
+                throw new ApplicationException("Erreur lors de la récupération du client avec historique.", ex);
+            }
+        }
+
+        public void AjouterAllergenesAuClient(int clientId, List<int> allergeneIds)
+        {
+            _clientRepository.AjouterAllergenesAuClient(clientId, allergeneIds);
+        }
+
     }
 }

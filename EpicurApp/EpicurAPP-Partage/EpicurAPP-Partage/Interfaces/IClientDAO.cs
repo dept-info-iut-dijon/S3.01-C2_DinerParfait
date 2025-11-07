@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using EpicurApp_API.Models;
+using EpicurAPP_Partage.Models;
 
 namespace EpicurAPP_Partage.Interfaces
 {
@@ -17,5 +17,26 @@ namespace EpicurAPP_Partage.Interfaces
         /// </summary>
         /// <param name="client">Le client à ajouter.</param>
         void AjouterClient(Client client);
+
+        /// <summary>
+        /// Recherche un client par son ID
+        /// </summary>
+        /// <param name="id">ID du client</param>
+        /// <returns>Le client avec l'ID correspodant</returns>
+        public Client RechercherClientParId(int id);
+
+        /// <summary>
+        /// Récupère l'historique de repas du client
+        /// </summary>
+        /// <param name="id">Id du client</param>
+        Task<Client> GetByIdWithHistoryAsync(int id);
+        List<Client> GetAll();
+        public Client GetById(int id);
+
+        void AjouterAllergenesAuClient(int clientId, List<int> allergeneIds);
+        void ModifierClient(Client client);
+        void SupprimerClient(int id);
     }
+
 }
+

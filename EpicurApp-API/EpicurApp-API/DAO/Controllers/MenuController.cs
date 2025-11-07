@@ -8,7 +8,7 @@ namespace EpicurApp_API.DAO.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class MenuController : Controller
+    public class MenuController : ControllerBase
     {
         private readonly IMenuService _menuService;
 

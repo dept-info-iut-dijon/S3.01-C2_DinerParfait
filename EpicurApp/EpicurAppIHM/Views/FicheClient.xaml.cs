@@ -1,53 +1,134 @@
-﻿using System;
+﻿using EpicurApp_API.Models;
+using EpicurAPP_Partage.Models;
+using EpicurAppIHM.Services;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Media;
-using EpicurApp_API.Models;
-using EpicurAPP_Partage.Models;
-using EpicurAppIHM.Services;
 
 namespace EpicurAppIHM.Views
 {
-    /// <summary>
-    /// Fenêtre de création d'un nouveau client
-    /// </summary>
     public partial class FicheClient : Window
     {
         private HttpClient _httpClient;
+        private List<Allergene> allergenes;
+        private int? _clientId;
+        private bool _modeConsultation;
 
         public FicheClient()
         {
             InitializeComponent();
-
             _httpClient = ApiClient.Instance;
+            _modeConsultation = false;
+            ChargerAllergenes();
+        }
+
+        public FicheClient(int clientId, bool modeConsultation = true)
+        {
+            InitializeComponent();
+            _httpClient = ApiClient.Instance;
+            _clientId = clientId;
+            _modeConsultation = modeConsultation;
 
             ChargerAllergenes();
+            ChargerClient();
+
+            if (_modeConsultation)
+            {
+                ConfigurerModeConsultation();
+            }
         }
 
         private async void ChargerAllergenes()
         {
             try
             {
-                Allergene[] allergenes = await _httpClient.GetFromJsonAsync<Allergene[]>("Allergenes");
+                allergenes = await _httpClient.GetFromJsonAsync<List<Allergene>>("Allergenes");
                 cmbAllergenes.ItemsSource = allergenes;
+                cmbAllergenes.SelectedIndex = 0;
             }
             catch (Exception ex)
             {
                 MessageBox.Show("Impossible de charger les allergènes : " + ex.Message,
-                                "Erreur",
-                                MessageBoxButton.OK,
-                                MessageBoxImage.Error);
+                                "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
-        #region Validation champs
+        private async void ChargerClient()
+        {
+            if (!_clientId.HasValue) return;
+
+            try
+            {
+                Client client = await _httpClient.GetFromJsonAsync<Client>($"Client/{_clientId.Value}");
+
+                if (client == null)
+                {
+                    MessageBox.Show("Client introuvable", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
+                    this.Close();
+                    return;
+                }
+
+                txtPrenom.Text = client.Prenom;
+                txtNom.Text = client.Nom;
+                txtEmail.Text = client.Email;
+                txtTelephone.Text = client.Telephone;
+                txtPlatsNonApprecies.Text = client.PlatsNonApprecies;
+                txtPreferences.Text = client.Preferences;
+
+              
+
+                if (client.Allergenes != null && client.Allergenes.Count > 0)
+                {
+                    cmbAllergenes.ItemsSource = client.Allergenes;
+                    cmbAllergenes.SelectedIndex = 0; 
+                }
+                else
+                {
+                    cmbAllergenes.ItemsSource = null;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Erreur lors du chargement du client : " + ex.Message,
+                                "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
+                this.Close();
+            }
+        }
+
+
+
+        private void ConfigurerModeConsultation()
+        {
+            this.Title = "Consultation Client";
+            txtPrenom.IsReadOnly = true;
+            txtNom.IsReadOnly = true;
+            txtEmail.IsReadOnly = true;
+            txtTelephone.IsReadOnly = true;
+            txtPlatsNonApprecies.IsReadOnly = true;
+            txtPreferences.IsReadOnly = true;
+            cmbAllergenes.IsEnabled = false;
+
+            txtPrenom.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#3a3a3a"));
+            txtNom.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#3a3a3a"));
+            txtEmail.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#3a3a3a"));
+            txtTelephone.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#3a3a3a"));
+            txtPlatsNonApprecies.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#3a3a3a"));
+            txtPreferences.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#3a3a3a"));
+
+            btnCreer.Visibility = Visibility.Collapsed;
+            btnAnnuler.Content = "Fermer";
+            btnAnnuler.Width = 180;
+        }
 
         private void ValiderPrenom(object sender, RoutedEventArgs e)
         {
+            if (_modeConsultation) return;
             string prenom = txtPrenom.Text.Trim();
-
             if (!string.IsNullOrEmpty(prenom) && !Regex.IsMatch(prenom, @"^[a-zA-ZÀ-ÿ\s'-]+$"))
             {
                 borderPrenom.BorderBrush = Brushes.Red;
@@ -62,8 +143,8 @@ namespace EpicurAppIHM.Views
 
         private void ValiderNom(object sender, RoutedEventArgs e)
         {
+            if (_modeConsultation) return;
             string nom = txtNom.Text.Trim();
-
             if (!string.IsNullOrEmpty(nom) && !Regex.IsMatch(nom, @"^[a-zA-ZÀ-ÿ\s'-]+$"))
             {
                 borderNom.BorderBrush = Brushes.Red;
@@ -78,8 +159,8 @@ namespace EpicurAppIHM.Views
 
         private void ValiderEmail(object sender, RoutedEventArgs e)
         {
+            if (_modeConsultation) return;
             string email = txtEmail.Text.Trim();
-
             if (!string.IsNullOrEmpty(email) && !Regex.IsMatch(email, @"^[^@\s]+@[^@\s]+\.[^@\s]+$"))
             {
                 borderEmail.BorderBrush = Brushes.Red;
@@ -94,8 +175,8 @@ namespace EpicurAppIHM.Views
 
         private void ValiderTelephone(object sender, RoutedEventArgs e)
         {
+            if (_modeConsultation) return;
             string telephone = txtTelephone.Text.Trim().Replace(" ", "").Replace("-", "");
-
             if (!string.IsNullOrEmpty(telephone) && !Regex.IsMatch(telephone, @"^0[1-9]\d{8}$"))
             {
                 borderTelephone.BorderBrush = Brushes.Red;
@@ -110,50 +191,29 @@ namespace EpicurAppIHM.Views
 
         private bool ToutEstValide()
         {
-            bool valide = true;
-
-            if (string.IsNullOrWhiteSpace(txtPrenom.Text) || erreurPrenom.Visibility == Visibility.Visible)
-            {
-                valide = false;
-            }
-
-            if (string.IsNullOrWhiteSpace(txtNom.Text) || erreurNom.Visibility == Visibility.Visible)
-            {
-                valide = false;
-            }
-
-            if (string.IsNullOrWhiteSpace(txtEmail.Text) || erreurEmail.Visibility == Visibility.Visible)
-            {
-                valide = false;
-            }
-
-            if (string.IsNullOrWhiteSpace(txtTelephone.Text) || erreurTelephone.Visibility == Visibility.Visible)
-            {
-                valide = false;
-            }
-
-            return valide;
+            if (string.IsNullOrWhiteSpace(txtPrenom.Text) || erreurPrenom.Visibility == Visibility.Visible) return false;
+            if (string.IsNullOrWhiteSpace(txtNom.Text) || erreurNom.Visibility == Visibility.Visible) return false;
+            if (string.IsNullOrWhiteSpace(txtEmail.Text) || erreurEmail.Visibility == Visibility.Visible) return false;
+            if (string.IsNullOrWhiteSpace(txtTelephone.Text) || erreurTelephone.Visibility == Visibility.Visible) return false;
+            return true;
         }
-
-        #endregion
 
         private void Annuler(object sender, RoutedEventArgs e)
         {
-            // Vider les champs
+            if (_modeConsultation) { this.Close(); return; }
+
             txtPrenom.Clear();
             txtNom.Clear();
             txtEmail.Clear();
             txtTelephone.Clear();
-            cmbAllergenes.SelectedIndex = -1;
-            txtPlats.Clear();
+            txtPlatsNonApprecies.Clear();
+            txtPreferences.Clear();
 
-            // Réinitialiser les bordures
             borderPrenom.BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#D4AF37"));
             borderNom.BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#D4AF37"));
             borderEmail.BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#D4AF37"));
             borderTelephone.BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#D4AF37"));
 
-            // Masquer les messages d'erreur
             erreurPrenom.Visibility = Visibility.Collapsed;
             erreurNom.Visibility = Visibility.Collapsed;
             erreurEmail.Visibility = Visibility.Collapsed;
@@ -165,9 +225,7 @@ namespace EpicurAppIHM.Views
             if (!ToutEstValide())
             {
                 MessageBox.Show("Veuillez corriger les erreurs dans le formulaire",
-                                "Champs invalides",
-                                MessageBoxButton.OK,
-                                MessageBoxImage.Warning);
+                                "Champs invalides", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
@@ -176,54 +234,48 @@ namespace EpicurAppIHM.Views
 
             try
             {
-                string selectedAllergene = "";
-                if (cmbAllergenes.SelectedItem is Allergene allergene)
+                Client client = new Client
                 {
-                    selectedAllergene = allergene.Nom;
-                }
-
-                Client client = new Client();
-                client.Id = 0;
-                client.Nom = txtNom.Text.Trim();
-                client.Prenom = txtPrenom.Text.Trim();
-                client.Telephone = txtTelephone.Text.Trim().Replace(" ", "").Replace("-", "");
-                client.Email = txtEmail.Text.Trim();
-                client.Allergies = selectedAllergene;
-                client.Notes = txtPlats.Text.Trim();
+                    Nom = txtNom.Text.Trim(),
+                    Prenom = txtPrenom.Text.Trim(),
+                    Telephone = txtTelephone.Text.Trim().Replace(" ", "").Replace("-", ""),
+                    Email = txtEmail.Text.Trim(),
+                    PlatsNonApprecies = txtPlatsNonApprecies.Text.Trim(),
+                    Preferences = txtPreferences.Text.Trim()
+                };
 
                 HttpResponseMessage response = await _httpClient.PostAsJsonAsync("Client", client);
 
                 if (response.IsSuccessStatusCode)
                 {
-                    MessageBox.Show("Client " + client.Prenom + " " + client.Nom + " créé avec succès !",
-                                    "Succès",
-                                    MessageBoxButton.OK,
-                                    MessageBoxImage.Information);
+                    Client clientCree = await response.Content.ReadFromJsonAsync<Client>();
 
-                    Annuler(sender, e);
+                    int? allergeneIdSelectionne = (cmbAllergenes.SelectedItem as Allergene)?.Id;
+
+                    if (allergeneIdSelectionne.HasValue && clientCree != null)
+                    {
+                        await _httpClient.PostAsJsonAsync($"Client/{clientCree.Id}/allergenes", new List<int> { allergeneIdSelectionne.Value });
+                    }
+
+                    MessageBox.Show($"Client {client.Prenom} {client.Nom} créé avec succès !",
+                                    "Succès", MessageBoxButton.OK, MessageBoxImage.Information);
+                    this.DialogResult = true;
+                    this.Close();
                 }
                 else
                 {
                     string errorContent = await response.Content.ReadAsStringAsync();
-                    MessageBox.Show("Erreur lors de la création :\n" + errorContent,
-                                    "Erreur",
-                                    MessageBoxButton.OK,
-                                    MessageBoxImage.Error);
+                    MessageBox.Show($"Erreur : {errorContent}", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
             catch (HttpRequestException)
             {
-                MessageBox.Show("Impossible de contacter l'API.\nVérifiez qu'elle est bien lancée (ex: http://localhost:8080)",
-                                "Erreur de connexion",
-                                MessageBoxButton.OK,
-                                MessageBoxImage.Error);
+                MessageBox.Show("Impossible de contacter l'API.\nVérifiez qu'elle est bien lancée",
+                                "Erreur de connexion", MessageBoxButton.OK, MessageBoxImage.Error);
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Erreur inattendue :\n" + ex.Message,
-                                "Erreur",
-                                MessageBoxButton.OK,
-                                MessageBoxImage.Error);
+                MessageBox.Show($"Erreur : {ex.Message}", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
             }
             finally
             {

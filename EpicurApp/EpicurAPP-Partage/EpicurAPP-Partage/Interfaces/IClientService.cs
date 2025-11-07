@@ -1,4 +1,4 @@
-﻿using EpicurApp_API.Models;
+﻿using EpicurAPP_Partage.Models;
 using System;
 using System.Collections.Generic;
 
@@ -15,5 +15,10 @@ namespace EpicurAPP_Partage.Interfaces
         /// </summary>
         /// <param name="client">L’objet <see cref="Client"/> contenant les informations du client à ajouter.</param>
         void AjouterClient(Client client);
+
+        List<Client> ObtenirTousLesClients();
+        Client ObtenirClientParId(int id);
+        Task<Client> ObtenirClientAvecHistoriqueAsync(int id);
+        void AjouterAllergenesAuClient(int id, List<int> allergeneIds);
     }
 }

@@ -1,5 +1,4 @@
-﻿using EpicurApp_API.DAO;
-using EpicurApp_API.Models;
+﻿using EpicurApp_API.Models;
 using EpicurAPP_Partage.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 

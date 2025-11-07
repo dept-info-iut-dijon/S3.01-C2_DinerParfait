@@ -16,6 +16,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\EpicurAPP-Partage\EpicurAPP-Partage\EpicurAPP-Partage.csproj" />
+	<PackageReference Include="System.Net.Http.Json" Version="9.0.10" />
   </ItemGroup>
 
   <ItemGroup>
