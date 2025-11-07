@@ -40,18 +40,24 @@ namespace EpicurApp_API.DAO.Controllers
             catch (Exception ex)
             {
                 // Sinon renvoie une erreur 500 Internal Server Error
-                return StatusCode(StatusCodes.Status500InternalServerError,"Une erreur est survenue lors de la création du client.");
+                return StatusCode(StatusCodes.Status500InternalServerError, "Une erreur est survenue lors de la création du client.");
             }
         }
         /// <summary>
-        /// ///////////////////////////////////////////////////////
+        /// Récupère la liste de tous les clients
         /// </summary>
-        /// <returns></returns>
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Client>>> GetClients()
         {
-            var clients = await _context.Clients.ToListAsync();
-            return Ok(clients);
+            try
+            {
+                var clients = await clientDAO.GetAllAsync();
+                return Ok(clients);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
 
 
@@ -75,14 +81,6 @@ namespace EpicurApp_API.DAO.Controllers
                 return StatusCode(500, ex.Message);
             }
         }
-
-    }
-
-
-
-
-
-
 
     }
 }
