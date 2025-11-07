@@ -185,7 +185,10 @@
                 <Button x:Name="btnAnnuler" Content="Annuler" Width="130" Height="45" Margin="0,0,15,0"
                         Background="Transparent" Foreground="#D4AF37" BorderBrush="#D4AF37" BorderThickness="2"
                         FontSize="15" FontWeight="SemiBold" Cursor="Hand" />
-                <Button x:Name="btnCreer" Content="Créer le Menu" Width="180" Height="45"
+                <Button x:Name="btnEnregistrerBrouillon" Content="Enregistrer le brouillon" Width="200" Height="45" Margin="0,0,15,0"
+                        Background="#2a2a2a" Foreground="#D4AF37" BorderBrush="#D4AF37" BorderThickness="2"
+                        FontSize="15" FontWeight="SemiBold" Cursor="Hand" />
+                <Button x:Name="btnValider" Content="Valider le menu" Width="180" Height="45"
                         Background="#D4AF37" Foreground="#1a1a1a" BorderThickness="0"
                         FontSize="15" FontWeight="Bold" Cursor="Hand" />
             </StackPanel>

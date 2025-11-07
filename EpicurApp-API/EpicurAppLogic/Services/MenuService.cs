@@ -70,6 +70,62 @@ namespace EpicurApp.Logic.Services
                 throw new ApplicationException("Erreur lors de l'ajout des plats au menu.", ex);
             }
         }
+
+            public Menu? GetDernierBrouillon()
+        {
+            try
+            {
+                return _menuRepository.GetDernierBrouillon();
+            }
+            catch (Exception ex)
+            {
+                throw new ApplicationException("Erreur lors de la récupération du brouillon de menu.", ex);
+            }
+        }
+
+        public void MettreAJourMenu(Menu menu)
+        {
+            if (menu == null)
+            {
+                throw new InvalidFieldException("Les informations du menu sont obligatoires.");
+            }
+
+            if (menu.Id <= 0)
+            {
+                throw new InvalidFieldException("L'identifiant du menu est obligatoire pour la mise à jour.");
+            }
+
+            if (string.IsNullOrWhiteSpace(menu.Nom))
+            {
+                throw new InvalidFieldException("Le nom du menu est obligatoire.");
+            }
+
+            ValiderStatut(menu.Statut);
+
+            try
+            {
+                _menuRepository.MettreAJourMenu(menu);
+            }
+            catch (Exception ex)
+            {
+                throw new ApplicationException("Erreur lors de la mise à jour du menu.", ex);
+            }
+        }
+
+        private static void ValiderStatut(string statut)
+        {
+            if (string.IsNullOrWhiteSpace(statut))
+            {
+                throw new InvalidFieldException("Le statut du menu est obligatoire.");
+            }
+
+            if (!string.Equals(statut, "Brouillon") &&
+                !string.Equals(statut, "Validé"))
+            {
+                throw new InvalidFieldException("Le statut du menu doit être 'Brouillon' ou 'Validé'.");
+            }
+        }
     }
+    
 }
 

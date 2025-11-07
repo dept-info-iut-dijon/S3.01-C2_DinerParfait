@@ -1,11 +1,13 @@
 ﻿using EpicurApp_API.Models;
 using System;
 using System.Collections.Generic;
+using System.Net;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Windows;
 using System.Windows.Controls;
 using EpicurAppIHM.Services;
+using Menu = EpicurApp_API.Models.Menu;
 
 namespace EpicurAppIHM.Views
 {
@@ -13,6 +15,7 @@ namespace EpicurAppIHM.Views
     {
         private HttpClient _httpClient;
         private List<Plat> tousLesPlats;
+        private int? _menuBrouillonId;
 
         public CreationMenu()
         {
@@ -21,9 +24,11 @@ namespace EpicurAppIHM.Views
             _httpClient = ApiClient.Instance;
 
             ChargerPlats();
+            ChargerBrouillon();
 
             btnAnnuler.Click += Annuler;
-            btnCreer.Click += CreerMenu;
+            btnEnregistrerBrouillon.Click += EnregistrerBrouillon;
+            btnValider.Click += ValiderMenu;
         }
 
         private void ChargerPlats()
@@ -96,13 +101,7 @@ namespace EpicurAppIHM.Views
 
         private void Annuler(object sender, RoutedEventArgs e)
         {
-            cmbAmuseGueule.SelectedIndex = -1;
-            cmbBoissonAperitif.SelectedIndex = -1;
-            cmbEntree.SelectedIndex = -1;
-            cmbPlat.SelectedIndex = -1;
-            cmbVin.SelectedIndex = -1;
-            cmbFromage.SelectedIndex = -1;
-            cmbDessert.SelectedIndex = -1;
+            ReinitialiserSelection();
         }
 
         private bool ValidationMenu()
@@ -122,42 +121,137 @@ namespace EpicurAppIHM.Views
             return true;
         }
 
-        private void CreerMenu(object sender, RoutedEventArgs e)
+        private void EnregistrerBrouillon(object sender, RoutedEventArgs e)
         {
-            if (!ValidationMenu()) return;
+            EnregistrerMenu("Brouillon", false);
+        }
 
-            btnCreer.IsEnabled = false;
-            btnCreer.Content = "Création en cours...";
+        private void ValiderMenu(object sender, RoutedEventArgs e)
+        {
+            if (!ValidationMenu())
+                return;
+
+            EnregistrerMenu("Validé", true);
+        }
+
+        private void ChargerBrouillon()
+        {
+            try
+            {
+                HttpResponseMessage response = _httpClient.GetAsync("Menu/Brouillon").Result;
+
+                if (response.StatusCode == HttpStatusCode.NotFound)
+                {
+                    _menuBrouillonId = null;
+                    return;
+                }
+
+                response.EnsureSuccessStatusCode();
+
+                Menu? menu = response.Content.ReadFromJsonAsync<Menu>().Result;
+                if (menu != null)
+                {
+                    _menuBrouillonId = menu.Id;
+
+                    cmbAmuseGueule.SelectedValue = menu.AmuseBoucheId;
+                    cmbBoissonAperitif.SelectedValue = menu.BoissonAperitifId;
+                    cmbEntree.SelectedValue = menu.EntreeId;
+                    cmbPlat.SelectedValue = menu.PlatPrincipalId;
+                    cmbVin.SelectedValue = menu.VinId;
+                    cmbFromage.SelectedValue = menu.FromageId;
+                    cmbDessert.SelectedValue = menu.DessertId;
+                }
+                else
+                {
+                    _menuBrouillonId = null;
+                }
+            }
+            catch
+            {
+                _menuBrouillonId = null;
+            }
+        }
+
+        private void EnregistrerMenu(string statut, bool estValidation)
+        {
+            btnAnnuler.IsEnabled = false;
+            btnEnregistrerBrouillon.IsEnabled = false;
+            btnValider.IsEnabled = false;
 
             try
             {
-                EpicurApp_API.Models.Menu menu = new EpicurApp_API.Models.Menu();
-                menu.Nom = "Nouveau menu";
-                menu.Date = DateTime.Now;
-                menu.Statut = "Brouillon";
+                Menu menu = ConstruireMenu(statut);
+                HttpResponseMessage response;
+                bool creation = !_menuBrouillonId.HasValue;
 
-                menu.AmuseBoucheId = cmbAmuseGueule.SelectedValue as int?;
-                menu.BoissonAperitifId = cmbBoissonAperitif.SelectedValue as int?;
-                menu.EntreeId = cmbEntree.SelectedValue as int?;
-                menu.PlatPrincipalId = cmbPlat.SelectedValue as int?;
-                menu.VinId = cmbVin.SelectedValue as int?;
-                menu.FromageId = cmbFromage.SelectedValue as int?;
-                menu.DessertId = cmbDessert.SelectedValue as int?;
-
-                menu.AmuseBouche = null;
-                menu.BoissonAperitif = null;
-                menu.Entree = null;
-                menu.PlatPrincipal = null;
-                menu.Vin = null;
-                menu.Fromage = null;
-                menu.Dessert = null;
-
-                HttpResponseMessage response = _httpClient.PostAsJsonAsync("Menu", menu).Result;
-
-                if (response.IsSuccessStatusCode)
+                if (creation)
                 {
-                    MessageBox.Show("Menu créé avec succès !", "Succès", MessageBoxButton.OK, MessageBoxImage.Information);
-                    Annuler(sender, e);
+                    response = _httpClient.PostAsJsonAsync("Menu", menu).Result;
+                }
+                else
+                {
+                    menu.Id = _menuBrouillonId!.Value;
+                    response = _httpClient.PutAsJsonAsync($"Menu/{menu.Id}", menu).Result;
+                }
+
+                if (response.IsSuccessStatusCode || response.StatusCode == HttpStatusCode.NoContent)
+                {
+                    if (creation)
+                    {
+                        Menu? menuCree = null;
+                        try
+                        {
+                            menuCree = response.Content.ReadFromJsonAsync<Menu>().Result;
+                        }
+                        catch
+                        {
+                            menuCree = null;
+                        }
+
+                        if (menuCree != null)
+                        {
+                            _menuBrouillonId = menuCree.Id;
+                        }
+                        else
+                        {
+                            try
+                            {
+                                HttpResponseMessage brouillonResponse = _httpClient.GetAsync("Menu/Brouillon").Result;
+                                if (brouillonResponse.IsSuccessStatusCode)
+                                {
+                                    Menu? brouillon = brouillonResponse.Content.ReadFromJsonAsync<Menu>().Result;
+                                    if (brouillon != null)
+                                    {
+                                        _menuBrouillonId = brouillon.Id;
+                                    }
+                                }
+                            }
+                            catch
+                            {
+                            }
+                        }
+                    }
+
+                    if (_menuBrouillonId == null)
+                    {
+                        MessageBox.Show("Brouillon enregistré mais impossible de récupérer son identifiant.",
+                                        "Avertissement",
+                                        MessageBoxButton.OK,
+                                        MessageBoxImage.Warning);
+                    }
+
+                    if (statut.Equals("Validé", StringComparison.OrdinalIgnoreCase))
+                    {
+                        MessageBox.Show("Menu validé avec succès !", "Succès", MessageBoxButton.OK, MessageBoxImage.Information);
+                        _menuBrouillonId = null;
+                        ReinitialiserSelection();
+                    }
+                    else
+                    {
+                        MessageBox.Show("Brouillon enregistré avec succès !", "Succès", MessageBoxButton.OK, MessageBoxImage.Information);
+                    }
+
+                    ChargerBrouillon();
                 }
                 else
                 {
@@ -172,7 +266,7 @@ namespace EpicurAppIHM.Views
             catch (Exception ex)
             {
                 MessageBox.Show(
-                    "Exception lors de la création :\n\n" + ex.Message +
+                    "Erreur lors de l'enregistrement :\n\n" + ex.Message +
                     "\n\nInner: " + (ex.InnerException != null ? ex.InnerException.Message : "Aucune"),
                     "Erreur",
                     MessageBoxButton.OK,
@@ -180,9 +274,67 @@ namespace EpicurAppIHM.Views
             }
             finally
             {
-                btnCreer.IsEnabled = true;
-                btnCreer.Content = "Créer le Menu";
+                btnAnnuler.IsEnabled = true;
+                btnEnregistrerBrouillon.IsEnabled = true;
+                btnValider.IsEnabled = true;
             }
+        }
+
+        private Menu ConstruireMenu(string statut)
+        {
+            Menu menu = new Menu();
+            menu.Nom = "Nouveau menu";
+            menu.Date = DateTime.Now;
+            menu.Statut = statut;
+
+            menu.AmuseBoucheId = ObtenirValeurSelectionnee(cmbAmuseGueule);
+            menu.BoissonAperitifId = ObtenirValeurSelectionnee(cmbBoissonAperitif);
+            menu.EntreeId = ObtenirValeurSelectionnee(cmbEntree);
+            menu.PlatPrincipalId = ObtenirValeurSelectionnee(cmbPlat);
+            menu.VinId = ObtenirValeurSelectionnee(cmbVin);
+            menu.FromageId = ObtenirValeurSelectionnee(cmbFromage);
+            menu.DessertId = ObtenirValeurSelectionnee(cmbDessert);
+
+            menu.AmuseBouche = null;
+            menu.BoissonAperitif = null;
+            menu.Entree = null;
+            menu.PlatPrincipal = null;
+            menu.Vin = null;
+            menu.Fromage = null;
+            menu.Dessert = null;
+
+            return menu;
+        }
+
+        private static int? ObtenirValeurSelectionnee(ComboBox comboBox)
+        {
+            if (comboBox.SelectedValue == null)
+            {
+                return null;
+            }
+
+            if (comboBox.SelectedValue is int valeur)
+            {
+                return valeur;
+            }
+
+            if (int.TryParse(comboBox.SelectedValue.ToString(), out int resultat))
+            {
+                return resultat;
+            }
+
+            return null;
+        }
+
+        private void ReinitialiserSelection()
+        {
+            cmbAmuseGueule.SelectedIndex = -1;
+            cmbBoissonAperitif.SelectedIndex = -1;
+            cmbEntree.SelectedIndex = -1;
+            cmbPlat.SelectedIndex = -1;
+            cmbVin.SelectedIndex = -1;
+            cmbFromage.SelectedIndex = -1;
+            cmbDessert.SelectedIndex = -1;
         }
     }
 }
