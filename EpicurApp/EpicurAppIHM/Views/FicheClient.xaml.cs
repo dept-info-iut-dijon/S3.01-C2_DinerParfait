@@ -4,6 +4,7 @@ using System.Net.Http.Json;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Media;
+using EpicurApp_API.Models;
 using EpicurAPP_Partage.Models;
 
 namespace EpicurAppIHM.Views
@@ -19,12 +20,9 @@ namespace EpicurAppIHM.Views
         {
             InitializeComponent();
 
-            _httpClient = new HttpClient
-            {
-                BaseAddress = new Uri("https://localhost:7068/")
-            };
+            _httpClient = new HttpClient();
+            _httpClient.BaseAddress = new Uri("https://localhost:7068/");
 
-            // Charger la liste des allergènes depuis l'API
             ChargerAllergenes();
         }
 
@@ -32,12 +30,15 @@ namespace EpicurAppIHM.Views
         {
             try
             {
-                var allergenes = await _httpClient.GetFromJsonAsync<Allergene[]>("Allergenes");
+                Allergene[] allergenes = await _httpClient.GetFromJsonAsync<Allergene[]>("Allergenes");
                 cmbAllergenes.ItemsSource = allergenes;
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Impossible de charger les allergènes : {ex.Message}", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("Impossible de charger les allergènes : " + ex.Message,
+                                "Erreur",
+                                MessageBoxButton.OK,
+                                MessageBoxImage.Error);
             }
         }
 
@@ -112,16 +113,24 @@ namespace EpicurAppIHM.Views
             bool valide = true;
 
             if (string.IsNullOrWhiteSpace(txtPrenom.Text) || erreurPrenom.Visibility == Visibility.Visible)
+            {
                 valide = false;
+            }
 
             if (string.IsNullOrWhiteSpace(txtNom.Text) || erreurNom.Visibility == Visibility.Visible)
+            {
                 valide = false;
+            }
 
             if (string.IsNullOrWhiteSpace(txtEmail.Text) || erreurEmail.Visibility == Visibility.Visible)
+            {
                 valide = false;
+            }
 
             if (string.IsNullOrWhiteSpace(txtTelephone.Text) || erreurTelephone.Visibility == Visibility.Visible)
+            {
                 valide = false;
+            }
 
             return valide;
         }
@@ -167,24 +176,26 @@ namespace EpicurAppIHM.Views
 
             try
             {
-                string selectedAllergene = cmbAllergenes.SelectedItem is Allergene a ? a.Nom : "";
-
-                var clientData = new
+                string selectedAllergene = "";
+                if (cmbAllergenes.SelectedItem is Allergene allergene)
                 {
-                    id = 0,
-                    nom = txtNom.Text.Trim(),
-                    prenom = txtPrenom.Text.Trim(),
-                    telephone = txtTelephone.Text.Trim().Replace(" ", "").Replace("-", ""),
-                    email = txtEmail.Text.Trim(),
-                    allergies = selectedAllergene,
-                    notes = txtPlats.Text.Trim()
-                };
+                    selectedAllergene = allergene.Nom;
+                }
 
-                var response = await _httpClient.PostAsJsonAsync("Client", clientData);
+                Client client = new Client();
+                client.Id = 0;
+                client.Nom = txtNom.Text.Trim();
+                client.Prenom = txtPrenom.Text.Trim();
+                client.Telephone = txtTelephone.Text.Trim().Replace(" ", "").Replace("-", "");
+                client.Email = txtEmail.Text.Trim();
+                client.Allergies = selectedAllergene;
+                client.Notes = txtPlats.Text.Trim();
+
+                HttpResponseMessage response = await _httpClient.PostAsJsonAsync("Client", client);
 
                 if (response.IsSuccessStatusCode)
                 {
-                    MessageBox.Show($"Client {clientData.prenom} {clientData.nom} créé avec succès !",
+                    MessageBox.Show("Client " + client.Prenom + " " + client.Nom + " créé avec succès !",
                                     "Succès",
                                     MessageBoxButton.OK,
                                     MessageBoxImage.Information);
@@ -194,7 +205,7 @@ namespace EpicurAppIHM.Views
                 else
                 {
                     string errorContent = await response.Content.ReadAsStringAsync();
-                    MessageBox.Show($"Erreur lors de la création :\n{errorContent}",
+                    MessageBox.Show("Erreur lors de la création :\n" + errorContent,
                                     "Erreur",
                                     MessageBoxButton.OK,
                                     MessageBoxImage.Error);
@@ -209,7 +220,7 @@ namespace EpicurAppIHM.Views
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Erreur inattendue :\n{ex.Message}",
+                MessageBox.Show("Erreur inattendue :\n" + ex.Message,
                                 "Erreur",
                                 MessageBoxButton.OK,
                                 MessageBoxImage.Error);
@@ -219,11 +230,6 @@ namespace EpicurAppIHM.Views
                 btnCreer.IsEnabled = true;
                 btnCreer.Content = "Créer le client";
             }
-        }
-
-        private void cmbAllergenes_SelectionChanged(object sender, System.Windows.Controls.SelectionChangedEventArgs e)
-        {
-            // Ici, tu peux gérer des actions si tu veux à la sélection
         }
     }
 }
