@@ -48,6 +48,9 @@ namespace EpicurAppIHM.Views
             try
             {
                 allergenes = await _httpClient.GetFromJsonAsync<List<Allergene>>("Allergenes");
+
+                allergenes.Insert(0, new Allergene { Id = -1, Nom = "Aucun", Description = "" });
+
                 cmbAllergenes.ItemsSource = allergenes;
                 cmbAllergenes.SelectedIndex = 0;
             }
@@ -57,6 +60,7 @@ namespace EpicurAppIHM.Views
                                 "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
+
 
         private async void ChargerClient()
         {
