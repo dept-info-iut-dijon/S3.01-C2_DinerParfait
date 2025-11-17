@@ -1,4 +1,5 @@
-﻿using EpicurAPP_Partage.Exceptions;
+﻿using EpicurApp_API.DAO;
+using EpicurAPP_Partage.Exceptions;
 using EpicurAPP_Partage.Interfaces;
 using EpicurAPP_Partage.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -85,5 +86,23 @@ public class ClientController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Supprime un client de la base de données en fonction de son ID.
+    /// </summary>
+    /// <param name="id">L'ID du client à supprimer.</param>
+    /// <returns>Code 204 si succès, ou un code d'erreur.</returns>
+    [HttpDelete("{id}")]
+    public IActionResult DeleteClient(int id)
+    {
+        try
+        {
+            _clientService.Delete(id);
 
+            return Ok();
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ex.Message);
+        }
+    }
 }

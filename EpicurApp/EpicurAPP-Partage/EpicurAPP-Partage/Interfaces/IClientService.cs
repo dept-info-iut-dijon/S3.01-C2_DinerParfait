@@ -20,5 +20,10 @@ namespace EpicurAPP_Partage.Interfaces
         Client ObtenirClientParId(int id);
         Task<Client> ObtenirClientAvecHistoriqueAsync(int id);
         void AjouterAllergenesAuClient(int id, List<int> allergeneIds);
+        /// <summary>
+        /// Supprime un client en fonction de son ID.
+        /// </summary>
+        /// <param name="id">L'ID du client à supprimer.</param>
+        void Delete(int id);
     }
 }

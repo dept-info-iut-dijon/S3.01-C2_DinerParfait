@@ -78,5 +78,19 @@ namespace EpicurAppLogic.Services
             _clientRepository.AjouterAllergenesAuClient(clientId, allergeneIds);
         }
 
+
+        public void Delete(int id)
+        {
+            try
+            {
+                // Appelle la méthode Delete du DAO
+                _clientRepository.Delete(id);
+            }
+            catch (Exception ex)
+            {
+                throw new ApplicationException("Erreur lors de la suppression dans le service.", ex);
+            }
+        }
+
     }
 }

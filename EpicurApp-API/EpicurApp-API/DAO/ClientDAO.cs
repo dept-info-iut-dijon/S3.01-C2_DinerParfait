@@ -159,14 +159,13 @@ namespace EpicurApp_API.DAO
             }
         }
 
-        public void SupprimerClient(int id)
+        public void Delete(int id)
         {
+            const string query = "DELETE FROM Clients WHERE Id = @Id;";
+
             using (var connection = new SqliteConnection(_connectionString))
             {
                 connection.Open();
-
-                string query = "DELETE FROM Clients WHERE Id = @Id";
-
                 using (var command = new SqliteCommand(query, connection))
                 {
                     command.Parameters.AddWithValue("@Id", id);

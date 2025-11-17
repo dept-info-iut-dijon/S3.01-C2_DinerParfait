@@ -35,7 +35,12 @@ namespace EpicurAPP_Partage.Interfaces
 
         void AjouterAllergenesAuClient(int clientId, List<int> allergeneIds);
         void ModifierClient(Client client);
-        void SupprimerClient(int id);
+
+        /// <summary>
+        /// Supprime un client de la base de données en fonction de son ID.
+        /// </summary>
+        /// <param name="id">L'ID du client à supprimer.</param>
+        void Delete(int id);
     }
 
 }
