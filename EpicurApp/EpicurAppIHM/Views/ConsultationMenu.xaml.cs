@@ -1,4 +1,4 @@
-﻿using EpicurApp_API.Models;
+﻿using EpicurAPP_Partage.Models;
 using EpicurAppIHM.Services;
 using System;
 using System.Collections.Generic;
@@ -23,7 +23,7 @@ namespace EpicurAppIHM.Views
             try
             {
                 // Récupérer le menu depuis l'API
-                Menu menu = await ApiClient.Instance.GetFromJsonAsync<Menu>($"Menu/{_menuId}");
+                Menu menu = await App.ApiClient.HttpClient.GetFromJsonAsync<Menu>($"Menu/{_menuId}");
 
                 if (menu == null)
                 {
@@ -33,7 +33,7 @@ namespace EpicurAppIHM.Views
                 }
 
                 // Récupérer tous les plats pour afficher les noms
-                List<Plat> plats = await ApiClient.Instance.GetFromJsonAsync<List<Plat>>("Plats");
+                List<Plat> plats = await App.ApiClient.HttpClient.GetFromJsonAsync<List<Plat>>("Plats");
 
                 // Afficher les informations générales
                 txtNom.Text = menu.Nom;

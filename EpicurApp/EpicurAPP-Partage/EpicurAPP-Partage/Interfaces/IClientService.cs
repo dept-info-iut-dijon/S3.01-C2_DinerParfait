@@ -1,6 +1,4 @@
 ﻿using EpicurAPP_Partage.Models;
-using System;
-using System.Collections.Generic;
 
 namespace EpicurAPP_Partage.Interfaces
 {

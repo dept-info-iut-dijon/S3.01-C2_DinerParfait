@@ -1,17 +1,19 @@
-﻿using EpicurApp_API.Models;
+﻿using EpicurAPP_Partage.Models;
 using EpicurAppIHM.Services;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Net.Http.Json;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using MenuModel = EpicurAPP_Partage.Models.Menu;
 
 namespace EpicurAppIHM.Views
 {
     public partial class MenusView : UserControl
     {
-        public ObservableCollection<EpicurApp_API.Models.Menu> Menus { get; set; } = new ObservableCollection<EpicurApp_API.Models.Menu>();
+        public ObservableCollection<MenuModel> Menus { get; set; } = new ObservableCollection<MenuModel>();
 
         public MenusView()
         {
@@ -24,7 +26,7 @@ namespace EpicurAppIHM.Views
         {
             try
             {
-                var menus = await ApiClient.Instance.GetFromJsonAsync<List<EpicurApp_API.Models.Menu>>("Menu/GetAll");
+                var menus = await App.ApiClient.HttpClient.GetFromJsonAsync<List<MenuModel>>("Menu/GetAll");
                 if (menus != null)
                 {
                     Menus.Clear();
@@ -41,7 +43,7 @@ namespace EpicurAppIHM.Views
 
         private void ListBoxMenus_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
-            if (ListBoxMenus.SelectedItem is EpicurApp_API.Models.Menu menuSelectionne)
+            if (ListBoxMenus.SelectedItem is MenuModel menuSelectionne)
             {
                 // Ouvrir la fenêtre de consultation du menu (lecture seule)
                 var ficheMenu = new ConsultationMenu(menuSelectionne.Id);

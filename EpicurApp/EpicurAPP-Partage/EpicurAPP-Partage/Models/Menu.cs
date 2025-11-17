@@ -1,4 +1,6 @@
-﻿namespace EpicurApp_API.Models
+﻿using EpicurApp_API.Models;
+
+namespace EpicurAPP_Partage.Models
 {
     public class Menu
     {

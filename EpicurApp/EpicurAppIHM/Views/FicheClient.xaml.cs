@@ -1,5 +1,4 @@
-﻿using EpicurApp_API.Models;
-using EpicurAPP_Partage.Models;
+﻿using EpicurAPP_Partage.Models;
 using EpicurAppIHM.Services;
 using System;
 using System.Collections.Generic;
@@ -22,7 +21,7 @@ namespace EpicurAppIHM.Views
         public FicheClient()
         {
             InitializeComponent();
-            _httpClient = ApiClient.Instance;
+            _httpClient = App.ApiClient.HttpClient;
             _modeConsultation = false;
             ChargerAllergenes();
         }
@@ -30,7 +29,7 @@ namespace EpicurAppIHM.Views
         public FicheClient(int clientId, bool modeConsultation = true)
         {
             InitializeComponent();
-            _httpClient = ApiClient.Instance;
+            _httpClient = App.ApiClient.HttpClient;
             _clientId = clientId;
             _modeConsultation = modeConsultation;
 
@@ -81,7 +80,10 @@ namespace EpicurAppIHM.Views
                 txtNom.Text = client.Nom;
                 txtEmail.Text = client.Email;
                 txtTelephone.Text = client.Telephone;
-                txtPlatsNonApprecies.Text = client.PlatsNonApprecies;
+                // Convertir la liste des plats non appréciés en string
+                txtPlatsNonApprecies.Text = client.PlatsNonApprecies != null && client.PlatsNonApprecies.Count > 0
+                    ? string.Join(", ", client.PlatsNonApprecies.Select(p => p.Nom))
+                    : "";
                 txtPreferences.Text = client.Preferences;
 
               
@@ -244,8 +246,8 @@ namespace EpicurAppIHM.Views
                     Prenom = txtPrenom.Text.Trim(),
                     Telephone = txtTelephone.Text.Trim().Replace(" ", "").Replace("-", ""),
                     Email = txtEmail.Text.Trim(),
-                    PlatsNonApprecies = txtPlatsNonApprecies.Text.Trim(),
                     Preferences = txtPreferences.Text.Trim()
+                    // Note: PlatsNonApprecies est géré séparément via l'API
                 };
 
                 HttpResponseMessage response = await _httpClient.PostAsJsonAsync("Client", client);

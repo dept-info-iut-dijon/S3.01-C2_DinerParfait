@@ -1,5 +1,4 @@
-﻿using EpicurApp_API.Models;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace EpicurAPP_Partage.Models
 {

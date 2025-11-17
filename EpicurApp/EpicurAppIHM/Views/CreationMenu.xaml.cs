@@ -1,4 +1,4 @@
-﻿using EpicurApp_API.Models;
+﻿using EpicurAPP_Partage.Models;
 using System;
 using System.Collections.Generic;
 using System.Net;
@@ -7,7 +7,7 @@ using System.Net.Http.Json;
 using System.Windows;
 using System.Windows.Controls;
 using EpicurAppIHM.Services;
-using Menu = EpicurApp_API.Models.Menu;
+using MenuModel = EpicurAPP_Partage.Models.Menu;
 
 namespace EpicurAppIHM.Views
 {
@@ -21,7 +21,7 @@ namespace EpicurAppIHM.Views
         {
             InitializeComponent();
 
-            _httpClient = ApiClient.Instance;
+            _httpClient = App.ApiClient.HttpClient;
 
             ChargerPlats();
             ChargerBrouillon();
@@ -66,15 +66,19 @@ namespace EpicurAppIHM.Views
             ConfigurerComboBox(cmbDessert, "Dessert");
         }
 
-        private void ConfigurerComboBox(ComboBox comboBox, string categorie)
+        private void ConfigurerComboBox(ComboBox comboBox, string categorieStr)
         {
             List<Plat> platsClasse = new List<Plat>();
 
-            foreach (Plat plat in tousLesPlats)
+            // Convertir la string en enum
+            if (Enum.TryParse<CategorieEnum>(categorieStr, out CategorieEnum categorie))
             {
-                if (plat.Categorie == categorie)
+                foreach (Plat plat in tousLesPlats)
                 {
-                    platsClasse.Add(plat);
+                    if (plat.Categorie == categorie)
+                    {
+                        platsClasse.Add(plat);
+                    }
                 }
             }
 
@@ -148,7 +152,7 @@ namespace EpicurAppIHM.Views
 
                 response.EnsureSuccessStatusCode();
 
-                Menu? menu = response.Content.ReadFromJsonAsync<Menu>().Result;
+                MenuModel? menu = response.Content.ReadFromJsonAsync<MenuModel>().Result;
                 if (menu != null)
                 {
                     _menuBrouillonId = menu.Id;
@@ -180,7 +184,7 @@ namespace EpicurAppIHM.Views
 
             try
             {
-                Menu menu = ConstruireMenu(statut);
+                MenuModel menu = ConstruireMenu(statut);
                 HttpResponseMessage response;
                 bool creation = !_menuBrouillonId.HasValue;
 
@@ -198,10 +202,10 @@ namespace EpicurAppIHM.Views
                 {
                     if (creation)
                     {
-                        Menu? menuCree = null;
+                        MenuModel? menuCree = null;
                         try
                         {
-                            menuCree = response.Content.ReadFromJsonAsync<Menu>().Result;
+                            menuCree = response.Content.ReadFromJsonAsync<MenuModel>().Result;
                         }
                         catch
                         {
@@ -219,7 +223,7 @@ namespace EpicurAppIHM.Views
                                 HttpResponseMessage brouillonResponse = _httpClient.GetAsync("Menu/Brouillon").Result;
                                 if (brouillonResponse.IsSuccessStatusCode)
                                 {
-                                    Menu? brouillon = brouillonResponse.Content.ReadFromJsonAsync<Menu>().Result;
+                                    MenuModel? brouillon = brouillonResponse.Content.ReadFromJsonAsync<MenuModel>().Result;
                                     if (brouillon != null)
                                     {
                                         _menuBrouillonId = brouillon.Id;
@@ -280,9 +284,9 @@ namespace EpicurAppIHM.Views
             }
         }
 
-        private Menu ConstruireMenu(string statut)
+        private MenuModel ConstruireMenu(string statut)
         {
-            Menu menu = new Menu();
+            MenuModel menu = new MenuModel();
             menu.Nom = "Nouveau menu";
             menu.Date = DateTime.Now;
             menu.Statut = statut;

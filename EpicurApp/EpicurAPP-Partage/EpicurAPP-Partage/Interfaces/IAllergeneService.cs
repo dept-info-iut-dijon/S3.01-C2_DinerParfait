@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using EpicurAPP_Partage.Models;
+﻿using EpicurAPP_Partage.Models;
 
 namespace EpicurAPP_Partage.Interfaces
 {

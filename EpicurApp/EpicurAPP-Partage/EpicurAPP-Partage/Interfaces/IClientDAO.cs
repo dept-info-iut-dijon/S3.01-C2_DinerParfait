@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using EpicurAPP_Partage.Models;
+﻿using EpicurAPP_Partage.Models;
 
 namespace EpicurAPP_Partage.Interfaces
 {

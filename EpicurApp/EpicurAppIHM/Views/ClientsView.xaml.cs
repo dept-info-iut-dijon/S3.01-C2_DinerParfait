@@ -24,7 +24,7 @@ namespace EpicurAppIHM.Views
         {
             try
             {
-                var clients = await ApiClient.Instance.GetFromJsonAsync<List<Client>>("Client");
+                var clients = await App.ApiClient.HttpClient.GetFromJsonAsync<List<Client>>("Client");
                 if (clients != null)
                 {
                     Clients.Clear();
