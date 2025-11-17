@@ -54,17 +54,10 @@
                    Foreground="#8B1538" 
                    Margin="0,0,0,20"/>
 
-        <!-- Bouton Nouveau Client -->
-        <Button Grid.Row="1"
-                x:Name="btnNouveauClient"
-                Content="+ Nouveau Client"
-                Width="200"
-                HorizontalAlignment="Left"
-                Margin="0,0,0,15"
-                Background="#D4AF37"
-                Foreground="White"
-                Style="{StaticResource EpicurAppButtonStyle}"
-                Click="NouveauClient_Click"/>
+
+        <!-- Boutons Nouveau Client et supprimer client -->
+        <!-- A faire-->
+
 
         <!-- DataGrid des clients -->
         <DataGrid x:Name="DataGridClients"
