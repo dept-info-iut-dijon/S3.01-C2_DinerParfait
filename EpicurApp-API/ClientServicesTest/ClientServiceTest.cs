@@ -1,8 +1,8 @@
 using Moq;
-using EpicurAPP_Partage.Interfaces;
 using EpicurAPP_Partage.Exceptions;
 using EpicurAPP_Partage.Models;
 using EpicurAppLogic.Services;
+using EpicurAppLogic.Interfaces;
 
 public class ClientServiceTests
 {

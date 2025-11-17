@@ -1,12 +1,15 @@
 ﻿using EpicurAPP_Partage.Exceptions;
-using EpicurAPP_Partage.Interfaces;
 using EpicurAPP_Partage.Models;
+using EpicurAppLogic.Interfaces;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace EpicurAppLogic.Services
 {
     public class ClientService : IClientService
     {
-        private IClientDAO _clientRepository;
+        private readonly IClientDAO _clientRepository;
 
         public ClientService(IClientDAO clientRepository)
         {
@@ -34,7 +37,8 @@ namespace EpicurAppLogic.Services
         {
             try
             {
-                return _clientRepository.GetAll();
+                List<Client> clients = _clientRepository.GetAll();
+                return clients;
             }
             catch (Exception ex)
             {
@@ -46,9 +50,11 @@ namespace EpicurAppLogic.Services
         {
             try
             {
-                var client = _clientRepository.RechercherClientParId(id);
+                Client? client = _clientRepository.RechercherClientParId(id);
                 if (client == null)
+                {
                     throw new Exception($"Client avec l'id {id} introuvable.");
+                }
                 return client;
             }
             catch (Exception ex)
@@ -57,14 +63,15 @@ namespace EpicurAppLogic.Services
             }
         }
 
-
         public async Task<Client> ObtenirClientAvecHistoriqueAsync(int id)
         {
             try
             {
-                var client = await _clientRepository.GetByIdWithHistoryAsync(id);
+                Client? client = await _clientRepository.GetByIdWithHistoryAsync(id);
                 if (client == null)
+                {
                     throw new Exception($"Client avec l'id {id} introuvable.");
+                }
                 return client;
             }
             catch (Exception ex)
@@ -77,6 +84,5 @@ namespace EpicurAppLogic.Services
         {
             _clientRepository.AjouterAllergenesAuClient(clientId, allergeneIds);
         }
-
     }
 }

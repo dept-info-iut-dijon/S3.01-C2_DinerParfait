@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using EpicurAPP_Partage.Exceptions;
-using EpicurAPP_Partage.Interfaces;
+﻿using EpicurAPP_Partage.Exceptions;
 using EpicurAPP_Partage.Models;
+using EpicurAppLogic.Interfaces;
 using EpicurAppLogic.Services;
 using Moq;
 

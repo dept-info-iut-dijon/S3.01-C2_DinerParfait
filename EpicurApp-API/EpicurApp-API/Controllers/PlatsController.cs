@@ -1,9 +1,12 @@
-﻿using EpicurApp_API.Models;
-using EpicurAPP_Partage.Interfaces;
+using EpicurAPP_Partage.Models;
+using EpicurAppLogic.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EpicurApp_API.Controllers
 {
+    /// <summary>
+    /// Contrôleur pour la gestion des plats
+    /// </summary>
     [ApiController]
     [Route("[controller]")]
     public class PlatsController : Controller
@@ -15,7 +18,10 @@ namespace EpicurApp_API.Controllers
             _platDAO = platDAO;
         }
 
-        // GET: plats
+        /// <summary>
+        /// Récupère tous les plats
+        /// </summary>
+        /// <returns>Liste de tous les plats</returns>
         [HttpGet]
         public ActionResult<IEnumerable<Plat>> GetAllPlats()
         {
@@ -23,10 +29,9 @@ namespace EpicurApp_API.Controllers
             {
                 List<Plat> plats = _platDAO.GetAll();
 
-
                 if (plats == null || !plats.Any())
                 {
-                    return Ok(new List<Plat>()); 
+                    return Ok(new List<Plat>());
                 }
 
                 return Ok(plats);
@@ -37,7 +42,11 @@ namespace EpicurApp_API.Controllers
             }
         }
 
-        // GET: plats
+        /// <summary>
+        /// Récupère un plat par son identifiant
+        /// </summary>
+        /// <param name="id">Identifiant du plat</param>
+        /// <returns>Le plat correspondant</returns>
         [HttpGet("{id}")]
         public ActionResult<Plat> GetPlatById(int id)
         {
@@ -56,14 +65,18 @@ namespace EpicurApp_API.Controllers
             }
         }
 
-        // GET: plats/categorie/{categorie}
+        /// <summary>
+        /// Récupère les plats par catégorie
+        /// </summary>
+        /// <param name="categorie">Nom de la catégorie</param>
+        /// <returns>Liste des plats de la catégorie</returns>
         [HttpGet("categorie/{categorie}")]
         public ActionResult<IEnumerable<Plat>> GetPlatsByCategorie(string categorie)
         {
             try
             {
                 List<Plat> plats = _platDAO.GetAll()
-                    .Where(p => p.Categorie.Equals(categorie, StringComparison.OrdinalIgnoreCase))
+                    .Where(p => p.Categorie.ToString().Equals(categorie, StringComparison.OrdinalIgnoreCase))
                     .ToList();
 
                 return Ok(plats);
@@ -74,7 +87,11 @@ namespace EpicurApp_API.Controllers
             }
         }
 
-        // POST: plats
+        /// <summary>
+        /// Crée un nouveau plat
+        /// </summary>
+        /// <param name="plat">Les données du plat à créer</param>
+        /// <returns>Le plat créé</returns>
         [HttpPost]
         public ActionResult<Plat> CreatePlat([FromBody] Plat plat)
         {

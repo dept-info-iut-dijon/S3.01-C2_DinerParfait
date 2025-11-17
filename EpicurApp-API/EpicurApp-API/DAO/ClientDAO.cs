@@ -1,30 +1,33 @@
-﻿using EpicurApp_API.Models;
-using EpicurAPP_Partage.Interfaces;
+﻿using EpicurApp_API.Configuration;
 using EpicurAPP_Partage.Models;
+using EpicurAppLogic.Interfaces;
 using Microsoft.Data.Sqlite;
-using Microsoft.Extensions.Configuration;
 
 namespace EpicurApp_API.DAO
 {
+    /// <summary>
+    /// DAO pour la gestion des clients dans la base de données
+    /// </summary>
     public class ClientDAO : IClientDAO
     {
-        private readonly string _connectionString;
+        private readonly DatabaseConfiguration _dbConfig;
+        private readonly PlatDAO _platDAO;
 
-        public ClientDAO(IConfiguration configuration)
+        public ClientDAO(DatabaseConfiguration dbConfig, PlatDAO platDAO)
         {
-            _connectionString = configuration.GetConnectionString("DefaultConnection")
-                ?? "Data Source=epicurapp.db";
+            _dbConfig = dbConfig;
+            _platDAO = platDAO;
         }
 
         public void AjouterClient(Client client)
         {
-            using (SqliteConnection connection = new SqliteConnection(_connectionString))
+            using (SqliteConnection connection = _dbConfig.CreateConnection())
             {
                 connection.Open();
 
-                string query = @"INSERT INTO Clients 
-                    (Nom, Prenom, Email, Telephone, platsNonApprecies, preferences) 
-                    VALUES (@Nom, @Prenom, @Email, @Telephone, @PlatsNonApprecies, @Preferences);
+                string query = @"INSERT INTO Clients
+                    (Nom, Prenom, Email, Telephone, Preferences)
+                    VALUES (@Nom, @Prenom, @Email, @Telephone, @Preferences);
                     SELECT last_insert_rowid();";
 
                 using (SqliteCommand command = new SqliteCommand(query, connection))
@@ -33,47 +36,56 @@ namespace EpicurApp_API.DAO
                     command.Parameters.AddWithValue("@Prenom", client.Prenom);
                     command.Parameters.AddWithValue("@Email", client.Email ?? "");
                     command.Parameters.AddWithValue("@Telephone", client.Telephone ?? "");
-                    command.Parameters.AddWithValue("@PlatsNonApprecies", client.PlatsNonApprecies ?? "");
                     command.Parameters.AddWithValue("@Preferences", client.Preferences ?? "");
 
-                    var result = command.ExecuteScalar();
+                    object result = command.ExecuteScalar();
                     if (result != null)
                     {
                         client.Id = Convert.ToInt32(result);
                     }
+                }
+
+                if (client.PlatsNonApprecies != null && client.PlatsNonApprecies.Count > 0)
+                {
+                    AjouterPlatsNonAppreciesAuClient(
+                        client.Id,
+                        client.PlatsNonApprecies.Select(p => p.Id).ToList()
+                    );
                 }
             }
         }
 
         public Client GetById(int id)
         {
-            using (var connection = new SqliteConnection(_connectionString))
+            using (SqliteConnection connection = _dbConfig.CreateConnection())
             {
                 connection.Open();
 
-                string query = @"SELECT Id, Nom, Prenom, Email, Telephone, PlatsNonApprecies, Preferences 
+                string query = @"SELECT Id, Nom, Prenom, Email, Telephone, Preferences
                     FROM Clients WHERE Id = @Id";
 
-                using (var command = new SqliteCommand(query, connection))
+                using (SqliteCommand command = new SqliteCommand(query, connection))
                 {
                     command.Parameters.AddWithValue("@Id", id);
-                    using (var reader = command.ExecuteReader())
+
+                    using (SqliteDataReader reader = command.ExecuteReader())
                     {
                         if (!reader.Read())
                         {
                             return null;
                         }
 
-                        var client = new Client
+                        Client client = new Client
                         {
                             Id = reader.GetInt32(0),
                             Nom = reader.GetString(1),
                             Prenom = reader.GetString(2),
                             Email = reader.IsDBNull(3) ? "" : reader.GetString(3),
                             Telephone = reader.IsDBNull(4) ? "" : reader.GetString(4),
-                            PlatsNonApprecies = reader.IsDBNull(5) ? "" : reader.GetString(5),
-                            Preferences = reader.IsDBNull(6) ? "" : reader.GetString(6)
+                            Preferences = reader.IsDBNull(5) ? "" : reader.GetString(5)
                         };
+
+                        client.PlatsNonApprecies = GetPlatsNonAppreciesByClientId(id);
 
                         return client;
                     }
@@ -87,36 +99,32 @@ namespace EpicurApp_API.DAO
 
             try
             {
-                using (SqliteConnection connection = new SqliteConnection(_connectionString))
+                using (SqliteConnection connection = _dbConfig.CreateConnection())
                 {
                     connection.Open();
-                    Console.WriteLine(" Connexion ouverte");
 
-                    string query = "SELECT Id, Nom, Prenom, Email, Telephone, PlatsNonApprecies, Preferences FROM Clients ORDER BY Nom, Prenom";
+                    string query = "SELECT Id, Nom, Prenom, Email, Telephone, Preferences FROM Clients ORDER BY Nom, Prenom";
 
                     using (SqliteCommand command = new SqliteCommand(query, connection))
                     using (SqliteDataReader reader = command.ExecuteReader())
                     {
                         while (reader.Read())
                         {
+                            int clientId = reader.GetInt32(0);
+
                             Client client = new Client
                             {
-                                Id = reader.GetInt32(0),
+                                Id = clientId,
                                 Nom = reader.GetString(1),
                                 Prenom = reader.GetString(2),
                                 Email = reader.IsDBNull(3) ? "" : reader.GetString(3),
                                 Telephone = reader.IsDBNull(4) ? "" : reader.GetString(4),
-                                PlatsNonApprecies = reader.IsDBNull(5) ? "" : reader.GetString(5),
-                                Preferences = reader.IsDBNull(6) ? "" : reader.GetString(6)
+                                Preferences = reader.IsDBNull(5) ? "" : reader.GetString(5)
                             };
 
                             clients.Add(client);
                         }
                     }
-
-                    Console.WriteLine($" {clients.Count} clients récupérés");
-
-                
                 }
 
                 return clients;
@@ -131,43 +139,49 @@ namespace EpicurApp_API.DAO
 
         public void ModifierClient(Client client)
         {
-            using (var connection = new SqliteConnection(_connectionString))
+            using (SqliteConnection connection = _dbConfig.CreateConnection())
             {
                 connection.Open();
 
-                string query = @"UPDATE Clients SET 
-                    Nom = @Nom, 
-                    Prenom = @Prenom, 
-                    Email = @Email, 
-                    Telephone = @Telephone, 
-                    PlatsNonApprecies = @PlatsNonApprecies, 
-                    Preferences = @Preferences 
+                string query = @"UPDATE Clients SET
+                    Nom = @Nom,
+                    Prenom = @Prenom,
+                    Email = @Email,
+                    Telephone = @Telephone,
+                    Preferences = @Preferences
                     WHERE Id = @Id";
 
-                using (var command = new SqliteCommand(query, connection))
+                using (SqliteCommand command = new SqliteCommand(query, connection))
                 {
                     command.Parameters.AddWithValue("@Id", client.Id);
                     command.Parameters.AddWithValue("@Nom", client.Nom);
                     command.Parameters.AddWithValue("@Prenom", client.Prenom);
                     command.Parameters.AddWithValue("@Email", client.Email ?? "");
                     command.Parameters.AddWithValue("@Telephone", client.Telephone ?? "");
-                    command.Parameters.AddWithValue("@PlatsNonApprecies", client.PlatsNonApprecies ?? "");
                     command.Parameters.AddWithValue("@Preferences", client.Preferences ?? "");
 
                     command.ExecuteNonQuery();
+                }
+
+                if (client.PlatsNonApprecies != null)
+                {
+                    AjouterPlatsNonAppreciesAuClient(
+                        client.Id,
+                        client.PlatsNonApprecies.Select(p => p.Id).ToList()
+                    );
                 }
             }
         }
 
         public void SupprimerClient(int id)
         {
-            using (var connection = new SqliteConnection(_connectionString))
+            using (SqliteConnection connection = _dbConfig.CreateConnection())
             {
                 connection.Open();
 
                 string query = "DELETE FROM Clients WHERE Id = @Id";
 
-                using (var command = new SqliteCommand(query, connection))
+                using (SqliteCommand command = new SqliteCommand(query, connection))
                 {
                     command.Parameters.AddWithValue("@Id", id);
                     command.ExecuteNonQuery();
@@ -177,14 +191,14 @@ namespace EpicurApp_API.DAO
 
         public Client RechercherClientParId(int id)
         {
-            Client client = GetById(id); // charge les infos de base
+            Client client = GetById(id);
 
             if (client != null)
             {
-                // charger les allergènes associés
-                using (SqliteConnection connection = new SqliteConnection(_connectionString))
+                using (SqliteConnection connection = _dbConfig.CreateConnection())
                 {
                     connection.Open();
+
                     string query = @"SELECT a.Id, a.Nom, a.Description
                              FROM Allergenes a
                              INNER JOIN ClientAllergene ca ON a.Id = ca.AllergeneId
@@ -193,6 +207,7 @@ namespace EpicurApp_API.DAO
                     using (SqliteCommand command = new SqliteCommand(query, connection))
                     {
                         command.Parameters.AddWithValue("@ClientId", id);
+
                         using (SqliteDataReader reader = command.ExecuteReader())
                         {
                             while (reader.Read())
@@ -203,6 +218,7 @@ namespace EpicurApp_API.DAO
                                     Nom = reader.GetString(1),
                                     Description = reader.IsDBNull(2) ? "" : reader.GetString(2)
                                 };
+
                                 client.Allergenes.Add(allergene);
                             }
                         }
@@ -213,23 +229,22 @@ namespace EpicurApp_API.DAO
             return client;
         }
 
-
         public async Task<Client> GetByIdWithHistoryAsync(int id)
         {
             Client client = null;
 
-            using (var connection = new SqliteConnection(_connectionString))
+            using (SqliteConnection connection = _dbConfig.CreateConnection())
             {
                 await connection.OpenAsync();
 
-                // Charger le client
-                const string clientQuery = @"SELECT Id, Nom, Prenom, Email, Telephone, PlatsNonApprecies, Preferences 
+                const string clientQuery = @"SELECT Id, Nom, Prenom, Email, Telephone, Preferences
                     FROM Clients WHERE Id=@Id";
 
-                using (var cmdClient = new SqliteCommand(clientQuery, connection))
+                using (SqliteCommand cmdClient = new SqliteCommand(clientQuery, connection))
                 {
                     cmdClient.Parameters.AddWithValue("@Id", id);
-                    using (var reader = await cmdClient.ExecuteReaderAsync())
+
+                    using (SqliteDataReader reader = await cmdClient.ExecuteReaderAsync())
                     {
                         if (await reader.ReadAsync())
                         {
@@ -240,8 +255,7 @@ namespace EpicurApp_API.DAO
                                 Prenom = reader.GetString(2),
                                 Email = reader.IsDBNull(3) ? "" : reader.GetString(3),
                                 Telephone = reader.IsDBNull(4) ? "" : reader.GetString(4),
-                                PlatsNonApprecies = reader.IsDBNull(5) ? "" : reader.GetString(5),
-                                Preferences = reader.IsDBNull(6) ? "" : reader.GetString(6)
+                                Preferences = reader.IsDBNull(5) ? "" : reader.GetString(5)
                             };
                         }
                     }
@@ -249,16 +263,18 @@ namespace EpicurApp_API.DAO
 
                 if (client == null) return null;
 
-                // Charger les allergènes du client
+                client.PlatsNonApprecies = GetPlatsNonAppreciesByClientId(id);
+
                 const string allergenesQuery = @"SELECT a.Id, a.Nom, a.Description 
                     FROM Allergenes a 
                     JOIN ClientAllergene ca ON a.Id = ca.AllergeneId 
                     WHERE ca.ClientId = @ClientId";
 
-                using (var cmdAllergenes = new SqliteCommand(allergenesQuery, connection))
+                using (SqliteCommand cmdAllergenes = new SqliteCommand(allergenesQuery, connection))
                 {
                     cmdAllergenes.Parameters.AddWithValue("@ClientId", id);
-                    using (var reader = await cmdAllergenes.ExecuteReaderAsync())
+
+                    using (SqliteDataReader reader = await cmdAllergenes.ExecuteReaderAsync())
                     {
                         while (await reader.ReadAsync())
                         {
@@ -272,17 +288,17 @@ namespace EpicurApp_API.DAO
                     }
                 }
 
-                // Charger l'historique des menus
                 const string historyQuery = @"SELECT m.Id, m.Nom, m.Date, m.Statut 
                     FROM Menus m 
                     JOIN ClientMenu cm ON m.Id = cm.MenuId 
                     WHERE cm.ClientId = @ClientId 
                     ORDER BY m.Date DESC";
 
-                using (var cmdHistory = new SqliteCommand(historyQuery, connection))
+                using (SqliteCommand cmdHistory = new SqliteCommand(historyQuery, connection))
                 {
                     cmdHistory.Parameters.AddWithValue("@ClientId", id);
-                    using (var reader = await cmdHistory.ExecuteReaderAsync())
+
+                    using (SqliteDataReader reader = await cmdHistory.ExecuteReaderAsync())
                     {
                         while (await reader.ReadAsync())
                         {
@@ -303,26 +319,90 @@ namespace EpicurApp_API.DAO
 
         public void AjouterAllergenesAuClient(int clientId, List<int> allergeneIds)
         {
-            using (var connection = new SqliteConnection(_connectionString))
+            using (SqliteConnection connection = _dbConfig.CreateConnection())
             {
                 connection.Open();
 
-                // Supprimer les anciennes associations
                 string deleteQuery = "DELETE FROM ClientAllergene WHERE ClientId = @ClientId";
-                using (var command = new SqliteCommand(deleteQuery, connection))
+
+                using (SqliteCommand command = new SqliteCommand(deleteQuery, connection))
                 {
                     command.Parameters.AddWithValue("@ClientId", clientId);
                     command.ExecuteNonQuery();
                 }
 
-                // Ajouter les nouvelles associations
                 foreach (int allergeneId in allergeneIds)
                 {
                     string insertQuery = "INSERT INTO ClientAllergene (ClientId, AllergeneId) VALUES (@ClientId, @AllergeneId)";
-                    using (var command = new SqliteCommand(insertQuery, connection))
+
+                    using (SqliteCommand command = new SqliteCommand(insertQuery, connection))
                     {
                         command.Parameters.AddWithValue("@ClientId", clientId);
                         command.Parameters.AddWithValue("@AllergeneId", allergeneId);
+                        command.ExecuteNonQuery();
+                    }
+                }
+            }
+        }
+
+        private List<Plat> GetPlatsNonAppreciesByClientId(int clientId)
+        {
+            List<Plat> plats = new List<Plat>();
+
+            const string query = @"SELECT p.Id
+                                  FROM Plats p
+                                  INNER JOIN ClientPlat cp ON p.Id = cp.PlatId
+                                  WHERE cp.ClientId = @ClientId";
+
+            using (SqliteConnection connection = _dbConfig.CreateConnection())
+            {
+                connection.Open();
+
+                using (SqliteCommand command = new SqliteCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@ClientId", clientId);
+
+                    using (SqliteDataReader reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            int platId = reader.GetInt32(0);
+                            Plat plat = _platDAO.GetById(platId);
+
+                            if (plat != null)
+                            {
+                                plats.Add(plat);
+                            }
+                        }
+                    }
+                }
+            }
+
+            return plats;
+        }
+
+        private void AjouterPlatsNonAppreciesAuClient(int clientId, List<int> platIds)
+        {
+            using (SqliteConnection connection = _dbConfig.CreateConnection())
+            {
+                connection.Open();
+
+                string deleteQuery = "DELETE FROM ClientPlat WHERE ClientId = @ClientId";
+
+                using (SqliteCommand command = new SqliteCommand(deleteQuery, connection))
+                {
+                    command.Parameters.AddWithValue("@ClientId", clientId);
+                    command.ExecuteNonQuery();
+                }
+
+                foreach (int platId in platIds)
+                {
+                    string insertQuery = "INSERT INTO ClientPlat (ClientId, PlatId) VALUES (@ClientId, @PlatId)";
+
+                    using (SqliteCommand command = new SqliteCommand(insertQuery, connection))
+                    {
+                        command.Parameters.AddWithValue("@ClientId", clientId);
+                        command.Parameters.AddWithValue("@PlatId", platId);
                         command.ExecuteNonQuery();
                     }
                 }

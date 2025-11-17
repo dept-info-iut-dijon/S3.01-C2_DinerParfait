@@ -22,16 +22,16 @@ WORKDIR /src
 # Copier les fichiers .csproj avec l'arborescence d'origine
 COPY ["EpicurApp-API/EpicurApp-API/EpicurApp-API.csproj", "EpicurApp-API/EpicurApp-API/"]
 COPY ["EpicurApp-API/EpicurAppLogic/EpicurAppLogic.csproj", "EpicurApp-API/EpicurAppLogic/"]
-# Copier le dossier EpicurApp 
-COPY ["EpicurApp/EpicurAPP-Partage/EpicurAPP-Partage/EpicurAPP-Partage.csproj", "EpicurApp/EpicurAPP-Partage/EpicurAPP-Partage/"]
+# Copier le projet de partage
+COPY ["EpicurAPP-Partage/EpicurAPP-Partage/EpicurAPP-Partage.csproj", "EpicurAPP-Partage/EpicurAPP-Partage/"]
 
-# Restaurer les dépendances depuis l'API 
+# Restaurer les dépendances depuis l'API
 RUN dotnet restore "EpicurApp-API/EpicurApp-API/EpicurApp-API.csproj"
 
 # Copier tout le code source en conservant l'arborescence
 COPY ["EpicurApp-API/EpicurApp-API/", "EpicurApp-API/EpicurApp-API/"]
 COPY ["EpicurApp-API/EpicurAppLogic/", "EpicurApp-API/EpicurAppLogic/"]
-COPY ["EpicurApp/EpicurAPP-Partage/EpicurAPP-Partage/", "EpicurApp/EpicurAPP-Partage/EpicurAPP-Partage/"]
+COPY ["EpicurAPP-Partage/EpicurAPP-Partage/", "EpicurAPP-Partage/EpicurAPP-Partage/"]
 
 # Compiler le projet
 WORKDIR "/src/EpicurApp-API/EpicurApp-API"

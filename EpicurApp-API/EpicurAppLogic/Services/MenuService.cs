@@ -1,8 +1,8 @@
 ﻿using EpicurAPP_Partage.Exceptions;
-using EpicurAPP_Partage.Interfaces;
-using EpicurApp_API.Models;
+using EpicurAPP_Partage.Models;
+using EpicurAppLogic.Interfaces;
 
-namespace EpicurApp.Logic.Services
+namespace EpicurAppLogic.Services
 {
     public class MenuService : IMenuService
     {
@@ -19,6 +19,7 @@ namespace EpicurApp.Logic.Services
             {
                 throw new InvalidFieldException("Le nom du menu est obligatoire.");
             }
+            ValiderStatut(menu.Statut);
 
             try
             {
