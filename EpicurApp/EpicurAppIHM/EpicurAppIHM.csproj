@@ -1,0 +1,32 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <UseWPF>true</UseWPF>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="Police\PlayfairDisplay-Bold.ttf" />
+    <None Remove="Police\PlayfairDisplay-Italic.ttf" />
+    <None Remove="Police\PlayfairDisplay-Regular.ttf" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\EpicurAPP-Partage\EpicurAPP-Partage\EpicurAPP-Partage.csproj" />
+	<PackageReference Include="System.Net.Http.Json" Version="9.0.10" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Police\PlayfairDisplay-Bold.ttf" />
+    <Resource Include="Police\PlayfairDisplay-Italic.ttf" />
+    <Resource Include="Police\PlayfairDisplay-Regular.ttf" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Page Include="App.xaml" />
+  </ItemGroup>
+
+</Project>

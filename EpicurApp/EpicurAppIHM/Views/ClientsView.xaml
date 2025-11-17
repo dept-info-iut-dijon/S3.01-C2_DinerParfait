@@ -1,0 +1,190 @@
+﻿<UserControl x:Class="EpicurAppIHM.Views.ClientsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             mc:Ignorable="d" 
+             d:DesignHeight="600" d:DesignWidth="1000"
+             Background="#FDF6E3" 
+             FontFamily="/Police/#Playfair Display">
+
+    <UserControl.Resources>
+        <Style x:Key="DataGridCellPadding" TargetType="TextBlock">
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Margin" Value="8,0,0,0"/>
+        </Style>
+
+        <Style x:Key="EpicurAppButtonStyle" TargetType="Button">
+            <Setter Property="Height" Value="45"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" 
+                                CornerRadius="5">
+                            <ContentPresenter HorizontalAlignment="Center" 
+                                              VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Opacity" Value="0.85"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- En-tête avec titre -->
+        <TextBlock Grid.Row="0" 
+                   Text="Gestion des Clients" 
+                   FontSize="28" 
+                   FontWeight="Bold" 
+                   Foreground="#8B1538" 
+                   Margin="0,0,0,20"/>
+
+        <!-- Bouton Nouveau Client -->
+        <Button Grid.Row="1"
+                x:Name="btnNouveauClient"
+                Content="+ Nouveau Client"
+                Width="200"
+                HorizontalAlignment="Left"
+                Margin="0,0,0,15"
+                Background="#D4AF37"
+                Foreground="White"
+                Style="{StaticResource EpicurAppButtonStyle}"
+                Click="NouveauClient_Click"/>
+
+        <!-- DataGrid des clients -->
+        <DataGrid x:Name="DataGridClients"
+                  Grid.Row="2" 
+                  AutoGenerateColumns="False" 
+                  IsReadOnly="True"
+                  CanUserAddRows="False"
+                  CanUserDeleteRows="False"
+                  SelectionMode="Single"
+                  SelectionUnit="FullRow"
+                  MouseDoubleClick="DataGridClients_MouseDoubleClick"
+                  RowHeight="50"
+                  Foreground="#475569"
+                  GridLinesVisibility="Horizontal"
+                  HorizontalGridLinesBrush="#D4AF37"
+                  Background="#F8FAFC"
+                  BorderBrush="#475569" 
+                  BorderThickness="1">
+
+            <DataGrid.Columns>
+                <!-- Nom complet -->
+                <DataGridTemplateColumn Header="Client" Width="200">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <StackPanel VerticalAlignment="Center" Margin="8,0">
+                                <TextBlock FontWeight="SemiBold" FontSize="14">
+                                    <Run Text="{Binding Prenom}"/>
+                                    <Run Text=" "/>
+                                    <Run Text="{Binding Nom}"/>
+                                </TextBlock>
+                            </StackPanel>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
+                <!-- Email -->
+                <DataGridTextColumn Header="Email" 
+                                    Binding="{Binding Email}" 
+                                    Width="220" 
+                                    ElementStyle="{StaticResource DataGridCellPadding}"/>
+
+                <!-- Téléphone -->
+                <DataGridTextColumn Header="Téléphone" 
+                                    Binding="{Binding Telephone}" 
+                                    Width="130" 
+                                    ElementStyle="{StaticResource DataGridCellPadding}"/>
+
+                <!-- Allergènes -->
+                <DataGridTemplateColumn Header="Allergènes" Width="250">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <ItemsControl ItemsSource="{Binding Allergenes}" 
+                                         VerticalAlignment="Center" 
+                                         Margin="8,0">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <WrapPanel/>
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border Background="#EF4444" 
+                                               CornerRadius="3" 
+                                               Margin="0,2,4,2"
+                                               Padding="6,2">
+                                            <TextBlock Text="{Binding Nom}" 
+                                                      FontSize="11" 
+                                                      Foreground="White"
+                                                      FontWeight="SemiBold"/>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
+                <!-- Préférences (aperçu) -->
+                <DataGridTemplateColumn Header="Préférences" Width="*" MinWidth="150">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding Preferences}" 
+                                      TextTrimming="CharacterEllipsis"
+                                      VerticalAlignment="Center"
+                                      Margin="8,0"
+                                      FontSize="12"
+                                      Foreground="#6B7280"
+                                      ToolTip="{Binding Preferences}"/>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>
+
+            <DataGrid.ColumnHeaderStyle>
+                <Style TargetType="DataGridColumnHeader">
+                    <Setter Property="Background" Value="#8B1538"/>
+                    <Setter Property="Foreground" Value="#FDF6E3"/>
+                    <Setter Property="FontWeight" Value="Bold"/>
+                    <Setter Property="FontSize" Value="14"/>
+                    <Setter Property="Height" Value="45"/>
+                    <Setter Property="Padding" Value="10,0"/>
+                    <Setter Property="HorizontalContentAlignment" Value="Left"/>
+                </Style>
+            </DataGrid.ColumnHeaderStyle>
+
+            <DataGrid.RowStyle>
+                <Style TargetType="DataGridRow">
+                    <Setter Property="Background" Value="#F8FAFC"/>
+                    <Setter Property="Cursor" Value="Hand"/>
+                    <Style.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Background" Value="#FFFDEE"/>
+                        </Trigger>
+                        <Trigger Property="IsSelected" Value="True">
+                            <Setter Property="Background" Value="#FFF9E6"/>
+                            <Setter Property="FontWeight" Value="SemiBold"/>
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </DataGrid.RowStyle>
+        </DataGrid>
+    </Grid>
+</UserControl>
