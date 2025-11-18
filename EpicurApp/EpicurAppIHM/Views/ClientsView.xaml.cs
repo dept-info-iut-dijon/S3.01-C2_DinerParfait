@@ -14,9 +14,22 @@ namespace EpicurAppIHM.Views
     {
         public ObservableCollection<Client> Clients { get; set; } = new ObservableCollection<Client>();
 
+        //Client HTTP local
+        private readonly HttpClient _httpClient;
+
         public ClientsView()
         {
             InitializeComponent();
+
+            var handler = new HttpClientHandler
+            {
+                ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
+            };
+
+            _httpClient = new HttpClient(handler)
+            {
+                BaseAddress = new Uri("https://localhost:7068/")
+            };
             DataGridClients.ItemsSource = Clients;
             ChargerClients();
         }
@@ -25,7 +38,7 @@ namespace EpicurAppIHM.Views
         {
             try
             {
-                var clients = await ApiClient.Instance.GetFromJsonAsync<List<Client>>("Client");
+                var clients = await _httpClient.GetFromJsonAsync<List<Client>>("Client");
                 if (clients != null)
                 {
                     Clients.Clear();
@@ -75,17 +88,12 @@ namespace EpicurAppIHM.Views
             //Vérifier si un client est sélectionné
             if (DataGridClients.SelectedItem is not Client clientSelectionne)
             {
-                MessageBox.Show("Veuillez sélectionner un client dans la liste à supprimer.",
-                                "Aucune sélection", MessageBoxButton.OK, MessageBoxImage.Warning);
+                MessageBox.Show("Veuillez sélectionner un client dans la liste à supprimer.","Aucune sélection", MessageBoxButton.OK, MessageBoxImage.Warning);
                 return;
             }
 
             //Demander confirmation
-            MessageBoxResult confirmation = MessageBox.Show(
-                $"Êtes-vous sûr de vouloir supprimer le client {clientSelectionne.Prenom} {clientSelectionne.Nom} ?\nCette action est irréversible.",
-                "Confirmation de suppression",
-                MessageBoxButton.YesNo,
-                MessageBoxImage.Warning);
+            MessageBoxResult confirmation = MessageBox.Show($"Êtes-vous sûr de vouloir supprimer le client {clientSelectionne.Prenom} {clientSelectionne.Nom} ?\nCette action est irréversible.","Confirmation de suppression",MessageBoxButton.YesNo,MessageBoxImage.Warning);
 
             if (confirmation == MessageBoxResult.No)
             {
@@ -95,7 +103,7 @@ namespace EpicurAppIHM.Views
             //Appel à l'API
             try
             {
-                HttpResponseMessage response = await ApiClient.Instance.DeleteAsync($"api/Client/{clientSelectionne.Id}");
+                HttpResponseMessage response = await _httpClient.DeleteAsync($"Client/{ clientSelectionne.Id}");
 
                 if (response.IsSuccessStatusCode)
                 {
