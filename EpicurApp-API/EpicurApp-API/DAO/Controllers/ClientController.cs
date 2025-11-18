@@ -71,6 +71,30 @@ public class ClientController : ControllerBase
     }
 
 
+    [HttpPut("{id}")]
+    public IActionResult ModifierClient(int id, [FromBody] Client client)
+    {
+        try
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            _clientService.ModifierClient(client);
+            return Ok(client);
+        }
+        catch (InvalidFieldException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, "Erreur lors de la modification : " + ex.Message);
+        }
+    }
+
+
     [HttpPost("{id}/allergenes")]
     public IActionResult AssocierAllergenes(int id, [FromBody] List<int> allergeneIds)
     {
