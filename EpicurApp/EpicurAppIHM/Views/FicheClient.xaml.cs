@@ -1,9 +1,4 @@
-﻿using EpicurApp_API.Models;
-using EpicurAPP_Partage.Models;
-using EpicurAppIHM.Services;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using EpicurAPP_Partage.Models;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text.RegularExpressions;
@@ -12,27 +7,37 @@ using System.Windows.Media;
 
 namespace EpicurAppIHM.Views
 {
+    /// <summary>
+    /// Logique d'interaction pour FicheClient.xaml
+    /// </summary>
     public partial class FicheClient : Window
     {
+        /// <summary>
+        /// L'instance HttpClient pour les appels API
+        /// </summary>
         private HttpClient _httpClient;
+        /// <summary>
+        /// Liste des allergènes disponibles
+        /// </summary>
         private List<Allergene> allergenes;
+        /// <summary>
+        /// L'ID du client en consultation/modification
+        /// </summary>
         private int? _clientId;
         private bool _modeModification;
 
-        // Constructeur pour CRÉATION
         public FicheClient()
         {
             InitializeComponent();
-            _httpClient = ApiClient.Instance;
+            _httpClient = App.ApiClient.HttpClient;
             _modeModification = false;
             ChargerAllergenes();
         }
 
-        // Constructeur pour MODIFICATION
-        public FicheClient(int clientId)
+        public FicheClient(int clientId, bool modeConsultation = true)
         {
             InitializeComponent();
-            _httpClient = ApiClient.Instance;
+            _httpClient = App.ApiClient.HttpClient;
             _clientId = clientId;
             _modeModification = true;
 
@@ -43,6 +48,10 @@ namespace EpicurAppIHM.Views
             ChargerClient();
         }
 
+        /// <summary>
+        /// Charge la liste des allergènes depuis l'API
+        /// </summary>
+        /// <exception cref="Exception">erreur de chargement des allergènes</exception>
         private async void ChargerAllergenes()
         {
             try
@@ -59,6 +68,7 @@ namespace EpicurAppIHM.Views
                                 "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
+
 
         private async void ChargerClient()
         {
@@ -79,7 +89,10 @@ namespace EpicurAppIHM.Views
                 txtNom.Text = client.Nom;
                 txtEmail.Text = client.Email;
                 txtTelephone.Text = client.Telephone;
-                txtPlatsNonApprecies.Text = client.PlatsNonApprecies;
+                // Convertir la liste de plats en string pour l'affichage
+                txtPlatsNonApprecies.Text = client.PlatsNonApprecies != null && client.PlatsNonApprecies.Count > 0
+                    ? string.Join(", ", client.PlatsNonApprecies.Select(p => p.Nom))
+                    : string.Empty;
                 txtPreferences.Text = client.Preferences;
 
                 if (client.Allergenes != null && client.Allergenes.Count > 0)
@@ -100,6 +113,31 @@ namespace EpicurAppIHM.Views
             }
         }
 
+
+
+        private void ConfigurerModeConsultation()
+        {
+            this.Title = "Consultation Client";
+            txtPrenom.IsReadOnly = true;
+            txtNom.IsReadOnly = true;
+            txtEmail.IsReadOnly = true;
+            txtTelephone.IsReadOnly = true;
+            txtPlatsNonApprecies.IsReadOnly = true;
+            txtPreferences.IsReadOnly = true;
+            cmbAllergenes.IsEnabled = false;
+
+            txtPrenom.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#3a3a3a"));
+            txtNom.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#3a3a3a"));
+            txtEmail.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#3a3a3a"));
+            txtTelephone.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#3a3a3a"));
+            txtPlatsNonApprecies.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#3a3a3a"));
+            txtPreferences.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#3a3a3a"));
+
+            btnCreer.Visibility = Visibility.Collapsed;
+            btnAnnuler.Content = "Fermer";
+            btnAnnuler.Width = 180;
+        }
+
         private void ValiderPrenom(object sender, RoutedEventArgs e)
         {
             string prenom = txtPrenom.Text.Trim();
@@ -115,6 +153,11 @@ namespace EpicurAppIHM.Views
             }
         }
 
+        /// <summary>
+        /// Validation du nom
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void ValiderNom(object sender, RoutedEventArgs e)
         {
             string nom = txtNom.Text.Trim();
@@ -130,6 +173,9 @@ namespace EpicurAppIHM.Views
             }
         }
 
+        /// <summary>
+        /// Validation de l'email
+        /// </summary>
         private void ValiderEmail(object sender, RoutedEventArgs e)
         {
             string email = txtEmail.Text.Trim();
@@ -145,6 +191,9 @@ namespace EpicurAppIHM.Views
             }
         }
 
+        /// <summary>
+        /// Validation du téléphone
+        /// </summary>
         private void ValiderTelephone(object sender, RoutedEventArgs e)
         {
             string telephone = txtTelephone.Text.Trim().Replace(" ", "").Replace("-", "");
@@ -160,20 +209,35 @@ namespace EpicurAppIHM.Views
             }
         }
 
+        /// <summary>
+        /// Vérifie si tous les champs sont valides
+        /// </summary>
+        /// <returns>renvoie true si tout les champs obligatoires sont remplis</returns>
         private bool ToutEstValide()
         {
-            if (string.IsNullOrWhiteSpace(txtPrenom.Text) || erreurPrenom.Visibility == Visibility.Visible) return false;
-            if (string.IsNullOrWhiteSpace(txtNom.Text) || erreurNom.Visibility == Visibility.Visible) return false;
-            if (string.IsNullOrWhiteSpace(txtEmail.Text) || erreurEmail.Visibility == Visibility.Visible) return false;
-            if (string.IsNullOrWhiteSpace(txtTelephone.Text) || erreurTelephone.Visibility == Visibility.Visible) return false;
-            return true;
+            bool res = true;
+            if (string.IsNullOrWhiteSpace(txtPrenom.Text) || erreurPrenom.Visibility == Visibility.Visible) res = false;
+            if (string.IsNullOrWhiteSpace(txtNom.Text) || erreurNom.Visibility == Visibility.Visible) res = false;
+            if (string.IsNullOrWhiteSpace(txtEmail.Text) || erreurEmail.Visibility == Visibility.Visible) res = false;
+            if (string.IsNullOrWhiteSpace(txtTelephone.Text) || erreurTelephone.Visibility == Visibility.Visible) res =  false;
+            return res;
         }
 
+        /// <summary>
+        /// Efface les champs du formulaire ou ferme la fenêtre en mode consultation
+        /// </summary>
         private void Annuler(object sender, RoutedEventArgs e)
         {
             this.Close();
         }
 
+        /// <summary>
+        /// Crée un nouveau client via l'API
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        /// <exception cref="Exception">erreur lors de la création du client</exception>
+        /// <exception cref="HttpRequestException">erreur de connexion à l'API</exception>
         private async void CreerClient(object sender, RoutedEventArgs e)
         {
             if (!ToutEstValide())
@@ -204,7 +268,7 @@ namespace EpicurAppIHM.Views
                         Prenom = txtPrenom.Text.Trim(),
                         Telephone = txtTelephone.Text.Trim().Replace(" ", "").Replace("-", ""),
                         Email = txtEmail.Text.Trim(),
-                        PlatsNonApprecies = txtPlatsNonApprecies.Text.Trim(),
+                        //PlatsNonApprecies = txtPlatsNonApprecies.Text.Trim(),
                         Preferences = txtPreferences.Text.Trim()
                     };
 
@@ -251,17 +315,17 @@ namespace EpicurAppIHM.Views
                 btnCreer.IsEnabled = false;
                 btnCreer.Content = "Création en cours...";
 
-                try
+            try
+            {
+                Client client = new Client
                 {
-                    Client client = new Client
-                    {
-                        Nom = txtNom.Text.Trim(),
-                        Prenom = txtPrenom.Text.Trim(),
-                        Telephone = txtTelephone.Text.Trim().Replace(" ", "").Replace("-", ""),
-                        Email = txtEmail.Text.Trim(),
-                        PlatsNonApprecies = txtPlatsNonApprecies.Text.Trim(),
-                        Preferences = txtPreferences.Text.Trim()
-                    };
+                    Nom = txtNom.Text.Trim(),
+                    Prenom = txtPrenom.Text.Trim(),
+                    Telephone = txtTelephone.Text.Trim().Replace(" ", "").Replace("-", ""),
+                    Email = txtEmail.Text.Trim(),
+                    //PlatsNonApprecies = txtPlatsNonApprecies.Text.Trim(),
+                    Preferences = txtPreferences.Text.Trim()
+                };
 
                     HttpResponseMessage response = await _httpClient.PostAsJsonAsync("Client", client);
 

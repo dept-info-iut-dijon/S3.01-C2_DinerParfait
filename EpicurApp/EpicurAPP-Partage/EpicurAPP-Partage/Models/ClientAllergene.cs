@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace EpicurAPP_Partage.Models
+﻿namespace EpicurAPP_Partage.Models
 {
     /// <summary>
     /// Table de liaison entre Client et Allergene

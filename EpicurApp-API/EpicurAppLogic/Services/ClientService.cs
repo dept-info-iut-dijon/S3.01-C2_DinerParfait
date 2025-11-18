@@ -1,5 +1,5 @@
 ﻿using EpicurAPP_Partage.Exceptions;
-using EpicurAPP_Partage.Interfaces;
+using EpicurAppLogic.Interfaces;
 using EpicurAPP_Partage.Models;
 
 namespace EpicurAppLogic.Services
@@ -106,8 +106,8 @@ namespace EpicurAppLogic.Services
                     champsModifies.Add($"Email: {ancienClient.Email} = {client.Email}");
                 if (ancienClient.Telephone != client.Telephone)
                     champsModifies.Add($"Telephone: {ancienClient.Telephone} = {client.Telephone}");
-                if (ancienClient.PlatsNonApprecies != client.PlatsNonApprecies)
-                    champsModifies.Add($"PlatsNonApprecies: {ancienClient.PlatsNonApprecies} = {client.PlatsNonApprecies}");
+                //if (ancienClient.PlatsNonApprecies != client.PlatsNonApprecies)
+                   // champsModifies.Add($"PlatsNonApprecies: {ancienClient.PlatsNonApprecies} = {client.PlatsNonApprecies}");
                 if (ancienClient.Preferences != client.Preferences)
                     champsModifies.Add($"Preferences: {ancienClient.Preferences} = {client.Preferences}");
 

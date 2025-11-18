@@ -1,21 +1,33 @@
-﻿using EpicurApp_API.Models;
-using EpicurAPP_Partage.Interfaces;
+﻿using EpicurAppLogic.Interfaces;
 using EpicurAPP_Partage.Models;
 using Microsoft.Data.Sqlite;
-using Microsoft.Extensions.Configuration;
+using EpicurApp_API.Configuration;
 
 namespace EpicurApp_API.DAO
 {
+    /// <summary>
+    /// DAO pour la gestion des clients.
+    /// </summary>
     public class ClientDAO : IClientDAO
     {
         private readonly string _connectionString;
+        private readonly IPlatDAO _platDAO;
 
-        public ClientDAO(IConfiguration configuration)
+        /// <summary>
+        /// Initialise une nouvelle instance de ClientDAO.
+        /// </summary>
+        /// <param name="databaseConfiguration">Configuration de la base de données.</param>
+        /// <param name="platDAO">DAO pour accéder aux plats.</param>
+        public ClientDAO(DatabaseConfiguration databaseConfiguration, IPlatDAO platDAO)
         {
-            _connectionString = configuration.GetConnectionString("DefaultConnection")
-                ?? "Data Source=epicurapp.db";
+            _connectionString = databaseConfiguration.GetConnectionString();
+            _platDAO = platDAO;
         }
 
+        /// <summary>
+        /// Ajoute un nouveau client dans la base de données.
+        /// </summary>
+        /// <param name="client">Le client à ajouter.</param>
         public void AjouterClient(Client client)
         {
             using (SqliteConnection connection = new SqliteConnection(_connectionString))
@@ -33,7 +45,7 @@ namespace EpicurApp_API.DAO
                     command.Parameters.AddWithValue("@Prenom", client.Prenom);
                     command.Parameters.AddWithValue("@Email", client.Email ?? "");
                     command.Parameters.AddWithValue("@Telephone", client.Telephone ?? "");
-                    command.Parameters.AddWithValue("@PlatsNonApprecies", client.PlatsNonApprecies ?? "");
+                    command.Parameters.AddWithValue("@PlatsNonApprecies", ConvertirPlatsEnIds(client.PlatsNonApprecies));
                     command.Parameters.AddWithValue("@Preferences", client.Preferences ?? "");
 
                     var result = command.ExecuteScalar();
@@ -45,6 +57,11 @@ namespace EpicurApp_API.DAO
             }
         }
 
+        /// <summary>
+        /// Récupère un client par son identifiant.
+        /// </summary>
+        /// <param name="id">Identifiant du client.</param>
+        /// <returns>Le client trouvé ou null.</returns>
         public Client GetById(int id)
         {
             using (var connection = new SqliteConnection(_connectionString))
@@ -64,6 +81,8 @@ namespace EpicurApp_API.DAO
                             return null;
                         }
 
+                        string platsNonAppreciesIds = reader.IsDBNull(5) ? "" : reader.GetString(5);
+
                         var client = new Client
                         {
                             Id = reader.GetInt32(0),
@@ -71,7 +90,7 @@ namespace EpicurApp_API.DAO
                             Prenom = reader.GetString(2),
                             Email = reader.IsDBNull(3) ? "" : reader.GetString(3),
                             Telephone = reader.IsDBNull(4) ? "" : reader.GetString(4),
-                            PlatsNonApprecies = reader.IsDBNull(5) ? "" : reader.GetString(5),
+                            PlatsNonApprecies = ConvertirIdsEnPlats(platsNonAppreciesIds),
                             Preferences = reader.IsDBNull(6) ? "" : reader.GetString(6)
                         };
 
@@ -81,6 +100,10 @@ namespace EpicurApp_API.DAO
             }
         }
 
+        /// <summary>
+        /// Récupère tous les clients de la base de données.
+        /// </summary>
+        /// <returns>Liste de tous les clients.</returns>
         public List<Client> GetAll()
         {
             List<Client> clients = new List<Client>();
@@ -99,6 +122,8 @@ namespace EpicurApp_API.DAO
                     {
                         while (reader.Read())
                         {
+                            string platsNonAppreciesIds = reader.IsDBNull(5) ? "" : reader.GetString(5);
+
                             Client client = new Client
                             {
                                 Id = reader.GetInt32(0),
@@ -106,7 +131,7 @@ namespace EpicurApp_API.DAO
                                 Prenom = reader.GetString(2),
                                 Email = reader.IsDBNull(3) ? "" : reader.GetString(3),
                                 Telephone = reader.IsDBNull(4) ? "" : reader.GetString(4),
-                                PlatsNonApprecies = reader.IsDBNull(5) ? "" : reader.GetString(5),
+                                PlatsNonApprecies = ConvertirIdsEnPlats(platsNonAppreciesIds),
                                 Preferences = reader.IsDBNull(6) ? "" : reader.GetString(6)
                             };
 
@@ -129,6 +154,10 @@ namespace EpicurApp_API.DAO
             }
         }
 
+        /// <summary>
+        /// Met à jour les informations d'un client existant.
+        /// </summary>
+        /// <param name="client">Le client avec les informations mises à jour.</param>
         public void ModifierClient(Client client)
         {
             using (var connection = new SqliteConnection(_connectionString))
@@ -151,7 +180,7 @@ namespace EpicurApp_API.DAO
                     command.Parameters.AddWithValue("@Prenom", client.Prenom);
                     command.Parameters.AddWithValue("@Email", client.Email ?? "");
                     command.Parameters.AddWithValue("@Telephone", client.Telephone ?? "");
-                    command.Parameters.AddWithValue("@PlatsNonApprecies", client.PlatsNonApprecies ?? "");
+                    command.Parameters.AddWithValue("@PlatsNonApprecies", ConvertirPlatsEnIds(client.PlatsNonApprecies));
                     command.Parameters.AddWithValue("@Preferences", client.Preferences ?? "");
 
                     command.ExecuteNonQuery();
@@ -159,6 +188,10 @@ namespace EpicurApp_API.DAO
             }
         }
 
+        /// <summary>
+        /// Supprime un client de la base de données.
+        /// </summary>
+        /// <param name="id">Identifiant du client à supprimer.</param>
         public void SupprimerClient(int id)
         {
             using (var connection = new SqliteConnection(_connectionString))
@@ -175,6 +208,11 @@ namespace EpicurApp_API.DAO
             }
         }
 
+        /// <summary>
+        /// Recherche un client par son identifiant avec ses allergènes associés.
+        /// </summary>
+        /// <param name="id">Identifiant du client.</param>
+        /// <returns>Le client avec ses allergènes ou null.</returns>
         public Client RechercherClientParId(int id)
         {
             Client client = GetById(id); // charge les infos de base
@@ -214,6 +252,11 @@ namespace EpicurApp_API.DAO
         }
 
 
+        /// <summary>
+        /// Récupère un client par son identifiant avec son historique de repas de manière asynchrone.
+        /// </summary>
+        /// <param name="id">Identifiant du client.</param>
+        /// <returns>Le client avec son historique ou null.</returns>
         public async Task<Client> GetByIdWithHistoryAsync(int id)
         {
             Client client = null;
@@ -233,6 +276,8 @@ namespace EpicurApp_API.DAO
                     {
                         if (await reader.ReadAsync())
                         {
+                            string platsNonAppreciesIds = reader.IsDBNull(5) ? "" : reader.GetString(5);
+
                             client = new Client
                             {
                                 Id = reader.GetInt32(0),
@@ -240,7 +285,7 @@ namespace EpicurApp_API.DAO
                                 Prenom = reader.GetString(2),
                                 Email = reader.IsDBNull(3) ? "" : reader.GetString(3),
                                 Telephone = reader.IsDBNull(4) ? "" : reader.GetString(4),
-                                PlatsNonApprecies = reader.IsDBNull(5) ? "" : reader.GetString(5),
+                                PlatsNonApprecies = ConvertirIdsEnPlats(platsNonAppreciesIds),
                                 Preferences = reader.IsDBNull(6) ? "" : reader.GetString(6)
                             };
                         }
@@ -301,6 +346,12 @@ namespace EpicurApp_API.DAO
             return client;
         }
 
+        /// <summary>
+        /// Associe une liste d'allergènes à un client.
+        /// Supprime d'abord les anciennes associations puis ajoute les nouvelles.
+        /// </summary>
+        /// <param name="clientId">Identifiant du client.</param>
+        /// <param name="allergeneIds">Liste des identifiants des allergènes.</param>
         public void AjouterAllergenesAuClient(int clientId, List<int> allergeneIds)
         {
             using (var connection = new SqliteConnection(_connectionString))
@@ -327,6 +378,52 @@ namespace EpicurApp_API.DAO
                     }
                 }
             }
+        }
+
+        /// <summary>
+        /// Convertit une liste de plats en une chaîne d'IDs séparés par des virgules.
+        /// </summary>
+        /// <param name="plats">Liste de plats à convertir.</param>
+        /// <returns>Chaîne d'IDs séparés par des virgules.</returns>
+        private string ConvertirPlatsEnIds(List<Plat> plats)
+        {
+            if (plats == null || plats.Count == 0)
+            {
+                return string.Empty;
+            }
+
+            return string.Join(",", plats.Select(p => p.Id));
+        }
+
+        /// <summary>
+        /// Convertit une chaîne d'IDs séparés par des virgules en une liste de plats.
+        /// </summary>
+        /// <param name="ids">Chaîne d'IDs séparés par des virgules.</param>
+        /// <returns>Liste de plats correspondants.</returns>
+        private List<Plat> ConvertirIdsEnPlats(string ids)
+        {
+            List<Plat> plats = new List<Plat>();
+
+            if (string.IsNullOrWhiteSpace(ids))
+            {
+                return plats;
+            }
+
+            string[] idsArray = ids.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+
+            foreach (string idString in idsArray)
+            {
+                if (int.TryParse(idString.Trim(), out int platId))
+                {
+                    Plat? plat = _platDAO.GetById(platId);
+                    if (plat != null)
+                    {
+                        plats.Add(plat);
+                    }
+                }
+            }
+
+            return plats;
         }
     }
 }

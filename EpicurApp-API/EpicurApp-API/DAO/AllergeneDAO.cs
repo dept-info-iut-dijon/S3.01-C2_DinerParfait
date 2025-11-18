@@ -1,19 +1,29 @@
 ﻿using EpicurAPP_Partage.Models;
 using Microsoft.Data.Sqlite;
-using Microsoft.Extensions.Configuration;
+using EpicurApp_API.Configuration;
 
 namespace EpicurApp_API.DAO
 {
+    /// <summary>
+    /// DAO pour la gestion des allergènes.
+    /// </summary>
     public class AllergeneDAO
     {
         private readonly string _connectionString;
 
-        public AllergeneDAO(IConfiguration configuration)
+        /// <summary>
+        /// Initialise une nouvelle instance de AllergeneDAO.
+        /// </summary>
+        /// <param name="databaseConfiguration">Configuration de la base de données.</param>
+        public AllergeneDAO(DatabaseConfiguration databaseConfiguration)
         {
-            _connectionString = configuration.GetConnectionString("DefaultConnection") 
-                ?? "Data Source=epicurapp.db";
+            _connectionString = databaseConfiguration.GetConnectionString();
         }
 
+        /// <summary>
+        /// Récupère tous les allergènes de la base de données.
+        /// </summary>
+        /// <returns>Liste de tous les allergènes.</returns>
         public List<Allergene> GetAll()
         {
             var allergenes = new List<Allergene>();
@@ -39,6 +49,11 @@ namespace EpicurApp_API.DAO
             return allergenes;
         }
 
+        /// <summary>
+        /// Récupère les allergènes associés à un client spécifique.
+        /// </summary>
+        /// <param name="clientId">Identifiant du client.</param>
+        /// <returns>Liste des allergènes du client.</returns>
         public List<Allergene> GetAllergenesByClient(int clientId)
         {
             var allergenes = new List<Allergene>();
@@ -70,6 +85,12 @@ namespace EpicurApp_API.DAO
             return allergenes;
         }
 
+        /// <summary>
+        /// Associe une liste d'allergènes à un client.
+        /// Supprime d'abord les anciennes associations puis ajoute les nouvelles.
+        /// </summary>
+        /// <param name="clientId">Identifiant du client.</param>
+        /// <param name="allergeneIds">Liste des identifiants des allergènes à associer.</param>
         public void AjouterAllergenesAuClient(int clientId, List<int> allergeneIds)
         {
             using (var connection = new SqliteConnection(_connectionString))
@@ -97,6 +118,10 @@ namespace EpicurApp_API.DAO
             }
         }
 
+        /// <summary>
+        /// Ajoute un nouvel allergène à la base de données.
+        /// </summary>
+        /// <param name="allergene">L'allergène à ajouter.</param>
         public void AjouterAllergene(Allergene allergene)
         {
             using (var connection = new SqliteConnection(_connectionString))

@@ -1,7 +1,4 @@
-﻿using EpicurApp_API.Models;
-using EpicurAppIHM.Services;
-using System;
-using System.Collections.Generic;
+﻿using EpicurAPP_Partage.Models;
 using System.Net.Http.Json;
 using System.Windows;
 
@@ -11,6 +8,10 @@ namespace EpicurAppIHM.Views
     {
         private int _menuId;
 
+        /// <summary>
+        /// Intancie la fenetre avec les menus
+        /// </summary>
+        /// <param name="menuId">Le menu cible</param>
         public ConsultationMenu(int menuId)
         {
             InitializeComponent();
@@ -18,12 +19,16 @@ namespace EpicurAppIHM.Views
             ChargerMenu();
         }
 
+        /// <summary>
+        /// Charge les menus
+        /// </summary>
+        /// <exception cref="Exception">Erreur de chargement des menus</exception>
         private async void ChargerMenu()
         {
             try
             {
                 // Récupérer le menu depuis l'API
-                Menu menu = await ApiClient.Instance.GetFromJsonAsync<Menu>($"Menu/{_menuId}");
+                Menu menu = await App.ApiClient.HttpClient.GetFromJsonAsync<Menu>($"Menu/{_menuId}");
 
                 if (menu == null)
                 {
@@ -33,7 +38,7 @@ namespace EpicurAppIHM.Views
                 }
 
                 // Récupérer tous les plats pour afficher les noms
-                List<Plat> plats = await ApiClient.Instance.GetFromJsonAsync<List<Plat>>("Plats");
+                List<Plat> plats = await App.ApiClient.HttpClient.GetFromJsonAsync<List<Plat>>("Plats");
 
                 // Afficher les informations générales
                 txtNom.Text = menu.Nom;
@@ -41,13 +46,13 @@ namespace EpicurAppIHM.Views
                 txtStatut.Text = menu.Statut;
 
                 // Afficher les plats (avec vérification pour les IDs null)
-                txtAmuseBouche.Text = ObtenirNomPlat(plats, menu.AmuseBoucheId);
-                txtBoissonAperitif.Text = ObtenirNomPlat(plats, menu.BoissonAperitifId);
-                txtEntree.Text = ObtenirNomPlat(plats, menu.EntreeId);
-                txtPlatPrincipal.Text = ObtenirNomPlat(plats, menu.PlatPrincipalId);
-                txtVin.Text = ObtenirNomPlat(plats, menu.VinId);
-                txtFromage.Text = ObtenirNomPlat(plats, menu.FromageId);
-                txtDessert.Text = ObtenirNomPlat(plats, menu.DessertId);
+                txtAmuseBouche.Text = ObtenirNomPlat(plats, menu.AmuseBouche?.Id);
+                txtBoissonAperitif.Text = ObtenirNomPlat(plats, menu.BoissonAperitif?.Id);
+                txtEntree.Text = ObtenirNomPlat(plats, menu.Entree?.Id);
+                txtPlatPrincipal.Text = ObtenirNomPlat(plats, menu.PlatPrincipal?.Id);
+                txtVin.Text = ObtenirNomPlat(plats, menu.Vin?.Id);
+                txtFromage.Text = ObtenirNomPlat(plats, menu.Fromage?.Id);
+                txtDessert.Text = ObtenirNomPlat(plats, menu.Dessert?.Id);
             }
             catch (Exception ex)
             {
@@ -57,7 +62,12 @@ namespace EpicurAppIHM.Views
             }
         }
 
-        // Méthode pour obtenir le nom d'un plat depuis la liste
+        /// <summary>
+        /// Obtient le nom d'un plat depuis la liste
+        /// </summary>
+        /// <param name="plats">plats disponibles</param>
+        /// <param name="platId">plat cible</param>
+        /// <returns>Nom du plat cible</returns>
         private string ObtenirNomPlat(List<Plat> plats, int? platId)
         {
             if (platId == null || plats == null)
@@ -67,6 +77,9 @@ namespace EpicurAppIHM.Views
             return plat?.Nom ?? "-";
         }
 
+        /// <summary>
+        /// Ferme la fenetre actuelle
+        /// </summary>
         private void Fermer_Click(object sender, RoutedEventArgs e)
         {
             this.Close();

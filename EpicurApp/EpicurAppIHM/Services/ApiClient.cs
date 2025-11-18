@@ -4,32 +4,39 @@ using System.Net.Http;
 namespace EpicurAppIHM.Services
 {
     /// <summary>
-    /// Classe singleton pour gérer l'instance HttpClient 
+    /// Client HTTP simple pour communiquer avec l'API EpicurApp.
     /// </summary>
-    public static class ApiClient
+    public class ApiClient
     {
+        private HttpClient? _httpClient;
 
-        private static  HttpClient _instance;
-
-        public static HttpClient Instance
+        /// <summary>
+        /// Obtient l'instance HttpClient configurée pour communiquer avec l'API.
+        /// </summary>
+        public HttpClient HttpClient
         {
-            get { return _instance; }
-        }
-
-        static ApiClient()
-        {
-            string? baseUrl = Environment.GetEnvironmentVariable("EPICURAPP_API_BASEURL");
-            if (string.IsNullOrWhiteSpace(baseUrl))
+            get
             {
-                //baseUrl = "https://10.128.207.45:8081/";
-                baseUrl = "https://localhost:7068/";
+                if (_httpClient == null)
+                {
+                    // Détermination de l'URL de base
+                    string baseUrl = Environment.GetEnvironmentVariable("EPICURAPP_API_BASEURL")
+                        ?? "https://localhost:7068/";
+
+                    // Configuration du handler pour accepter tous les certificats SSL
+                    HttpClientHandler handler = new HttpClientHandler
+                    {
+                        ServerCertificateCustomValidationCallback = (message, cert, chain, sslPolicyErrors) => true
+                    };
+
+                    // Création et configuration du HttpClient
+                    _httpClient = new HttpClient(handler, disposeHandler: true)
+                    {
+                        BaseAddress = new Uri(baseUrl)
+                    };
+                }
+                return _httpClient;
             }
-
-            HttpClientHandler handler = new HttpClientHandler();
-            handler.ServerCertificateCustomValidationCallback = (message, cert, chain, sslPolicyErrors) => true;
-
-            _instance = new HttpClient(handler, disposeHandler: true);
-            _instance.BaseAddress = new Uri(baseUrl);
         }
     }
 }

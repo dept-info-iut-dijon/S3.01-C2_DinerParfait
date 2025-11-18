@@ -1,23 +1,37 @@
-﻿using EpicurApp_API.Models;
-using EpicurAPP_Partage.Interfaces;
+﻿using EpicurAPP_Partage.Models;
+using EpicurAppLogic.Interfaces;
 using Microsoft.Data.Sqlite;
-using Microsoft.Extensions.Configuration;
+using EpicurApp_API.Configuration;
 using System;
 
 namespace EpicurApp_API.DAO
 {
+    /// <summary>
+    /// DAO pour la gestion des menus.
+    /// </summary>
     public class MenuDAO : IMenuDAO
     {
-        private string _connectionString;
+        private readonly string _connectionString;
+        private readonly IPlatDAO _platDAO;
 
-        public MenuDAO(IConfiguration configuration)
+        /// <summary>
+        /// Initialise une nouvelle instance de MenuDAO.
+        /// </summary>
+        /// <param name="databaseConfiguration">Configuration de la base de données.</param>
+        /// <param name="platDAO">DAO pour accéder aux plats.</param>
+        public MenuDAO(DatabaseConfiguration databaseConfiguration, IPlatDAO platDAO)
         {
-            _connectionString = configuration.GetConnectionString("DefaultConnection") 
-                ?? "Data Source=epicurapp.db";
+            _connectionString = databaseConfiguration.GetConnectionString();
+            _platDAO = platDAO;
         }
 
+        /// <summary>
+        /// Ajoute un nouveau menu dans la base de données.
+        /// </summary>
+        /// <param name="menu">Le menu à ajouter.</param>
         public void AjouterMenu(Menu menu)
         {
+
             using (SqliteConnection connection = new SqliteConnection(_connectionString))
             {
                 connection.Open();
@@ -35,40 +49,20 @@ namespace EpicurApp_API.DAO
                     command.Parameters.AddWithValue("@Date", menu.Date);
                     command.Parameters.AddWithValue("@Statut", menu.Statut);
 
-                    if (menu.AmuseBoucheId == null)
-                        command.Parameters.AddWithValue("@AmuseBoucheId", DBNull.Value);
-                    else
-                        command.Parameters.AddWithValue("@AmuseBoucheId", menu.AmuseBoucheId);
-
-                    if (menu.BoissonAperitifId == null)
-                        command.Parameters.AddWithValue("@BoissonAperitifId", DBNull.Value);
-                    else
-                        command.Parameters.AddWithValue("@BoissonAperitifId", menu.BoissonAperitifId);
-
-                    if (menu.EntreeId == null)
-                        command.Parameters.AddWithValue("@EntreeId", DBNull.Value);
-                    else
-                        command.Parameters.AddWithValue("@EntreeId", menu.EntreeId);
-
-                    if (menu.PlatPrincipalId == null)
-                        command.Parameters.AddWithValue("@PlatPrincipalId", DBNull.Value);
-                    else
-                        command.Parameters.AddWithValue("@PlatPrincipalId", menu.PlatPrincipalId);
-
-                    if (menu.VinId == null)
-                        command.Parameters.AddWithValue("@VinId", DBNull.Value);
-                    else
-                        command.Parameters.AddWithValue("@VinId", menu.VinId);
-
-                    if (menu.FromageId == null)
-                        command.Parameters.AddWithValue("@FromageId", DBNull.Value);
-                    else
-                        command.Parameters.AddWithValue("@FromageId", menu.FromageId);
-
-                    if (menu.DessertId == null)
-                        command.Parameters.AddWithValue("@DessertId", DBNull.Value);
-                    else
-                        command.Parameters.AddWithValue("@DessertId", menu.DessertId);
+                    command.Parameters.AddWithValue("@AmuseBoucheId",
+                        menu.AmuseBouche?.Id ?? (object)DBNull.Value);
+                    command.Parameters.AddWithValue("@BoissonAperitifId",
+                        menu.BoissonAperitif?.Id ?? (object)DBNull.Value);
+                    command.Parameters.AddWithValue("@EntreeId",
+                        menu.Entree?.Id ?? (object)DBNull.Value);
+                    command.Parameters.AddWithValue("@PlatPrincipalId",
+                        menu.PlatPrincipal?.Id ?? (object)DBNull.Value);
+                    command.Parameters.AddWithValue("@VinId",
+                        menu.Vin?.Id ?? (object)DBNull.Value);
+                    command.Parameters.AddWithValue("@FromageId",
+                        menu.Fromage?.Id ?? (object)DBNull.Value);
+                    command.Parameters.AddWithValue("@DessertId",
+                        menu.Dessert?.Id ?? (object)DBNull.Value);
 
                     command.ExecuteNonQuery();
                 }
@@ -81,6 +75,11 @@ namespace EpicurApp_API.DAO
             }
         }
 
+        /// <summary>
+        /// Récupère un menu par son identifiant.
+        /// </summary>
+        /// <param name="id">Identifiant du menu.</param>
+        /// <returns>Le menu trouvé ou null.</returns>
         public Menu? GetById(int id)
         {
             using (SqliteConnection connection = new SqliteConnection(_connectionString))
@@ -107,6 +106,10 @@ namespace EpicurApp_API.DAO
             return null;
         }
 
+        /// <summary>
+        /// Récupère tous les menus de la base de données.
+        /// </summary>
+        /// <returns>Liste de tous les menus.</returns>
         public List<Menu> GetAll()
         {
             List<Menu> menus = new List<Menu>();
@@ -131,6 +134,10 @@ namespace EpicurApp_API.DAO
             return menus;
         }
 
+        /// <summary>
+        /// Récupère le dernier menu en statut "Brouillon".
+        /// </summary>
+        /// <returns>Le dernier menu brouillon ou null.</returns>
         public Menu? GetDernierBrouillon()
         {
             using (SqliteConnection connection = new SqliteConnection(_connectionString))
@@ -162,6 +169,10 @@ namespace EpicurApp_API.DAO
             return null;
         }
 
+        /// <summary>
+        /// Met à jour les informations d'un menu existant.
+        /// </summary>
+        /// <param name="menu">Le menu avec les informations mises à jour.</param>
         public void MettreAJourMenu(Menu menu)
         {
             using (SqliteConnection connection = new SqliteConnection(_connectionString))
@@ -188,46 +199,32 @@ namespace EpicurApp_API.DAO
                     command.Parameters.AddWithValue("@Statut", menu.Statut);
                     command.Parameters.AddWithValue("@Id", menu.Id);
 
-                    if (menu.AmuseBoucheId == null)
-                        command.Parameters.AddWithValue("@AmuseBoucheId", DBNull.Value);
-                    else
-                        command.Parameters.AddWithValue("@AmuseBoucheId", menu.AmuseBoucheId);
-
-                    if (menu.BoissonAperitifId == null)
-                        command.Parameters.AddWithValue("@BoissonAperitifId", DBNull.Value);
-                    else
-                        command.Parameters.AddWithValue("@BoissonAperitifId", menu.BoissonAperitifId);
-
-                    if (menu.EntreeId == null)
-                        command.Parameters.AddWithValue("@EntreeId", DBNull.Value);
-                    else
-                        command.Parameters.AddWithValue("@EntreeId", menu.EntreeId);
-
-                    if (menu.PlatPrincipalId == null)
-                        command.Parameters.AddWithValue("@PlatPrincipalId", DBNull.Value);
-                    else
-                        command.Parameters.AddWithValue("@PlatPrincipalId", menu.PlatPrincipalId);
-
-                    if (menu.VinId == null)
-                        command.Parameters.AddWithValue("@VinId", DBNull.Value);
-                    else
-                        command.Parameters.AddWithValue("@VinId", menu.VinId);
-
-                    if (menu.FromageId == null)
-                        command.Parameters.AddWithValue("@FromageId", DBNull.Value);
-                    else
-                        command.Parameters.AddWithValue("@FromageId", menu.FromageId);
-
-                    if (menu.DessertId == null)
-                        command.Parameters.AddWithValue("@DessertId", DBNull.Value);
-                    else
-                        command.Parameters.AddWithValue("@DessertId", menu.DessertId);
+                    command.Parameters.AddWithValue("@AmuseBoucheId",
+                        menu.AmuseBouche?.Id ?? (object)DBNull.Value);
+                    command.Parameters.AddWithValue("@BoissonAperitifId",
+                        menu.BoissonAperitif?.Id ?? (object)DBNull.Value);
+                    command.Parameters.AddWithValue("@EntreeId",
+                        menu.Entree?.Id ?? (object)DBNull.Value);
+                    command.Parameters.AddWithValue("@PlatPrincipalId",
+                        menu.PlatPrincipal?.Id ?? (object)DBNull.Value);
+                    command.Parameters.AddWithValue("@VinId",
+                        menu.Vin?.Id ?? (object)DBNull.Value);
+                    command.Parameters.AddWithValue("@FromageId",
+                        menu.Fromage?.Id ?? (object)DBNull.Value);
+                    command.Parameters.AddWithValue("@DessertId",
+                        menu.Dessert?.Id ?? (object)DBNull.Value);
 
                     command.ExecuteNonQuery();
                 }
             }
         }
 
+        /// <summary>
+        /// Associe une liste de plats à un menu.
+        /// Supprime d'abord les anciennes associations puis ajoute les nouvelles.
+        /// </summary>
+        /// <param name="menuId">Identifiant du menu.</param>
+        /// <param name="platIds">Liste des identifiants des plats.</param>
         public void AjouterPlatsAuMenu(int menuId, List<int> platIds)
         {
             using (SqliteConnection connection = new SqliteConnection(_connectionString))
@@ -254,7 +251,13 @@ namespace EpicurApp_API.DAO
             }
         }
 
-        private static Menu AvoirMenu(SqliteDataReader reader)
+        /// <summary>
+        /// Méthode privée pour construire un objet Menu à partir d'un SqliteDataReader.
+        /// Récupère les plats associés via leurs IDs.
+        /// </summary>
+        /// <param name="reader">Le reader contenant les données du menu.</param>
+        /// <returns>Un objet Menu construit.</returns>
+        private Menu AvoirMenu(SqliteDataReader reader)
         {
             Menu menu = new Menu();
             menu.Id = reader.GetInt32(0);
@@ -262,13 +265,23 @@ namespace EpicurApp_API.DAO
             menu.Date = reader.GetDateTime(2);
             menu.Statut = reader.GetString(3);
 
-            menu.AmuseBoucheId = reader.IsDBNull(4) ? null : reader.GetInt32(4);
-            menu.BoissonAperitifId = reader.IsDBNull(5) ? null : reader.GetInt32(5);
-            menu.EntreeId = reader.IsDBNull(6) ? null : reader.GetInt32(6);
-            menu.PlatPrincipalId = reader.IsDBNull(7) ? null : reader.GetInt32(7);
-            menu.VinId = reader.IsDBNull(8) ? null : reader.GetInt32(8);
-            menu.FromageId = reader.IsDBNull(9) ? null : reader.GetInt32(9);
-            menu.DessertId = reader.IsDBNull(10) ? null : reader.GetInt32(10);
+            // Récupération des plats via leurs IDs
+            int? amuseBoucheId = reader.IsDBNull(4) ? null : reader.GetInt32(4);
+            int? boissonAperitifId = reader.IsDBNull(5) ? null : reader.GetInt32(5);
+            int? entreeId = reader.IsDBNull(6) ? null : reader.GetInt32(6);
+            int? platPrincipalId = reader.IsDBNull(7) ? null : reader.GetInt32(7);
+            int? vinId = reader.IsDBNull(8) ? null : reader.GetInt32(8);
+            int? fromageId = reader.IsDBNull(9) ? null : reader.GetInt32(9);
+            int? dessertId = reader.IsDBNull(10) ? null : reader.GetInt32(10);
+
+            // Chargement des plats
+            menu.AmuseBouche = amuseBoucheId.HasValue ? _platDAO.GetById(amuseBoucheId.Value) : null;
+            menu.BoissonAperitif = boissonAperitifId.HasValue ? _platDAO.GetById(boissonAperitifId.Value) : null;
+            menu.Entree = entreeId.HasValue ? _platDAO.GetById(entreeId.Value) : null;
+            menu.PlatPrincipal = platPrincipalId.HasValue ? _platDAO.GetById(platPrincipalId.Value) : null;
+            menu.Vin = vinId.HasValue ? _platDAO.GetById(vinId.Value) : null;
+            menu.Fromage = fromageId.HasValue ? _platDAO.GetById(fromageId.Value) : null;
+            menu.Dessert = dessertId.HasValue ? _platDAO.GetById(dessertId.Value) : null;
 
             return menu;
         }
