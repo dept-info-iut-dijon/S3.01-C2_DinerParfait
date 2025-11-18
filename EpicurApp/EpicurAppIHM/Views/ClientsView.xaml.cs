@@ -43,12 +43,13 @@ namespace EpicurAppIHM.Views
         {
             if (DataGridClients.SelectedItem is Client clientSelectionne)
             {
-                // Ouvrir la fiche client en mode consultation (lecture seule)
-                var ficheClient = new FicheClient(clientSelectionne.Id, modeConsultation: true);
-                ficheClient.ShowDialog();
+                var ficheClient = new FicheClient(clientSelectionne.Id);
+                var result = ficheClient.ShowDialog();
 
-                // Recharger la liste après fermeture
-                ChargerClients();
+                if (result == true)
+                {
+                    ChargerClients();
+                }
             }
         }
 

@@ -6,7 +6,7 @@ namespace EpicurAppIHM.Views
     {
         public MainWindow()
         {
-            InitializeComponent();
+            InitializeComponent();  
         }
     }
 }
