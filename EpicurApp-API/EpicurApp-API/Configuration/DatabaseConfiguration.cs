@@ -1,36 +1,31 @@
-using Microsoft.Data.Sqlite;
+using Microsoft.Extensions.Configuration;
 
 namespace EpicurApp_API.Configuration
 {
     /// <summary>
-    /// Classe de configuration centralisée pour la connexion à la base de données
+    /// Classe de configuration centralisée pour la base de données.
     /// </summary>
     public class DatabaseConfiguration
     {
-        private readonly string _connectionString;
+        private readonly IConfiguration _configuration;
 
         /// <summary>
-        /// Constructeur initialisant la chaîne de connexion depuis la configuration
+        /// Initialise une nouvelle instance de DatabaseConfiguration.
         /// </summary>
-        /// <param name="configuration">Configuration de l'application</param>
+        /// <param name="configuration">Configuration de l'application.</param>
         public DatabaseConfiguration(IConfiguration configuration)
         {
-            _connectionString = configuration.GetConnectionString("DefaultConnection")
-                ?? "Data Source=epicurapp.db";
+            _configuration = configuration;
         }
 
         /// <summary>
-        /// Obtient la chaîne de connexion à la base de données
+        /// Obtient la chaîne de connexion à la base de données.
         /// </summary>
-        public string ConnectionString => _connectionString;
-
-        /// <summary>
-        /// Crée et retourne une nouvelle connexion SQLite
-        /// </summary>
-        /// <returns>Nouvelle instance de SqliteConnection</returns>
-        public SqliteConnection CreateConnection()
+        /// <returns>La chaîne de connexion configurée ou la valeur par défaut.</returns>
+        public string GetConnectionString()
         {
-            return new SqliteConnection(_connectionString);
+            return _configuration.GetConnectionString("DefaultConnection")
+                ?? "Data Source=epicurapp.db";
         }
     }
 }

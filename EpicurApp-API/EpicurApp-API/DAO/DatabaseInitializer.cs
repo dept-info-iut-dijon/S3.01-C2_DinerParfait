@@ -1,16 +1,16 @@
-using EpicurApp_API.Configuration;
 using Microsoft.Data.Sqlite;
+using Microsoft.Extensions.Configuration;
 
 namespace EpicurApp_API.DAO
 {
-    /// <summary>
-    /// Classe statique pour initialiser la base de données et peupler les tables
-    /// </summary>
     public static class DatabaseInitializer
     {
-        public static void Initialize(DatabaseConfiguration dbConfig)
+        public static void Initialize(IConfiguration configuration)
         {
-            using (var connection = dbConfig.CreateConnection())
+            var connectionString = configuration.GetConnectionString("DefaultConnection")
+                ?? "Data Source=epicurapp.db";
+
+            using (var connection = new SqliteConnection(connectionString))
             {
                 connection.Open();
 
@@ -22,7 +22,7 @@ namespace EpicurApp_API.DAO
                         Description TEXT
                     );";
 
-                // Table Clients
+                // Table Clients 
                 var createClientsTable = @"
                     CREATE TABLE IF NOT EXISTS Clients (
                         Id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -30,7 +30,8 @@ namespace EpicurApp_API.DAO
                         Prenom TEXT NOT NULL,
                         Email TEXT,
                         Telephone TEXT,
-                        Preferences TEXT
+                        platsNonApprecies TEXT,
+                        preferences TEXT
                     );";
 
                 // Table de liaison ClientAllergene 
@@ -43,40 +44,13 @@ namespace EpicurApp_API.DAO
                         FOREIGN KEY (AllergeneId) REFERENCES Allergenes(Id) ON DELETE CASCADE
                     );";
 
-                // Table Ingredients
-                var createIngredientsTable = @"
-                    CREATE TABLE IF NOT EXISTS Ingredients (
-                        Id INTEGER PRIMARY KEY AUTOINCREMENT,
-                        Nom TEXT NOT NULL,
-                        Description TEXT
-                    );";
-
                 // Table Plats
                 var createPlatsTable = @"
                     CREATE TABLE IF NOT EXISTS Plats (
                         Id INTEGER PRIMARY KEY AUTOINCREMENT,
                         Nom TEXT NOT NULL,
-                        Categorie INTEGER NOT NULL
-                    );";
-
-                // Table de liaison PlatIngredient
-                var createPlatIngredientTable = @"
-                    CREATE TABLE IF NOT EXISTS PlatIngredient (
-                        PlatId INTEGER NOT NULL,
-                        IngredientId INTEGER NOT NULL,
-                        PRIMARY KEY (PlatId, IngredientId),
-                        FOREIGN KEY (PlatId) REFERENCES Plats(Id) ON DELETE CASCADE,
-                        FOREIGN KEY (IngredientId) REFERENCES Ingredients(Id) ON DELETE CASCADE
-                    );";
-
-                // Table de liaison ClientPlat (pour plats non appréciés)
-                var createClientPlatTable = @"
-                    CREATE TABLE IF NOT EXISTS ClientPlat (
-                        ClientId INTEGER NOT NULL,
-                        PlatId INTEGER NOT NULL,
-                        PRIMARY KEY (ClientId, PlatId),
-                        FOREIGN KEY (ClientId) REFERENCES Clients(Id) ON DELETE CASCADE,
-                        FOREIGN KEY (PlatId) REFERENCES Plats(Id) ON DELETE CASCADE
+                        Categorie TEXT NOT NULL,
+                        IngredientsPrincipaux TEXT
                     );";
 
                 // Table Menus
@@ -127,9 +101,6 @@ namespace EpicurApp_API.DAO
                     command.CommandText = createAllergenesTable;
                     command.ExecuteNonQuery();
 
-                    command.CommandText = createIngredientsTable;
-                    command.ExecuteNonQuery();
-
                     command.CommandText = createClientsTable;
                     command.ExecuteNonQuery();
 
@@ -137,12 +108,6 @@ namespace EpicurApp_API.DAO
                     command.ExecuteNonQuery();
 
                     command.CommandText = createPlatsTable;
-                    command.ExecuteNonQuery();
-
-                    command.CommandText = createPlatIngredientTable;
-                    command.ExecuteNonQuery();
-
-                    command.CommandText = createClientPlatTable;
                     command.ExecuteNonQuery();
 
                     command.CommandText = createMenusTable;
@@ -156,18 +121,12 @@ namespace EpicurApp_API.DAO
                 }
 
                 SeedAllergenes(connection);
-                SeedIngredients(connection);
                 SeedPlats(connection);
-                SeedPlatIngredients(connection);
                 SeedClients(connection);
                 SeedMenus(connection);
             }
         }
 
-        /// <summary>
-        /// Méthode privée pour peupler la table Allergenes avec les données initiales
-        /// </summary>
-        /// <param name="connection">La connexion SQLite active</param>
         private static void SeedAllergenes(SqliteConnection connection)
         {
             using (var transaction = connection.BeginTransaction())
@@ -217,83 +176,6 @@ namespace EpicurApp_API.DAO
             }
         }
 
-        /// <summary>
-        /// Méthode privée pour peupler la table Ingredients avec les données initiales
-        /// </summary>
-        /// <param name="connection">La connexion SQLite active</param>
-        private static void SeedIngredients(SqliteConnection connection)
-        {
-            using (var transaction = connection.BeginTransaction())
-            {
-                using (var countCommand = new SqliteCommand("SELECT COUNT(*) FROM Ingredients;", connection, transaction))
-                {
-                    long count = (long)(countCommand.ExecuteScalar() ?? 0);
-                    if (count > 0)
-                    {
-                        transaction.Commit();
-                        return;
-                    }
-                }
-
-                var ingredients = new (string Nom, string Description)[]
-                {
-                    ("Tomates", "Légume fruit rouge"),
-                    ("Basilic", "Herbe aromatique"),
-                    ("Huile d'olive", "Huile végétale"),
-                    ("Saumon fumé", "Poisson fumé"),
-                    ("Avocat", "Fruit tropical"),
-                    ("Citron vert", "Agrume"),
-                    ("Prosecco", "Vin pétillant italien"),
-                    ("Aperol", "Apéritif italien"),
-                    ("Eau pétillante", "Eau gazeuse"),
-                    ("Framboise", "Fruit rouge"),
-                    ("Myrtille", "Fruit bleu"),
-                    ("Citron", "Agrume"),
-                    ("Potiron", "Courge"),
-                    ("Crème fraîche", "Produit laitier"),
-                    ("Muscade", "Épice"),
-                    ("Dorade", "Poisson blanc"),
-                    ("Agrumes", "Famille de fruits"),
-                    ("Ciboulette", "Herbe aromatique"),
-                    ("Magret", "Viande de canard"),
-                    ("Miel", "Produit sucré naturel"),
-                    ("Romarin", "Herbe aromatique"),
-                    ("Riz arborio", "Riz italien"),
-                    ("Cèpes", "Champignons"),
-                    ("Parmesan", "Fromage italien"),
-                    ("Comté", "Fromage français"),
-                    ("Brie", "Fromage français"),
-                    ("Roquefort", "Fromage bleu français"),
-                    ("Chèvre", "Fromage de chèvre"),
-                    ("Miel d'acacia", "Miel floral"),
-                    ("Noix", "Fruit à coque"),
-                    ("Meringue italienne", "Préparation sucrée"),
-                    ("Chocolat noir", "Chocolat à haute teneur en cacao"),
-                    ("Crème", "Produit laitier"),
-                    ("Œufs", "Produit aviaire")
-                };
-
-                using (var insertCommand = new SqliteCommand("INSERT INTO Ingredients (Nom, Description) VALUES (@Nom, @Description);", connection, transaction))
-                {
-                    insertCommand.Parameters.Add(new SqliteParameter("@Nom", SqliteType.Text));
-                    insertCommand.Parameters.Add(new SqliteParameter("@Description", SqliteType.Text));
-
-                    foreach (var ingredient in ingredients)
-                    {
-                        insertCommand.Parameters["@Nom"].Value = ingredient.Nom;
-                        insertCommand.Parameters["@Description"].Value = ingredient.Description;
-                        insertCommand.ExecuteNonQuery();
-                    }
-                }
-
-                transaction.Commit();
-            }
-        }
-
-        /// <summary>
-        /// Méthode privée pour peupler la table Plats avec les données initiales
-        /// </summary>
-        /// <param name="connection">La connexion SQLite active</param>
         private static void SeedPlats(SqliteConnection connection)
         {
             using (var transaction = connection.BeginTransaction())
@@ -308,34 +190,35 @@ namespace EpicurApp_API.DAO
                     }
                 }
 
-                // 0=AmuseBouche, 1=BoissonAperitif, 2=Entree, 3=PlatPrincipal, 4=Vin, 5=Fromage, 6=Dessert
-                var plats = new (string Nom, int Categorie)[]
+                var plats = new (string Nom, string Categorie, string Ingredients)[]
                 {
-                    ("Bruschetta aux tomates", 0),
-                    ("Verrine saumon-avocat", 0),
-                    ("Spritz maison", 1),
-                    ("Mocktail fruits rouges", 1),
-                    ("Velouté de potiron", 2),
-                    ("Tartare de dorade", 2),
-                    ("Magret de canard sauce miel", 3),
-                    ("Risotto aux champignons", 3),
-                    ("Pinot noir de Bourgogne", 4),
-                    ("Chardonnay réserve", 4),
-                    ("Assortiment de fromages affinés", 5),
-                    ("Chèvre frais miel-noix", 5),
-                    ("Tartelette citron meringuée", 6),
-                    ("Mousse au chocolat grand cru", 6),
+                    ("Bruschetta aux tomates", "AmuseBouche", "Tomates, basilic, huile d'olive"),
+                    ("Verrine saumon-avocat", "AmuseBouche", "Saumon fumé, avocat, citron vert"),
+                    ("Spritz maison", "BoissonAperitif", "Prosecco, Aperol, eau pétillante"),
+                    ("Mocktail fruits rouges", "BoissonAperitif", "Framboise, myrtille, citron"),
+                    ("Velouté de potiron", "Entree", "Potiron, crème fraîche, muscade"),
+                    ("Tartare de dorade", "Entree", "Dorade, agrumes, ciboulette"),
+                    ("Magret de canard sauce miel", "PlatPrincipal", "Magret, miel, romarin"),
+                    ("Risotto aux champignons", "PlatPrincipal", "Riz arborio, cèpes, parmesan"),
+                    ("Pinot noir de Bourgogne", "Vin", "Rouge, notes de fruits rouges"),
+                    ("Chardonnay réserve", "Vin", "Blanc, arômes de fleurs blanches"),
+                    ("Assortiment de fromages affinés", "Fromage", "Comté, Brie, Roquefort"),
+                    ("Chèvre frais miel-noix", "Fromage", "Chèvre, miel d'acacia, noix"),
+                    ("Tartelette citron meringuée", "Dessert", "Citron, meringue italienne"),
+                    ("Mousse au chocolat grand cru", "Dessert", "Chocolat noir, crème, œufs"),
                 };
 
-                using (var insertCommand = new SqliteCommand("INSERT INTO Plats (Nom, Categorie) VALUES (@Nom, @Categorie);", connection, transaction))
+                using (var insertCommand = new SqliteCommand("INSERT INTO Plats (Nom, Categorie, IngredientsPrincipaux) VALUES (@Nom, @Categorie, @Ingredients);", connection, transaction))
                 {
                     insertCommand.Parameters.Add(new SqliteParameter("@Nom", SqliteType.Text));
-                    insertCommand.Parameters.Add(new SqliteParameter("@Categorie", SqliteType.Integer));
+                    insertCommand.Parameters.Add(new SqliteParameter("@Categorie", SqliteType.Text));
+                    insertCommand.Parameters.Add(new SqliteParameter("@Ingredients", SqliteType.Text));
 
                     foreach (var plat in plats)
                     {
                         insertCommand.Parameters["@Nom"].Value = plat.Nom;
                         insertCommand.Parameters["@Categorie"].Value = plat.Categorie;
+                        insertCommand.Parameters["@Ingredients"].Value = plat.Ingredients;
                         insertCommand.ExecuteNonQuery();
                     }
                 }
@@ -344,74 +227,6 @@ namespace EpicurApp_API.DAO
             }
         }
 
-        /// <summary>
-        /// Méthode privée pour peupler la table PlatIngredient avec les liaisons plat-ingrédient
-        /// </summary>
-        /// <param name="connection">La connexion SQLite active</param>
-        private static void SeedPlatIngredients(SqliteConnection connection)
-        {
-            using (var transaction = connection.BeginTransaction())
-            {
-                using (var countCommand = new SqliteCommand("SELECT COUNT(*) FROM PlatIngredient;", connection, transaction))
-                {
-                    long count = (long)(countCommand.ExecuteScalar() ?? 0);
-                    if (count > 0)
-                    {
-                        transaction.Commit();
-                        return;
-                    }
-                }
-
-                // Relations PlatId -> IngredientId
-                var platIngredients = new (int PlatId, int IngredientId)[]
-                {
-                    // Bruschetta aux tomates (1) -> Tomates, Basilic, Huile d'olive
-                    (1, 1), (1, 2), (1, 3),
-                    // Verrine saumon-avocat (2) -> Saumon fumé, Avocat, Citron vert
-                    (2, 4), (2, 5), (2, 6),
-                    // Spritz maison (3) -> Prosecco, Aperol, Eau pétillante
-                    (3, 7), (3, 8), (3, 9),
-                    // Mocktail fruits rouges (4) -> Framboise, Myrtille, Citron
-                    (4, 10), (4, 11), (4, 12),
-                    // Velouté de potiron (5) -> Potiron, Crème fraîche, Muscade
-                    (5, 13), (5, 14), (5, 15),
-                    // Tartare de dorade (6) -> Dorade, Agrumes, Ciboulette
-                    (6, 16), (6, 17), (6, 18),
-                    // Magret de canard sauce miel (7) -> Magret, Miel, Romarin
-                    (7, 19), (7, 20), (7, 21),
-                    // Risotto aux champignons (8) -> Riz arborio, Cèpes, Parmesan
-                    (8, 22), (8, 23), (8, 24),
-                    // Assortiment de fromages affinés (11) -> Comté, Brie, Roquefort
-                    (11, 25), (11, 26), (11, 27),
-                    // Chèvre frais miel-noix (12) -> Chèvre, Miel d'acacia, Noix
-                    (12, 28), (12, 29), (12, 30),
-                    // Tartelette citron meringuée (13) -> Citron, Meringue italienne, Œufs
-                    (13, 12), (13, 31), (13, 34),
-                    // Mousse au chocolat grand cru (14) -> Chocolat noir, Crème, Œufs
-                    (14, 32), (14, 33), (14, 34)
-                };
-
-                using (var insertCommand = new SqliteCommand("INSERT INTO PlatIngredient (PlatId, IngredientId) VALUES (@PlatId, @IngredientId);", connection, transaction))
-                {
-                    insertCommand.Parameters.Add(new SqliteParameter("@PlatId", SqliteType.Integer));
-                    insertCommand.Parameters.Add(new SqliteParameter("@IngredientId", SqliteType.Integer));
-
-                    foreach (var platIngredient in platIngredients)
-                    {
-                        insertCommand.Parameters["@PlatId"].Value = platIngredient.PlatId;
-                        insertCommand.Parameters["@IngredientId"].Value = platIngredient.IngredientId;
-                        insertCommand.ExecuteNonQuery();
-                    }
-                }
-
-                transaction.Commit();
-            }
-        }
-
-        /// <summary>
-        /// Méthode privée pour peupler la table Clients avec des exemples
-        /// </summary>
-        /// <param name="connection">La connexion SQLite active</param>
         private static void SeedClients(SqliteConnection connection)
         {
             using (var transaction = connection.BeginTransaction())
@@ -428,19 +243,22 @@ namespace EpicurApp_API.DAO
 
                 var clients = new (string Nom, string Prenom, string Email, string Telephone, string Preferences)[]
                 {
-                    ("Dupont", "Marie", "marie.dupont@email.fr", "06 12 34 56 78", "Préfère les plats végétariens"),
-                    ("Martin", "Jean", "jean.martin@email.fr", "06 23 45 67 89", "Aime les plats épicés"),
-                    ("Bernard", "Sophie", "sophie.bernard@email.fr", "06 34 56 78 90", "Sans préférence particulière"),
-                    ("Petit", "Lucas", "lucas.petit@email.fr", "06 45 67 89 01", "Apprécie les saveurs asiatiques"),
-                    ("Dubois", "Emma", "emma.dubois@email.fr", "06 56 78 90 12", "Végétalienne stricte")
+                    ("Dupont", "Jean", "jean.dupont@email.fr", "0612345678", "Préfère les plats végétariens"),
+                    ("Martin", "Sophie", "sophie.martin@email.fr", "0623456789", "Amateur de cuisine asiatique"),
+                    ("Bernard", "Pierre", "pierre.bernard@email.fr", "0634567890", "Aime les plats traditionnels français"),
+                    ("Dubois", "Marie", "marie.dubois@email.fr", "0645678901", "Fan de desserts"),
+                    ("Petit", "Lucas", "lucas.petit@email.fr", "0656789012", "Cuisine méditerranéenne")
                 };
 
-                using (var insertCommand = new SqliteCommand("INSERT INTO Clients (Nom, Prenom, Email, Telephone, Preferences) VALUES (@Nom, @Prenom, @Email, @Telephone, @Preferences);", connection, transaction))
+                using (var insertCommand = new SqliteCommand(
+                    "INSERT INTO Clients (Nom, Prenom, Email, Telephone, platsNonApprecies, preferences) VALUES (@Nom, @Prenom, @Email, @Telephone, @PlatsNonApprecies, @Preferences);",
+                    connection, transaction))
                 {
                     insertCommand.Parameters.Add(new SqliteParameter("@Nom", SqliteType.Text));
                     insertCommand.Parameters.Add(new SqliteParameter("@Prenom", SqliteType.Text));
                     insertCommand.Parameters.Add(new SqliteParameter("@Email", SqliteType.Text));
                     insertCommand.Parameters.Add(new SqliteParameter("@Telephone", SqliteType.Text));
+                    insertCommand.Parameters.Add(new SqliteParameter("@PlatsNonApprecies", SqliteType.Text));
                     insertCommand.Parameters.Add(new SqliteParameter("@Preferences", SqliteType.Text));
 
                     foreach (var client in clients)
@@ -449,54 +267,34 @@ namespace EpicurApp_API.DAO
                         insertCommand.Parameters["@Prenom"].Value = client.Prenom;
                         insertCommand.Parameters["@Email"].Value = client.Email;
                         insertCommand.Parameters["@Telephone"].Value = client.Telephone;
+                        insertCommand.Parameters["@PlatsNonApprecies"].Value = "";
                         insertCommand.Parameters["@Preferences"].Value = client.Preferences;
                         insertCommand.ExecuteNonQuery();
                     }
                 }
 
-                // Ajouter des allergènes aux clients
-                var clientAllergenes = new (int ClientId, int AllergeneId)[]
+                // Assigner quelques allergènes aux clients
+                var allergeneAssignments = new (int ClientId, int AllergeneId)[]
                 {
-                    (1, 1),  // Marie Dupont - Gluten
-                    (1, 7),  // Marie Dupont - Lait
-                    (2, 4),  // Jean Martin - Poissons
-                    (3, 3),  // Sophie Bernard - Œufs
-                    (5, 1),  // Emma Dubois - Gluten
-                    (5, 3),  // Emma Dubois - Œufs
-                    (5, 7)   // Emma Dubois - Lait
+                    (1, 1),  // Jean Dupont - Gluten
+                    (1, 7),  // Jean Dupont - Lait
+                    (2, 3),  // Sophie Martin - Œufs
+                    (3, 4),  // Pierre Bernard - Poissons
+                    (4, 5),  // Marie Dubois - Arachides
                 };
 
-                using (var insertAllergeneCommand = new SqliteCommand("INSERT INTO ClientAllergene (ClientId, AllergeneId) VALUES (@ClientId, @AllergeneId);", connection, transaction))
+                using (var insertAllergeneCommand = new SqliteCommand(
+                    "INSERT INTO ClientAllergene (ClientId, AllergeneId) VALUES (@ClientId, @AllergeneId);",
+                    connection, transaction))
                 {
                     insertAllergeneCommand.Parameters.Add(new SqliteParameter("@ClientId", SqliteType.Integer));
                     insertAllergeneCommand.Parameters.Add(new SqliteParameter("@AllergeneId", SqliteType.Integer));
 
-                    foreach (var clientAllergene in clientAllergenes)
+                    foreach (var assignment in allergeneAssignments)
                     {
-                        insertAllergeneCommand.Parameters["@ClientId"].Value = clientAllergene.ClientId;
-                        insertAllergeneCommand.Parameters["@AllergeneId"].Value = clientAllergene.AllergeneId;
+                        insertAllergeneCommand.Parameters["@ClientId"].Value = assignment.ClientId;
+                        insertAllergeneCommand.Parameters["@AllergeneId"].Value = assignment.AllergeneId;
                         insertAllergeneCommand.ExecuteNonQuery();
-                    }
-                }
-
-                // Ajouter des plats non appréciés
-                var clientPlats = new (int ClientId, int PlatId)[]
-                {
-                    (2, 6),  // Jean Martin n'aime pas le Tartare de dorade
-                    (4, 7),  // Lucas Petit n'aime pas le Magret de canard
-                    (5, 14)  // Emma Dubois n'aime pas la Mousse au chocolat
-                };
-
-                using (var insertPlatCommand = new SqliteCommand("INSERT INTO ClientPlat (ClientId, PlatId) VALUES (@ClientId, @PlatId);", connection, transaction))
-                {
-                    insertPlatCommand.Parameters.Add(new SqliteParameter("@ClientId", SqliteType.Integer));
-                    insertPlatCommand.Parameters.Add(new SqliteParameter("@PlatId", SqliteType.Integer));
-
-                    foreach (var clientPlat in clientPlats)
-                    {
-                        insertPlatCommand.Parameters["@ClientId"].Value = clientPlat.ClientId;
-                        insertPlatCommand.Parameters["@PlatId"].Value = clientPlat.PlatId;
-                        insertPlatCommand.ExecuteNonQuery();
                     }
                 }
 
@@ -504,10 +302,6 @@ namespace EpicurApp_API.DAO
             }
         }
 
-        /// <summary>
-        /// Méthode privée pour peupler la table Menus avec des exemples
-        /// </summary>
-        /// <param name="connection">La connexion SQLite active</param>
         private static void SeedMenus(SqliteConnection connection)
         {
             using (var transaction = connection.BeginTransaction())
@@ -522,16 +316,16 @@ namespace EpicurApp_API.DAO
                     }
                 }
 
-                var menus = new (string Nom, string Date, string Statut, int? AmuseBouche, int? BoissonAperitif, int? Entree, int? PlatPrincipal, int? Vin, int? Fromage, int? Dessert)[]
+                var menus = new (string Nom, string Date, string Statut, int? AmuseBoucheId, int? BoissonId, int? EntreeId, int? PlatId, int? VinId, int? FromageId, int? DessertId)[]
                 {
-                    ("Menu Gastronomique du 20 Nov", "2025-11-20", "Publié", 1, 3, 5, 7, 9, 11, 13),
-                    ("Menu Végétarien du 21 Nov", "2025-11-21", "Publié", 2, 4, 5, 8, 10, 12, 14),
-                    ("Menu de la Mer du 22 Nov", "2025-11-22", "Brouillon", 2, 3, 6, null, 10, 11, 13)
+                    ("Menu Découverte", "2024-11-15", "Validé", 1, 3, 5, 7, 9, 11, 13),
+                    ("Menu Végétarien", "2024-11-16", "Validé", 2, 4, 6, 8, 10, 12, 14),
+                    ("Menu du Jour", "2024-11-18", "Validé", 1, 3, 6, 7, 9, 11, 14),
                 };
 
-                using (var insertCommand = new SqliteCommand(@"
-                    INSERT INTO Menus (Nom, Date, Statut, AmuseBoucheId, BoissonAperitifId, EntreeId, PlatPrincipalId, VinId, FromageId, DessertId)
-                    VALUES (@Nom, @Date, @Statut, @AmuseBoucheId, @BoissonAperitifId, @EntreeId, @PlatPrincipalId, @VinId, @FromageId, @DessertId);",
+                using (var insertCommand = new SqliteCommand(
+                    @"INSERT INTO Menus (Nom, Date, Statut, AmuseBoucheId, BoissonAperitifId, EntreeId, PlatPrincipalId, VinId, FromageId, DessertId)
+                      VALUES (@Nom, @Date, @Statut, @AmuseBoucheId, @BoissonAperitifId, @EntreeId, @PlatPrincipalId, @VinId, @FromageId, @DessertId);",
                     connection, transaction))
                 {
                     insertCommand.Parameters.Add(new SqliteParameter("@Nom", SqliteType.Text));
@@ -550,35 +344,39 @@ namespace EpicurApp_API.DAO
                         insertCommand.Parameters["@Nom"].Value = menu.Nom;
                         insertCommand.Parameters["@Date"].Value = menu.Date;
                         insertCommand.Parameters["@Statut"].Value = menu.Statut;
-                        insertCommand.Parameters["@AmuseBoucheId"].Value = menu.AmuseBouche.HasValue ? (object)menu.AmuseBouche.Value : DBNull.Value;
-                        insertCommand.Parameters["@BoissonAperitifId"].Value = menu.BoissonAperitif.HasValue ? (object)menu.BoissonAperitif.Value : DBNull.Value;
-                        insertCommand.Parameters["@EntreeId"].Value = menu.Entree.HasValue ? (object)menu.Entree.Value : DBNull.Value;
-                        insertCommand.Parameters["@PlatPrincipalId"].Value = menu.PlatPrincipal.HasValue ? (object)menu.PlatPrincipal.Value : DBNull.Value;
-                        insertCommand.Parameters["@VinId"].Value = menu.Vin.HasValue ? (object)menu.Vin.Value : DBNull.Value;
-                        insertCommand.Parameters["@FromageId"].Value = menu.Fromage.HasValue ? (object)menu.Fromage.Value : DBNull.Value;
-                        insertCommand.Parameters["@DessertId"].Value = menu.Dessert.HasValue ? (object)menu.Dessert.Value : DBNull.Value;
+                        insertCommand.Parameters["@AmuseBoucheId"].Value = menu.AmuseBoucheId.HasValue ? (object)menu.AmuseBoucheId.Value : DBNull.Value;
+                        insertCommand.Parameters["@BoissonAperitifId"].Value = menu.BoissonId.HasValue ? (object)menu.BoissonId.Value : DBNull.Value;
+                        insertCommand.Parameters["@EntreeId"].Value = menu.EntreeId.HasValue ? (object)menu.EntreeId.Value : DBNull.Value;
+                        insertCommand.Parameters["@PlatPrincipalId"].Value = menu.PlatId.HasValue ? (object)menu.PlatId.Value : DBNull.Value;
+                        insertCommand.Parameters["@VinId"].Value = menu.VinId.HasValue ? (object)menu.VinId.Value : DBNull.Value;
+                        insertCommand.Parameters["@FromageId"].Value = menu.FromageId.HasValue ? (object)menu.FromageId.Value : DBNull.Value;
+                        insertCommand.Parameters["@DessertId"].Value = menu.DessertId.HasValue ? (object)menu.DessertId.Value : DBNull.Value;
                         insertCommand.ExecuteNonQuery();
                     }
                 }
 
-                // Ajouter l'historique des menus pour certains clients
-                var clientMenus = new (int ClientId, int MenuId)[]
+                // Assigner les menus à certains clients
+                var menuAssignments = new (int ClientId, int MenuId)[]
                 {
-                    (1, 1),  // Marie Dupont a déjà eu le Menu Gastronomique
-                    (2, 1),  // Jean Martin a déjà eu le Menu Gastronomique
-                    (3, 2)   // Sophie Bernard a déjà eu le Menu Végétarien
+                    (1, 1),  // Jean Dupont - Menu Découverte
+                    (2, 2),  // Sophie Martin - Menu Végétarien
+                    (3, 1),  // Pierre Bernard - Menu Découverte
+                    (4, 3),  // Marie Dubois - Menu du Jour
+                    (5, 2),  // Lucas Petit - Menu Végétarien
                 };
 
-                using (var insertClientMenuCommand = new SqliteCommand("INSERT INTO ClientMenu (ClientId, MenuId) VALUES (@ClientId, @MenuId);", connection, transaction))
+                using (var insertMenuCommand = new SqliteCommand(
+                    "INSERT INTO ClientMenu (ClientId, MenuId) VALUES (@ClientId, @MenuId);",
+                    connection, transaction))
                 {
-                    insertClientMenuCommand.Parameters.Add(new SqliteParameter("@ClientId", SqliteType.Integer));
-                    insertClientMenuCommand.Parameters.Add(new SqliteParameter("@MenuId", SqliteType.Integer));
+                    insertMenuCommand.Parameters.Add(new SqliteParameter("@ClientId", SqliteType.Integer));
+                    insertMenuCommand.Parameters.Add(new SqliteParameter("@MenuId", SqliteType.Integer));
 
-                    foreach (var clientMenu in clientMenus)
+                    foreach (var assignment in menuAssignments)
                     {
-                        insertClientMenuCommand.Parameters["@ClientId"].Value = clientMenu.ClientId;
-                        insertClientMenuCommand.Parameters["@MenuId"].Value = clientMenu.MenuId;
-                        insertClientMenuCommand.ExecuteNonQuery();
+                        insertMenuCommand.Parameters["@ClientId"].Value = assignment.ClientId;
+                        insertMenuCommand.Parameters["@MenuId"].Value = assignment.MenuId;
+                        insertMenuCommand.ExecuteNonQuery();
                     }
                 }
 

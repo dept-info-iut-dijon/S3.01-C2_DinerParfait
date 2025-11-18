@@ -1,36 +1,22 @@
-using EpicurAPP_Partage.Models;
+﻿using EpicurAPP_Partage.Models;
 
 namespace EpicurAppLogic.Interfaces
 {
     /// <summary>
-    /// Interface définissant les règles métiers pour la gestion des clients
+    /// Interface définissant les opérations du service liées à la gestion des clients.
     /// </summary>
+    /// <remarks>
     public interface IClientService
     {
         /// <summary>
-        /// Ajoute un client en appliquant les règles métiers
+        /// Ajoute un nouveau client dans la base de données.
         /// </summary>
-        /// <param name="client">Client à ajouter</param>
+        /// <param name="client">L’objet <see cref="Client"/> contenant les informations du client à ajouter.</param>
         void AjouterClient(Client client);
 
-        /// <summary>
-        /// Récupère tous les clients
-        /// </summary>
-        /// <returns>Liste de tous les clients</returns>
         List<Client> ObtenirTousLesClients();
-
-        /// <summary>
-        /// Récupère un client par son identifiant
-        /// </summary>
-        /// <param name="id">Identifiant du client</param>
-        /// <returns>Le client correspondant</returns>
         Client ObtenirClientParId(int id);
-
-        /// <summary>
-        /// Associe des allergènes à un client
-        /// </summary>
-        /// <param name="clientId">Identifiant du client</param>
-        /// <param name="allergeneIds">Liste des identifiants des allergènes</param>
-        void AjouterAllergenesAuClient(int clientId, List<int> allergeneIds);
+        Task<Client> ObtenirClientAvecHistoriqueAsync(int id);
+        void AjouterAllergenesAuClient(int id, List<int> allergeneIds);
     }
 }

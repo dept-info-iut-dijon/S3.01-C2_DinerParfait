@@ -1,29 +1,27 @@
-using EpicurAPP_Partage.Models;
+﻿using EpicurApp_API.Models;
 
 namespace EpicurAppLogic.Interfaces
 {
-    /// <summary>
-    /// Interface définissant les règles métiers pour la gestion des plats
-    /// </summary>
     public interface IPlatService
     {
         /// <summary>
-        /// Récupère tous les plats
+        /// Récupère tous les plats.
         /// </summary>
         /// <returns>Liste de plats</returns>
         List<Plat> ObtenirTousLesPlats();
 
         /// <summary>
-        /// Récupère un plat par son identifiant
+        /// Récupère un plat par son identifiant.
         /// </summary>
         /// <param name="id">Identifiant du plat</param>
         /// <returns>Le plat correspondant</returns>
         Plat ObtenirPlatParId(int id);
 
         /// <summary>
-        /// Ajoute un nouveau plat
+        /// Ajoute un nouveau plat.
         /// </summary>
         /// <param name="plat">Plat à ajouter</param>
         void AjouterPlat(Plat plat);
     }
 }
+

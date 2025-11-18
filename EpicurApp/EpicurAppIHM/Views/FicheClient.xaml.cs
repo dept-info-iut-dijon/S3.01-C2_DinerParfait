@@ -80,10 +80,10 @@ namespace EpicurAppIHM.Views
                 txtNom.Text = client.Nom;
                 txtEmail.Text = client.Email;
                 txtTelephone.Text = client.Telephone;
-                // Convertir la liste des plats non appréciés en string
+                // Convertir la liste de plats en string pour l'affichage
                 txtPlatsNonApprecies.Text = client.PlatsNonApprecies != null && client.PlatsNonApprecies.Count > 0
                     ? string.Join(", ", client.PlatsNonApprecies.Select(p => p.Nom))
-                    : "";
+                    : string.Empty;
                 txtPreferences.Text = client.Preferences;
 
               
@@ -246,8 +246,11 @@ namespace EpicurAppIHM.Views
                     Prenom = txtPrenom.Text.Trim(),
                     Telephone = txtTelephone.Text.Trim().Replace(" ", "").Replace("-", ""),
                     Email = txtEmail.Text.Trim(),
-                    Preferences = txtPreferences.Text.Trim()
-                    // Note: PlatsNonApprecies est géré séparément via l'API
+                    // PlatsNonApprecies est maintenant List<Plat>, initialisé à vide
+                    // Le texte libre sera stocké dans Preferences pour le moment
+                    PlatsNonApprecies = new List<Plat>(),
+                    Preferences = txtPreferences.Text.Trim() +
+                        (string.IsNullOrWhiteSpace(txtPlatsNonApprecies.Text) ? "" : "\nPlats non appréciés: " + txtPlatsNonApprecies.Text.Trim())
                 };
 
                 HttpResponseMessage response = await _httpClient.PostAsJsonAsync("Client", client);

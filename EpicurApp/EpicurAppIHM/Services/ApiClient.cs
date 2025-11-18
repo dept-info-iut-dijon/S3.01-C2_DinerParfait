@@ -4,53 +4,39 @@ using System.Net.Http;
 namespace EpicurAppIHM.Services
 {
     /// <summary>
-    /// Classe pour gérer la connexion à l'API
+    /// Client HTTP simple pour communiquer avec l'API EpicurApp.
     /// </summary>
     public class ApiClient
     {
-        private readonly HttpClient _httpClient;
+        private static HttpClient? _httpClient;
 
         /// <summary>
-        /// Obtient l'instance HttpClient
+        /// Obtient l'instance HttpClient configurée pour communiquer avec l'API.
         /// </summary>
-        public HttpClient HttpClient => _httpClient;
-
-        /// <summary>
-        /// Constructeur par défaut utilisant l'URL depuis la variable d'environnement ou l'URL par défaut
-        /// </summary>
-        public ApiClient() : this(GetDefaultBaseUrl())
+        public static HttpClient Instance
         {
-        }
-
-        /// <summary>
-        /// Constructeur avec URL personnalisée
-        /// </summary>
-        /// <param name="baseUrl">L'URL de base de l'API</param>
-        public ApiClient(string baseUrl)
-        {
-            if (string.IsNullOrWhiteSpace(baseUrl))
+            get
             {
-                throw new ArgumentException("L'URL de base ne peut pas être vide", nameof(baseUrl));
+                if (_httpClient == null)
+                {
+                    // Détermination de l'URL de base
+                    string baseUrl = Environment.GetEnvironmentVariable("EPICURAPP_API_BASEURL")
+                        ?? "https://localhost:8081/";
+
+                    // Configuration du handler pour accepter tous les certificats SSL
+                    HttpClientHandler handler = new HttpClientHandler
+                    {
+                        ServerCertificateCustomValidationCallback = (message, cert, chain, sslPolicyErrors) => true
+                    };
+
+                    // Création et configuration du HttpClient
+                    _httpClient = new HttpClient(handler, disposeHandler: true)
+                    {
+                        BaseAddress = new Uri(baseUrl)
+                    };
+                }
+                return _httpClient;
             }
-
-            HttpClientHandler handler = new HttpClientHandler();
-            handler.ServerCertificateCustomValidationCallback = (message, cert, chain, sslPolicyErrors) => true;
-
-            _httpClient = new HttpClient(handler, disposeHandler: true);
-            _httpClient.BaseAddress = new Uri(baseUrl);
-        }
-
-        /// <summary>
-        /// Obtient l'URL par défaut depuis la variable d'environnement ou retourne l'URL par défaut
-        /// </summary>
-        private static string GetDefaultBaseUrl()
-        {
-            string? baseUrl = Environment.GetEnvironmentVariable("EPICURAPP_API_BASEURL");
-            if (string.IsNullOrWhiteSpace(baseUrl))
-            {
-                baseUrl = "https://localhost:8081/";
-            }
-            return baseUrl;
         }
     }
 }

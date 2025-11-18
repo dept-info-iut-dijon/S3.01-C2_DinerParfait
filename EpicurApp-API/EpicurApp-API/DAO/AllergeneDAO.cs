@@ -1,124 +1,135 @@
-﻿using EpicurApp_API.Configuration;
-using EpicurAPP_Partage.Models;
-using EpicurAppLogic.Interfaces;
+﻿using EpicurAPP_Partage.Models;
 using Microsoft.Data.Sqlite;
+using EpicurApp_API.Configuration;
 
 namespace EpicurApp_API.DAO
 {
     /// <summary>
-    /// DAO pour la gestion des allergènes dans la base de données
+    /// DAO pour la gestion des allergènes.
     /// </summary>
-    public class AllergeneDAO : IAllergeneDAO
+    public class AllergeneDAO
     {
-        private readonly DatabaseConfiguration _dbConfig;
+        private readonly string _connectionString;
 
-        public AllergeneDAO(DatabaseConfiguration dbConfig)
+        /// <summary>
+        /// Initialise une nouvelle instance de AllergeneDAO.
+        /// </summary>
+        /// <param name="databaseConfiguration">Configuration de la base de données.</param>
+        public AllergeneDAO(DatabaseConfiguration databaseConfiguration)
         {
-            _dbConfig = dbConfig;
+            _connectionString = databaseConfiguration.GetConnectionString();
         }
 
+        /// <summary>
+        /// Récupère tous les allergènes de la base de données.
+        /// </summary>
+        /// <returns>Liste de tous les allergènes.</returns>
         public List<Allergene> GetAll()
         {
-            List<Allergene> allergenes = new List<Allergene>();
-
-            using (SqliteConnection connection = _dbConfig.CreateConnection())
+            var allergenes = new List<Allergene>();
+            using (var connection = new SqliteConnection(_connectionString))
             {
                 connection.Open();
                 string query = "SELECT Id, Nom, Description FROM Allergenes";
 
-                using (SqliteCommand command = new SqliteCommand(query, connection))
-                using (SqliteDataReader reader = command.ExecuteReader())
+                using (var command = new SqliteCommand(query, connection))
+                using (var reader = command.ExecuteReader())
                 {
                     while (reader.Read())
                     {
-                        Allergene allergene = new Allergene
+                        allergenes.Add(new Allergene
                         {
                             Id = reader.GetInt32(0),
                             Nom = reader.GetString(1),
                             Description = reader.IsDBNull(2) ? "" : reader.GetString(2)
-                        };
-
-                        allergenes.Add(allergene);
+                        });
                     }
                 }
             }
             return allergenes;
         }
 
+        /// <summary>
+        /// Récupère les allergènes associés à un client spécifique.
+        /// </summary>
+        /// <param name="clientId">Identifiant du client.</param>
+        /// <returns>Liste des allergènes du client.</returns>
         public List<Allergene> GetAllergenesByClient(int clientId)
         {
-            List<Allergene> allergenes = new List<Allergene>();
-
-            using (SqliteConnection connection = _dbConfig.CreateConnection())
+            var allergenes = new List<Allergene>();
+            using (var connection = new SqliteConnection(_connectionString))
             {
                 connection.Open();
-
                 string query = @"SELECT a.Id, a.Nom, a.Description 
-                                 FROM Allergenes a
-                                 INNER JOIN ClientAllergene ca ON a.Id = ca.AllergeneId
-                                 WHERE ca.ClientId = @ClientId";
+                                FROM Allergenes a
+                                INNER JOIN ClientAllergene ca ON a.Id = ca.AllergeneId
+                                WHERE ca.ClientId = @ClientId";
 
-                using (SqliteCommand command = new SqliteCommand(query, connection))
+                using (var command = new SqliteCommand(query, connection))
                 {
                     command.Parameters.AddWithValue("@ClientId", clientId);
-
-                    using (SqliteDataReader reader = command.ExecuteReader())
+                    using (var reader = command.ExecuteReader())
                     {
                         while (reader.Read())
                         {
-                            Allergene allergene = new Allergene
+                            allergenes.Add(new Allergene
                             {
                                 Id = reader.GetInt32(0),
                                 Nom = reader.GetString(1),
                                 Description = reader.IsDBNull(2) ? "" : reader.GetString(2)
-                            };
-
-                            allergenes.Add(allergene);
+                            });
                         }
                     }
                 }
             }
-
             return allergenes;
         }
 
+        /// <summary>
+        /// Associe une liste d'allergènes à un client.
+        /// Supprime d'abord les anciennes associations puis ajoute les nouvelles.
+        /// </summary>
+        /// <param name="clientId">Identifiant du client.</param>
+        /// <param name="allergeneIds">Liste des identifiants des allergènes à associer.</param>
         public void AjouterAllergenesAuClient(int clientId, List<int> allergeneIds)
         {
-            using (SqliteConnection connection = _dbConfig.CreateConnection())
+            using (var connection = new SqliteConnection(_connectionString))
             {
                 connection.Open();
 
+                
                 string deleteQuery = "DELETE FROM ClientAllergene WHERE ClientId = @ClientId";
-
-                using (SqliteCommand deleteCommand = new SqliteCommand(deleteQuery, connection))
+                using (var command = new SqliteCommand(deleteQuery, connection))
                 {
-                    deleteCommand.Parameters.AddWithValue("@ClientId", clientId);
-                    deleteCommand.ExecuteNonQuery();
+                    command.Parameters.AddWithValue("@ClientId", clientId);
+                    command.ExecuteNonQuery();
                 }
 
-                foreach (int allergeneId in allergeneIds)
+                foreach (var allergeneId in allergeneIds)
                 {
                     string insertQuery = "INSERT INTO ClientAllergene (ClientId, AllergeneId) VALUES (@ClientId, @AllergeneId)";
-
-                    using (SqliteCommand insertCommand = new SqliteCommand(insertQuery, connection))
+                    using (var command = new SqliteCommand(insertQuery, connection))
                     {
-                        insertCommand.Parameters.AddWithValue("@ClientId", clientId);
-                        insertCommand.Parameters.AddWithValue("@AllergeneId", allergeneId);
-                        insertCommand.ExecuteNonQuery();
+                        command.Parameters.AddWithValue("@ClientId", clientId);
+                        command.Parameters.AddWithValue("@AllergeneId", allergeneId);
+                        command.ExecuteNonQuery();
                     }
                 }
             }
         }
 
+        /// <summary>
+        /// Ajoute un nouvel allergène à la base de données.
+        /// </summary>
+        /// <param name="allergene">L'allergène à ajouter.</param>
         public void AjouterAllergene(Allergene allergene)
         {
-            using (SqliteConnection connection = _dbConfig.CreateConnection())
+            using (var connection = new SqliteConnection(_connectionString))
             {
                 connection.Open();
-
                 string query = "INSERT INTO Allergenes (Nom, Description) VALUES (@Nom, @Description)";
 
-                using (SqliteCommand command = new SqliteCommand(query, connection))
+                using (var command = new SqliteCommand(query, connection))
                 {
                     command.Parameters.AddWithValue("@Nom", allergene.Nom);
                     command.Parameters.AddWithValue("@Description", allergene.Description);

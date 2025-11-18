@@ -1,41 +1,35 @@
-using EpicurAPP_Partage.Models;
+﻿using EpicurApp_API.Models;
 
 namespace EpicurAppLogic.Interfaces
 {
-    /// <summary>
-    /// Interface pour accéder à la base de données des plats
-    /// </summary>
     public interface IPlatDAO
     {
         /// <summary>
-        /// Récupère tous les plats de la base
+        /// Récupère tous les plats de la base.
         /// </summary>
         /// <returns>Liste de plats</returns>
         List<Plat> GetAll();
 
         /// <summary>
-        /// Récupère un plat à partir de son identifiant
+        /// Récupère un plat à partir de son identifiant.
         /// </summary>
         /// <param name="id">Id du plat</param>
         /// <returns>Le plat correspondant ou null si non trouvé</returns>
         Plat? GetById(int id);
 
         /// <summary>
-        /// Ajoute un nouveau plat dans la base
+        /// Ajoute un nouveau plat dans la base.
         /// </summary>
         /// <param name="plat">Plat à ajouter</param>
         void Add(Plat plat);
 
-        /// <summary>
-        /// Met à jour un plat existant
-        /// </summary>
-        /// <param name="plat">Plat à mettre à jour</param>
+    
         void Update(Plat plat);
 
         /// <summary>
-        /// Supprime un plat dans la base
+        /// Supprime un plat dans la base.
         /// </summary>
-        /// <param name="id">Id du plat à supprimer</param>
+        /// <param name="plat">Plat à supprimer</param>
         void Delete(int id);
     }
 }

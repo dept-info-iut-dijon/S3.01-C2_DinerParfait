@@ -41,13 +41,13 @@ namespace EpicurAppIHM.Views
                 txtStatut.Text = menu.Statut;
 
                 // Afficher les plats (avec vérification pour les IDs null)
-                txtAmuseBouche.Text = ObtenirNomPlat(plats, menu.AmuseBoucheId);
-                txtBoissonAperitif.Text = ObtenirNomPlat(plats, menu.BoissonAperitifId);
-                txtEntree.Text = ObtenirNomPlat(plats, menu.EntreeId);
-                txtPlatPrincipal.Text = ObtenirNomPlat(plats, menu.PlatPrincipalId);
-                txtVin.Text = ObtenirNomPlat(plats, menu.VinId);
-                txtFromage.Text = ObtenirNomPlat(plats, menu.FromageId);
-                txtDessert.Text = ObtenirNomPlat(plats, menu.DessertId);
+                txtAmuseBouche.Text = ObtenirNomPlat(plats, menu.AmuseBouche?.Id);
+                txtBoissonAperitif.Text = ObtenirNomPlat(plats, menu.BoissonAperitif?.Id);
+                txtEntree.Text = ObtenirNomPlat(plats, menu.Entree?.Id);
+                txtPlatPrincipal.Text = ObtenirNomPlat(plats, menu.PlatPrincipal?.Id);
+                txtVin.Text = ObtenirNomPlat(plats, menu.Vin?.Id);
+                txtFromage.Text = ObtenirNomPlat(plats, menu.Fromage?.Id);
+                txtDessert.Text = ObtenirNomPlat(plats, menu.Dessert?.Id);
             }
             catch (Exception ex)
             {

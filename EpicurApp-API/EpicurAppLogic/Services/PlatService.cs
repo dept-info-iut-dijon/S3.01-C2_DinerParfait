@@ -1,10 +1,10 @@
-﻿using EpicurAPP_Partage.Exceptions;
-using EpicurAPP_Partage.Models;
+﻿using EpicurApp_API.Models;
+using EpicurAPP_Partage.Exceptions;
 using EpicurAppLogic.Interfaces;
 using System;
 using System.Collections.Generic;
 
-namespace EpicurAppLogic.Services
+namespace EpicurApp.Logic.Services
 {
     public class PlatService : IPlatService
     {
@@ -23,8 +23,7 @@ namespace EpicurAppLogic.Services
         {
             try
             {
-                List<Plat> plats = _platDAO.GetAll();
-                return plats;
+                return _platDAO.GetAll();
             }
             catch (Exception ex)
             {
@@ -41,7 +40,7 @@ namespace EpicurAppLogic.Services
         {
             try
             {
-                Plat? plat = _platDAO.GetById(id);
+                var plat = _platDAO.GetById(id);
                 if (plat == null)
                 {
                     throw new Exception($"Le plat avec l'id {id} n'existe pas.");
@@ -76,3 +75,4 @@ namespace EpicurAppLogic.Services
         }
     }
 }
+

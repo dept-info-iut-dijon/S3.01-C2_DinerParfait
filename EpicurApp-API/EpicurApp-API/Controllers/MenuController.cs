@@ -1,14 +1,11 @@
+﻿using EpicurApp_API.Models;
 using EpicurAPP_Partage.Exceptions;
-using EpicurAPP_Partage.Models;
 using EpicurAppLogic.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 
-namespace EpicurApp_API.Controllers
+namespace EpicurApp_API.DAO.Controllers
 {
-    /// <summary>
-    /// Contrôleur pour la gestion des menus
-    /// </summary>
     [ApiController]
     [Route("[controller]")]
     public class MenuController : ControllerBase
@@ -21,17 +18,15 @@ namespace EpicurApp_API.Controllers
         }
 
         /// <summary>
-        /// Crée un nouveau menu
+        /// Crée un nouveau menu.
         /// </summary>
-        /// <param name="menu">Données du menu à créer</param>
-        /// <returns>Une réponse HTTP</returns>
+        /// <param name="menu">Données du menu à créer.</param>
+        /// <returns>Une réponse HTTP.</returns>
         [HttpPost]
         public IActionResult CreateMenu(Menu menu)
         {
             if (!ModelState.IsValid)
-            {
                 return BadRequest(ModelState);
-            }
 
             try
             {
@@ -50,23 +45,19 @@ namespace EpicurApp_API.Controllers
         }
 
         /// <summary>
-        /// Met à jour un menu existant
+        /// Met à jour un menu existant.
         /// </summary>
-        /// <param name="id">Identifiant du menu</param>
-        /// <param name="menu">Données à jour du menu</param>
-        /// <returns>Une réponse HTTP appropriée</returns>
+        /// <param name="id">Identifiant du menu.</param>
+        /// <param name="menu">Données à jour du menu.</param>
+        /// <returns>Une réponse HTTP appropriée.</returns>
         [HttpPut("{id}")]
         public IActionResult UpdateMenu(int id, Menu menu)
         {
             if (!ModelState.IsValid)
-            {
                 return BadRequest(ModelState);
-            }
 
             if (menu == null)
-            {
                 return BadRequest("Les données du menu sont manquantes.");
-            }
 
             if (menu.Id == 0)
             {
@@ -74,9 +65,7 @@ namespace EpicurApp_API.Controllers
             }
 
             if (menu.Id != id)
-            {
                 return BadRequest("L'identifiant du menu ne correspond pas.");
-            }
 
             try
             {
@@ -95,10 +84,10 @@ namespace EpicurApp_API.Controllers
         }
 
         /// <summary>
-        /// Récupère un menu par son Id
+        /// Récupère un menu par son Id.
         /// </summary>
-        /// <param name="id">Identifiant du menu</param>
-        /// <returns>Le menu ou une erreur 404</returns>
+        /// <param name="id">Identifiant du menu.</param>
+        /// <returns>Le menu ou une erreur 404.</returns>
         [HttpGet("{id}")]
         public IActionResult GetMenuById(int id)
         {
@@ -106,9 +95,7 @@ namespace EpicurApp_API.Controllers
             {
                 Menu menu = _menuService.GetById(id);
                 if (menu == null)
-                {
                     return NotFound($"Menu avec Id {id} non trouvé.");
-                }
 
                 return Ok(menu);
             }
@@ -120,9 +107,9 @@ namespace EpicurApp_API.Controllers
         }
 
         /// <summary>
-        /// Récupère tous les menus
+        /// Récupère tous les menus.
         /// </summary>
-        /// <returns>Liste des menus</returns>
+        /// <returns>Liste des menus.</returns>
         [HttpGet("GetAll")]
         public IActionResult GetAllMenus()
         {
@@ -139,9 +126,9 @@ namespace EpicurApp_API.Controllers
         }
 
         /// <summary>
-        /// Récupère le dernier menu enregistré en brouillon
+        /// Récupère le dernier menu enregistré en brouillon.
         /// </summary>
-        /// <returns>Le menu en brouillon ou une erreur 404</returns>
+        /// <returns>Le menu en brouillon ou une erreur 404.</returns>
         [HttpGet("Brouillon")]
         public IActionResult GetDernierBrouillon()
         {
@@ -163,18 +150,16 @@ namespace EpicurApp_API.Controllers
         }
 
         /// <summary>
-        /// Ajoute des plats existants à un menu
+        /// Ajoute des plats existants à un menu.
         /// </summary>
-        /// <param name="menuId">Id du menu</param>
-        /// <param name="platIds">Liste des Ids de plats à ajouter</param>
-        /// <returns>Réponse HTTP</returns>
+        /// <param name="menuId">Id du menu.</param>
+        /// <param name="platIds">Liste des Ids de plats à ajouter.</param>
+        /// <returns>Réponse HTTP.</returns>
         [HttpPost("{menuId}/AddPlats")]
         public IActionResult AjouterPlatsAuMenu(int menuId, [FromBody] List<int> platIds)
         {
             if (platIds == null || platIds.Count == 0)
-            {
                 return BadRequest("Au moins un plat doit être sélectionné.");
-            }
 
             try
             {
@@ -189,3 +174,6 @@ namespace EpicurApp_API.Controllers
         }
     }
 }
+
+
+

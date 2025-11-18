@@ -1,15 +1,12 @@
 ﻿using EpicurAPP_Partage.Exceptions;
-using EpicurAPP_Partage.Models;
 using EpicurAppLogic.Interfaces;
-using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
+using EpicurAPP_Partage.Models;
 
 namespace EpicurAppLogic.Services
 {
     public class ClientService : IClientService
     {
-        private readonly IClientDAO _clientRepository;
+        private IClientDAO _clientRepository;
 
         public ClientService(IClientDAO clientRepository)
         {
@@ -37,8 +34,7 @@ namespace EpicurAppLogic.Services
         {
             try
             {
-                List<Client> clients = _clientRepository.GetAll();
-                return clients;
+                return _clientRepository.GetAll();
             }
             catch (Exception ex)
             {
@@ -50,11 +46,9 @@ namespace EpicurAppLogic.Services
         {
             try
             {
-                Client? client = _clientRepository.RechercherClientParId(id);
+                var client = _clientRepository.RechercherClientParId(id);
                 if (client == null)
-                {
                     throw new Exception($"Client avec l'id {id} introuvable.");
-                }
                 return client;
             }
             catch (Exception ex)
@@ -63,15 +57,14 @@ namespace EpicurAppLogic.Services
             }
         }
 
+
         public async Task<Client> ObtenirClientAvecHistoriqueAsync(int id)
         {
             try
             {
-                Client? client = await _clientRepository.GetByIdWithHistoryAsync(id);
+                var client = await _clientRepository.GetByIdWithHistoryAsync(id);
                 if (client == null)
-                {
                     throw new Exception($"Client avec l'id {id} introuvable.");
-                }
                 return client;
             }
             catch (Exception ex)
@@ -84,5 +77,6 @@ namespace EpicurAppLogic.Services
         {
             _clientRepository.AjouterAllergenesAuClient(clientId, allergeneIds);
         }
+
     }
 }

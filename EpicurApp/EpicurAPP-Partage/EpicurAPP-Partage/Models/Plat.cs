@@ -1,15 +1,37 @@
 ﻿namespace EpicurApp_API.Models
 {
+    /// <summary>
+    /// Représente un plat avec ses informations et ingrédients.
+    /// </summary>
     public class Plat
     {
+        /// <summary>
+        /// Identifiant unique du plat.
+        /// </summary>
         public int Id { get; set; }
-        public string Nom { get; set; }
-        public string Categorie { get; set; } //Entrée, Plat, Dessert
-        public string IngredientsPrincipaux { get; set; } //Essentiel à l'alerte alergene
 
+        /// <summary>
+        /// Nom du plat.
+        /// </summary>
+        public string Nom { get; set; }
+
+        /// <summary>
+        /// Catégorie du plat (Entrée, Plat principal, Dessert, etc.).
+        /// </summary>
+        public CategoriePlat Categorie { get; set; }
+
+        /// <summary>
+        /// Liste des ingrédients principaux du plat.
+        /// Essentiel pour la gestion des alertes allergènes.
+        /// </summary>
+        public List<string> IngredientsPrincipaux { get; set; } = new List<string>();
+
+        /// <summary>
+        /// Retourne le nom du plat.
+        /// </summary>
         public override string ToString()
         {
-            return Nom; 
+            return Nom;
         }
     }
 }
