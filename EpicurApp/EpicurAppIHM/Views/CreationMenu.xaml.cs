@@ -70,9 +70,15 @@ namespace EpicurAppIHM.Views
         {
             List<Plat> platsClasse = new List<Plat>();
 
+            // Convertir la string en enum CategoriePlat
+            if (!Enum.TryParse<CategoriePlat>(categorie, out CategoriePlat categorieEnum))
+            {
+                return;
+            }
+
             foreach (Plat plat in tousLesPlats)
             {
-                if (plat.Categorie == categorie)
+                if (plat.Categorie == categorieEnum)
                 {
                     platsClasse.Add(plat);
                 }
@@ -153,13 +159,13 @@ namespace EpicurAppIHM.Views
                 {
                     _menuBrouillonId = menu.Id;
 
-                    cmbAmuseGueule.SelectedValue = menu.AmuseBoucheId;
-                    cmbBoissonAperitif.SelectedValue = menu.BoissonAperitifId;
-                    cmbEntree.SelectedValue = menu.EntreeId;
-                    cmbPlat.SelectedValue = menu.PlatPrincipalId;
-                    cmbVin.SelectedValue = menu.VinId;
-                    cmbFromage.SelectedValue = menu.FromageId;
-                    cmbDessert.SelectedValue = menu.DessertId;
+                    cmbAmuseGueule.SelectedValue = menu.AmuseBouche?.Id;
+                    cmbBoissonAperitif.SelectedValue = menu.BoissonAperitif?.Id;
+                    cmbEntree.SelectedValue = menu.Entree?.Id;
+                    cmbPlat.SelectedValue = menu.PlatPrincipal?.Id;
+                    cmbVin.SelectedValue = menu.Vin?.Id;
+                    cmbFromage.SelectedValue = menu.Fromage?.Id;
+                    cmbDessert.SelectedValue = menu.Dessert?.Id;
                 }
                 else
                 {
@@ -287,23 +293,21 @@ namespace EpicurAppIHM.Views
             menu.Date = DateTime.Now;
             menu.Statut = statut;
 
-            menu.AmuseBoucheId = ObtenirValeurSelectionnee(cmbAmuseGueule);
-            menu.BoissonAperitifId = ObtenirValeurSelectionnee(cmbBoissonAperitif);
-            menu.EntreeId = ObtenirValeurSelectionnee(cmbEntree);
-            menu.PlatPrincipalId = ObtenirValeurSelectionnee(cmbPlat);
-            menu.VinId = ObtenirValeurSelectionnee(cmbVin);
-            menu.FromageId = ObtenirValeurSelectionnee(cmbFromage);
-            menu.DessertId = ObtenirValeurSelectionnee(cmbDessert);
-
-            menu.AmuseBouche = null;
-            menu.BoissonAperitif = null;
-            menu.Entree = null;
-            menu.PlatPrincipal = null;
-            menu.Vin = null;
-            menu.Fromage = null;
-            menu.Dessert = null;
+            // Récupérer les plats sélectionnés depuis les ComboBox
+            menu.AmuseBouche = ObtenirPlatSelectionne(cmbAmuseGueule);
+            menu.BoissonAperitif = ObtenirPlatSelectionne(cmbBoissonAperitif);
+            menu.Entree = ObtenirPlatSelectionne(cmbEntree);
+            menu.PlatPrincipal = ObtenirPlatSelectionne(cmbPlat);
+            menu.Vin = ObtenirPlatSelectionne(cmbVin);
+            menu.Fromage = ObtenirPlatSelectionne(cmbFromage);
+            menu.Dessert = ObtenirPlatSelectionne(cmbDessert);
 
             return menu;
+        }
+
+        private static Plat? ObtenirPlatSelectionne(ComboBox comboBox)
+        {
+            return comboBox.SelectedItem as Plat;
         }
 
         private static int? ObtenirValeurSelectionnee(ComboBox comboBox)
