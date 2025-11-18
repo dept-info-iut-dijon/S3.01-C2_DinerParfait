@@ -77,8 +77,6 @@ namespace EpicurAppLogic.Services
         {
             _clientRepository.AjouterAllergenesAuClient(clientId, allergeneIds);
         }
-
-
         public void ModifierClient(Client client)
         {
             // Validation des champs obligatoires
@@ -107,7 +105,7 @@ namespace EpicurAppLogic.Services
                 if (ancienClient.Telephone != client.Telephone)
                     champsModifies.Add($"Telephone: {ancienClient.Telephone} = {client.Telephone}");
                 //if (ancienClient.PlatsNonApprecies != client.PlatsNonApprecies)
-                   // champsModifies.Add($"PlatsNonApprecies: {ancienClient.PlatsNonApprecies} = {client.PlatsNonApprecies}");
+                // champsModifies.Add($"PlatsNonApprecies: {ancienClient.PlatsNonApprecies} = {client.PlatsNonApprecies}");
                 if (ancienClient.Preferences != client.Preferences)
                     champsModifies.Add($"Preferences: {ancienClient.Preferences} = {client.Preferences}");
 
@@ -126,8 +124,18 @@ namespace EpicurAppLogic.Services
             }
         }
 
-
-
+        public void Delete(int id)
+        {
+            try
+            {
+                // Appelle la méthode Delete du DAO
+                _clientRepository.SupprimerClient(id);
+            }
+            catch (Exception ex)
+            {
+                throw new ApplicationException($"Erreur service : {ex.Message}", ex);
+            }
+        }
     }
 
     

@@ -188,6 +188,7 @@ namespace EpicurApp_API.DAO
             }
         }
 
+
         /// <summary>
         /// Supprime un client de la base de données.
         /// </summary>
@@ -198,12 +199,28 @@ namespace EpicurApp_API.DAO
             {
                 connection.Open();
 
-                string query = "DELETE FROM Clients WHERE Id = @Id";
-
-                using (var command = new SqliteCommand(query, connection))
+                //Supprimer les liens avec les allergenes
+                string deleteAllergies = "DELETE FROM ClientAllergene WHERE ClientId = @Id";
+                using (var cmd1 = new SqliteCommand(deleteAllergies, connection))
                 {
-                    command.Parameters.AddWithValue("@Id", id);
-                    command.ExecuteNonQuery();
+                    cmd1.Parameters.AddWithValue("@Id", id);
+                    cmd1.ExecuteNonQuery();
+                }
+
+                //Supprimer les liens avec les menus
+                string deleteMenus = "DELETE FROM ClientMenu WHERE ClientId = @Id";
+                using (var cmd2 = new SqliteCommand(deleteMenus, connection))
+                {
+                    cmd2.Parameters.AddWithValue("@Id", id);
+                    cmd2.ExecuteNonQuery();
+                }
+
+                //Supprimer le client
+                string deleteClient = "DELETE FROM Clients WHERE Id = @Id;";
+                using (var cmd3 = new SqliteCommand(deleteClient, connection))
+                {
+                    cmd3.Parameters.AddWithValue("@Id", id);
+                    cmd3.ExecuteNonQuery();
                 }
             }
         }

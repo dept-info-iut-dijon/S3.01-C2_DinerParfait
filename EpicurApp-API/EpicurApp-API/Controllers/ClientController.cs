@@ -172,4 +172,24 @@ namespace EpicurApp_API.Controllers
             }
         }
     }
+
+    /// <summary>
+    /// Supprime un client de la base de données en fonction de son ID.
+    /// </summary>
+    /// <param name="id">L'ID du client à supprimer.</param>
+    /// <returns>Code 204 si succès, ou un code d'erreur.</returns>
+    [HttpDelete("{id}")]
+    public IActionResult DeleteClient(int id)
+    {
+        try
+        {
+            _clientService.Delete(id);
+
+            return Ok();
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, ex.Message);
+        }
+    }
 }

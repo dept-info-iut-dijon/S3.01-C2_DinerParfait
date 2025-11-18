@@ -41,9 +41,20 @@ namespace EpicurAppIHM.Views
             _clientId = clientId;
             _modeModification = true;
 
-            this.Title = "Modification Fiche Client";
-            btnCreer.Content = "Modifier";
-
+            this.Title = "Consultation Fiche Client";
+            
+            if (modeConsultation)
+            {
+                ConfigurerModeConsultation();
+            }
+            else
+            {
+                // Mode modification directe
+                btnSupprimer.Visibility = Visibility.Visible;
+                btnModifier.Visibility = Visibility.Collapsed;
+                btnCreer.Content = "Enregistrer";
+                btnCreer.Visibility = Visibility.Visible;
+            }
             ChargerAllergenes();
             ChargerClient();
         }
@@ -133,9 +144,43 @@ namespace EpicurAppIHM.Views
             txtPlatsNonApprecies.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#3a3a3a"));
             txtPreferences.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#3a3a3a"));
 
+            // Configuration des boutons pour la consultation avec modification et suppression
             btnCreer.Visibility = Visibility.Collapsed;
+            btnModifier.Visibility = Visibility.Visible;
+            btnSupprimer.Visibility = Visibility.Visible;
             btnAnnuler.Content = "Fermer";
-            btnAnnuler.Width = 180;
+        }
+
+        /// <summary>
+        /// Active le mode modification à partir du mode consultation
+        /// </summary>
+        private void ModifierClient(object sender, RoutedEventArgs e)
+        {
+            // Passer en mode modification
+            this.Title = "Modification Fiche Client";
+            
+            txtPrenom.IsReadOnly = false;
+            txtNom.IsReadOnly = false;
+            txtEmail.IsReadOnly = false;
+            txtTelephone.IsReadOnly = false;
+            txtPlatsNonApprecies.IsReadOnly = false;
+            txtPreferences.IsReadOnly = false;
+            cmbAllergenes.IsEnabled = true;
+
+            // Restaurer l'apparence normale des champs
+            var normalBackground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#2a2a2a"));
+            txtPrenom.Background = normalBackground;
+            txtNom.Background = normalBackground;
+            txtEmail.Background = normalBackground;
+            txtTelephone.Background = normalBackground;
+            txtPlatsNonApprecies.Background = normalBackground;
+            txtPreferences.Background = normalBackground;
+
+            // Modifier les boutons
+            btnModifier.Visibility = Visibility.Collapsed;
+            btnCreer.Visibility = Visibility.Visible;
+            btnCreer.Content = "Enregistrer";
+            btnAnnuler.Content = "Annuler";
         }
 
         private void ValiderPrenom(object sender, RoutedEventArgs e)
@@ -228,7 +273,22 @@ namespace EpicurAppIHM.Views
         /// </summary>
         private void Annuler(object sender, RoutedEventArgs e)
         {
-            this.Close();
+            // Si on est en mode modification, retourner au mode consultation
+            if (btnCreer.Visibility == Visibility.Visible && _modeModification && _clientId.HasValue)
+            {
+                var result = MessageBox.Show("Voulez-vous abandonner les modifications ?", 
+                                           "Confirmation", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                if (result == MessageBoxResult.Yes)
+                {
+                    // Recharger les données originales et retourner en mode consultation
+                    ChargerClient();
+                    ConfigurerModeConsultation();
+                }
+            }
+            else
+            {
+                this.Close();
+            }
         }
 
         /// <summary>
@@ -365,6 +425,43 @@ namespace EpicurAppIHM.Views
                     btnCreer.IsEnabled = true;
                     btnCreer.Content = "Créer le client";
                 }
+            }
+        }
+
+        /// <summary>
+        /// Supprime le client actuel
+        /// </summary>
+        private async void SupprimerClient(object sender, RoutedEventArgs e)
+        {
+            if (!_clientId.HasValue) return;
+
+            //Confirmation de suppressio,
+            var result = MessageBox.Show($"Êtes-vous sûr de vouloir supprimer ce client ({txtPrenom.Text} {txtNom.Text}) ?","Confirmation de suppression", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+
+            if (result == MessageBoxResult.No) return;
+
+            //Appel API
+            try
+            {
+                var response = await _httpClient.DeleteAsync($"Client/{_clientId}");
+
+                if (response.IsSuccessStatusCode)
+                {
+                    MessageBox.Show("Client supprimé avec succès.", "Succès", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                    // Ferme la fenêtre et renvoie un résultat positif
+                    this.DialogResult = true;
+                    this.Close();
+                }
+                else
+                {
+                    string error = await response.Content.ReadAsStringAsync();
+                    MessageBox.Show($"Erreur lors de la suppression : {error}", "Erreur API", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erreur technique : {ex.Message}", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
     }
