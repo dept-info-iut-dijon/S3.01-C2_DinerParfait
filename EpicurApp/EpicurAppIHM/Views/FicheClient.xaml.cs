@@ -42,8 +42,15 @@ namespace EpicurAppIHM.Views
             _modeModification = true;
 
             this.Title = "Modification Fiche Client";
-            btnCreer.Content = "Modifier";
-
+            if (modeConsultation)
+            {
+                ConfigurerModeConsultation();
+            }
+            else
+            {
+                btnSupprimer.Visibility = Visibility.Visible;
+                btnCreer.Content = "Modifier";
+            }
             ChargerAllergenes();
             ChargerClient();
         }
