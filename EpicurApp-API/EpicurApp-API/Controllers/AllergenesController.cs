@@ -1,7 +1,8 @@
-﻿using EpicurAPP_Partage.Models;
+﻿using EpicurApp_API.DAO;
+using EpicurAPP_Partage.Models;
 using Microsoft.AspNetCore.Mvc;
 
-namespace EpicurApp_API.DAO.Controllers
+namespace EpicurApp_API.Controllers
 {
     [ApiController]
     [Route("[controller]")]

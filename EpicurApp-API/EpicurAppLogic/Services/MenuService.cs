@@ -2,7 +2,7 @@
 using EpicurAppLogic.Interfaces;
 using EpicurAPP_Partage.Models;
 
-namespace EpicurApp.Logic.Services
+namespace EpicurAppLogic.Services
 {
     public class MenuService : IMenuService
     {

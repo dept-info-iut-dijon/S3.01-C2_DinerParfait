@@ -4,7 +4,7 @@ using EpicurAppLogic.Interfaces;
 using System;
 using System.Collections.Generic;
 
-namespace EpicurApp.Logic.Services
+namespace EpicurAppLogic.Services
 {
     public class PlatService : IPlatService
     {
