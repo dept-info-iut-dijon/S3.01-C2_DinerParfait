@@ -106,7 +106,7 @@ public class ClientController : ControllerBase
     /// Associe une liste d'allergènes à un client.
     /// </summary>
     /// <param name="id">Id du client</param>
-    /// <param name="allergeneIds">Liste des Ids d’allergènes</param>
+    /// <param name="allergeneIds">Liste des Ids d'allergènes</param>
     /// <returns>Résultat HTTP</returns>
     [HttpPost("{id}/allergenes")]
     public IActionResult AssocierAllergenes(int id, [FromBody] List<int> allergeneIds)
@@ -124,6 +124,37 @@ public class ClientController : ControllerBase
                 500,
                 "Erreur lors de l'association des allergènes au client : " + ex.Message
             );
+        }
+    }
+
+    /// <summary>
+    /// Récupère l'historique des repas d'un client.
+    /// </summary>
+    /// <param name="id">Id du client</param>
+    /// <returns>Liste des repas triés par date décroissante</returns>
+    [HttpGet("{id}/repas")]
+    public IActionResult ObtenirHistoriqueRepas(int id)
+    {
+        try
+        {
+            // Récupération de l'historique des repas via le service
+            var repas = _clientService.ObtenirHistoriqueRepas(id);
+
+            // Si la liste est vide, on renvoie un message approprié
+            if (repas == null || repas.Count == 0)
+            {
+                return Ok(new
+                {
+                    message = "Aucun repas enregistré",
+                    repas = new List<object>()
+                });
+            }
+
+            return Ok(repas);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"Erreur lors de la récupération de l'historique des repas : {ex.Message}");
         }
     }
 }

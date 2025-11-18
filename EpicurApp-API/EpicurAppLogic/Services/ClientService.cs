@@ -7,17 +7,19 @@ namespace EpicurAppLogic.Services
     public class ClientService : IClientService
     {
         private IClientDAO _clientRepository;
+        private IRepasDAO _repasRepository;
 
-        public ClientService(IClientDAO clientRepository)
+        public ClientService(IClientDAO clientRepository, IRepasDAO repasRepository)
         {
             _clientRepository = clientRepository;
+            _repasRepository = repasRepository;
         }
 
         public void AjouterClient(Client client)
         {
             if (string.IsNullOrWhiteSpace(client.Nom) || string.IsNullOrWhiteSpace(client.Prenom))
             {
-                throw new InvalidFieldException("Le nom et le prénom sont obligatoires.");
+                throw new InvalidFieldException("Le nom et le prenom sont obligatoires.");
             }
 
             try
@@ -76,6 +78,18 @@ namespace EpicurAppLogic.Services
         public void AjouterAllergenesAuClient(int clientId, List<int> allergeneIds)
         {
             _clientRepository.AjouterAllergenesAuClient(clientId, allergeneIds);
+        }
+
+        public List<Repas> ObtenirHistoriqueRepas(int clientId)
+        {
+            try
+            {
+                return _repasRepository.GetRepasByClientId(clientId);
+            }
+            catch (Exception ex)
+            {
+                throw new ApplicationException($"Erreur lors de la récupération de l'historique des repas pour le client {clientId}.", ex);
+            }
         }
 
     }
