@@ -1,7 +1,7 @@
 ﻿using Xunit;
 using Moq;
 using EpicurApp.Logic.Services;
-using EpicurAPP_Partage.Interfaces;
+using EpicurAppLogic.Interfaces;
 using EpicurApp_API.Models;
 using EpicurAPP_Partage.Exceptions;
 using System;
@@ -61,7 +61,7 @@ public class PlatServiceTests
     [Fact]
     public void AjouterPlatExeptionNom()
     {
-        Plat platInvalide = new Plat { Nom = null, Categorie = "Dessert" };
+        Plat platInvalide = new Plat { Nom = null, Categorie = CategoriePlat.Dessert };
         InvalidFieldException exceptionVoulue = null;
 
         try

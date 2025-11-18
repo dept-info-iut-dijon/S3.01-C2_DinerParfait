@@ -1,6 +1,6 @@
 ﻿using EpicurApp_API.Models;
 using EpicurAPP_Partage.Exceptions;
-using EpicurAPP_Partage.Interfaces;
+using EpicurAppLogic.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 

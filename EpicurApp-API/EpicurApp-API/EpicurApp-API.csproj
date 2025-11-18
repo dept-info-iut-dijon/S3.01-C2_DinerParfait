@@ -22,11 +22,4 @@
     <ProjectReference Include="..\EpicurAppLogic\EpicurAppLogic.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Content Include="epicurapp.db">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <CopyToPublishDirectory>Always</CopyToPublishDirectory>
-    </Content>
-  </ItemGroup>
-
 </Project>
