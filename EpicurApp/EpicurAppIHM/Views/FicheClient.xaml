@@ -121,10 +121,15 @@
                        Margin="0,0,15,0" Background="Transparent" Foreground="#D4AF37" 
                        BorderBrush="#D4AF37" BorderThickness="2" FontSize="15" 
                        FontWeight="SemiBold" Cursor="Hand" Click="Annuler"/>
+                <Button x:Name="btnModifier" Content="Modifier" Width="130" Height="45"
+                       Margin="0,0,15,0" Background="#D4AF37" Foreground="#1a1a1a" BorderThickness="0"
+                       FontSize="15" FontWeight="Bold" Cursor="Hand" Click="ModifierClient" Visibility="Collapsed"/>
                 <Button x:Name="btnCreer" Content="Créer le client" Width="180" Height="45"
                        Background="#D4AF37" Foreground="#1a1a1a" BorderThickness="0"
                        FontSize="15" FontWeight="Bold" Cursor="Hand" Click="CreerClient"/>
-                <Button x:Name="btnSupprimer" Content="Supprimer" Margin="15" Width="130" Height="45" Background="#EF4444" Foreground="White" BorderThickness="0" FontSize="15" FontWeight="Bold" Cursor="Hand" Visibility="Collapsed" Click="SupprimerClient" Grid.Row="3"/>
+                <Button x:Name="btnSupprimer" Content="Supprimer" Width="130" Height="45" 
+                       Background="#EF4444" Foreground="White" BorderThickness="0" FontSize="15" 
+                       FontWeight="Bold" Cursor="Hand" Visibility="Collapsed" Click="SupprimerClient"/>
             </StackPanel>
         </Grid>
     </Border>
