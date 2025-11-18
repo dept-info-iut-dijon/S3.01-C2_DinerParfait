@@ -1,6 +1,6 @@
 ﻿using EpicurAPP_Partage.Exceptions;
-using EpicurAPP_Partage.Interfaces;
-using EpicurApp_API.Models;
+using EpicurAppLogic.Interfaces;
+using EpicurAPP_Partage.Models;
 
 namespace EpicurApp.Logic.Services
 {
@@ -15,6 +15,11 @@ namespace EpicurApp.Logic.Services
 
         public void AjouterMenu(Menu menu)
         {
+            if (menu.Statut != "Brouillon" && menu.Statut != "Validé")
+            {
+                throw new InvalidFieldException("Le statut du menu doit être 'Brouillon' ou 'Validé'.");
+            }
+
             if (string.IsNullOrWhiteSpace(menu.Nom))
             {
                 throw new InvalidFieldException("Le nom du menu est obligatoire.");

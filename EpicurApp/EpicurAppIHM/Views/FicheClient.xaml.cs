@@ -1,9 +1,4 @@
-﻿using EpicurApp_API.Models;
-using EpicurAPP_Partage.Models;
-using EpicurAppIHM.Services;
-using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using EpicurAPP_Partage.Models;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text.RegularExpressions;
@@ -12,25 +7,48 @@ using System.Windows.Media;
 
 namespace EpicurAppIHM.Views
 {
+    /// <summary>
+    /// Logique d'interaction pour FicheClient.xaml
+    /// </summary>
     public partial class FicheClient : Window
     {
+        /// <summary>
+        /// L'instance HttpClient pour les appels API
+        /// </summary>
         private HttpClient _httpClient;
+        /// <summary>
+        /// Liste des allergènes disponibles
+        /// </summary>
         private List<Allergene> allergenes;
+        /// <summary>
+        /// L'ID du client en consultation/modification
+        /// </summary>
         private int? _clientId;
+        /// <summary>
+        /// Indique si la fiche est en mode consultation (lecture seule)
+        /// </summary>
         private bool _modeConsultation;
 
+        /// <summary>
+        /// instance la fenetre de fiche client en mode création
+        /// </summary>
         public FicheClient()
         {
             InitializeComponent();
-            _httpClient = ApiClient.Instance;
+            _httpClient = App.ApiClient.HttpClient;
             _modeConsultation = false;
             ChargerAllergenes();
         }
 
+        /// <summary>
+        /// Instance la fenetre de fiche client en mode consultation
+        /// </summary>
+        /// <param name="clientId">client cible</param>
+        /// <param name="modeConsultation">mode de lecture seule</param>
         public FicheClient(int clientId, bool modeConsultation = true)
         {
             InitializeComponent();
-            _httpClient = ApiClient.Instance;
+            _httpClient = App.ApiClient.HttpClient;
             _clientId = clientId;
             _modeConsultation = modeConsultation;
 
@@ -43,6 +61,10 @@ namespace EpicurAppIHM.Views
             }
         }
 
+        /// <summary>
+        /// Charge la liste des allergènes depuis l'API
+        /// </summary>
+        /// <exception cref="Exception">erreur de chargement des allergènes</exception>
         private async void ChargerAllergenes()
         {
             try
@@ -61,7 +83,10 @@ namespace EpicurAppIHM.Views
             }
         }
 
-
+        /// <summary>
+        /// Charge les données du client depuis l'API
+        /// </summary>
+        /// <exception cref="Exception">erreur de chargement du client</exception>
         private async void ChargerClient()
         {
             if (!_clientId.HasValue) return;
@@ -81,7 +106,10 @@ namespace EpicurAppIHM.Views
                 txtNom.Text = client.Nom;
                 txtEmail.Text = client.Email;
                 txtTelephone.Text = client.Telephone;
-                txtPlatsNonApprecies.Text = client.PlatsNonApprecies;
+                // Convertir la liste de plats en string pour l'affichage
+                txtPlatsNonApprecies.Text = client.PlatsNonApprecies != null && client.PlatsNonApprecies.Count > 0
+                    ? string.Join(", ", client.PlatsNonApprecies.Select(p => p.Nom))
+                    : string.Empty;
                 txtPreferences.Text = client.Preferences;
 
               
@@ -104,8 +132,9 @@ namespace EpicurAppIHM.Views
             }
         }
 
-
-
+        /// <summary>
+        /// Configure la fenêtre en mode consultation (lecture seule)
+        /// </summary>
         private void ConfigurerModeConsultation()
         {
             this.Title = "Consultation Client";
@@ -129,6 +158,9 @@ namespace EpicurAppIHM.Views
             btnAnnuler.Width = 180;
         }
 
+        /// <summary>
+        /// Validation du prénom
+        /// </summary>
         private void ValiderPrenom(object sender, RoutedEventArgs e)
         {
             if (_modeConsultation) return;
@@ -145,6 +177,11 @@ namespace EpicurAppIHM.Views
             }
         }
 
+        /// <summary>
+        /// Validation du nom
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void ValiderNom(object sender, RoutedEventArgs e)
         {
             if (_modeConsultation) return;
@@ -161,6 +198,9 @@ namespace EpicurAppIHM.Views
             }
         }
 
+        /// <summary>
+        /// Validation de l'email
+        /// </summary>
         private void ValiderEmail(object sender, RoutedEventArgs e)
         {
             if (_modeConsultation) return;
@@ -177,6 +217,9 @@ namespace EpicurAppIHM.Views
             }
         }
 
+        /// <summary>
+        /// Validation du téléphone
+        /// </summary>
         private void ValiderTelephone(object sender, RoutedEventArgs e)
         {
             if (_modeConsultation) return;
@@ -193,15 +236,23 @@ namespace EpicurAppIHM.Views
             }
         }
 
+        /// <summary>
+        /// Vérifie si tous les champs sont valides
+        /// </summary>
+        /// <returns>renvoie true si tout les champs obligatoires sont remplis</returns>
         private bool ToutEstValide()
         {
-            if (string.IsNullOrWhiteSpace(txtPrenom.Text) || erreurPrenom.Visibility == Visibility.Visible) return false;
-            if (string.IsNullOrWhiteSpace(txtNom.Text) || erreurNom.Visibility == Visibility.Visible) return false;
-            if (string.IsNullOrWhiteSpace(txtEmail.Text) || erreurEmail.Visibility == Visibility.Visible) return false;
-            if (string.IsNullOrWhiteSpace(txtTelephone.Text) || erreurTelephone.Visibility == Visibility.Visible) return false;
-            return true;
+            bool res = true;
+            if (string.IsNullOrWhiteSpace(txtPrenom.Text) || erreurPrenom.Visibility == Visibility.Visible) res = false;
+            if (string.IsNullOrWhiteSpace(txtNom.Text) || erreurNom.Visibility == Visibility.Visible) res = false;
+            if (string.IsNullOrWhiteSpace(txtEmail.Text) || erreurEmail.Visibility == Visibility.Visible) res = false;
+            if (string.IsNullOrWhiteSpace(txtTelephone.Text) || erreurTelephone.Visibility == Visibility.Visible) res =  false;
+            return res;
         }
 
+        /// <summary>
+        /// Efface les champs du formulaire ou ferme la fenêtre en mode consultation
+        /// </summary>
         private void Annuler(object sender, RoutedEventArgs e)
         {
             if (_modeConsultation) { this.Close(); return; }
@@ -224,6 +275,13 @@ namespace EpicurAppIHM.Views
             erreurTelephone.Visibility = Visibility.Collapsed;
         }
 
+        /// <summary>
+        /// Crée un nouveau client via l'API
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        /// <exception cref="Exception">erreur lors de la création du client</exception>
+        /// <exception cref="HttpRequestException">erreur de connexion à l'API</exception>
         private async void CreerClient(object sender, RoutedEventArgs e)
         {
             if (!ToutEstValide())
@@ -244,8 +302,11 @@ namespace EpicurAppIHM.Views
                     Prenom = txtPrenom.Text.Trim(),
                     Telephone = txtTelephone.Text.Trim().Replace(" ", "").Replace("-", ""),
                     Email = txtEmail.Text.Trim(),
-                    PlatsNonApprecies = txtPlatsNonApprecies.Text.Trim(),
-                    Preferences = txtPreferences.Text.Trim()
+                    // PlatsNonApprecies est maintenant List<Plat>, initialisé à vide
+                    // Le texte libre sera stocké dans Preferences pour le moment
+                    PlatsNonApprecies = new List<Plat>(),
+                    Preferences = txtPreferences.Text.Trim() +
+                        (string.IsNullOrWhiteSpace(txtPlatsNonApprecies.Text) ? "" : "\nPlats non appréciés: " + txtPlatsNonApprecies.Text.Trim())
                 };
 
                 HttpResponseMessage response = await _httpClient.PostAsJsonAsync("Client", client);

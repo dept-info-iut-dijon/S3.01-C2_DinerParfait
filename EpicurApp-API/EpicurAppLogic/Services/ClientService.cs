@@ -1,5 +1,5 @@
 ﻿using EpicurAPP_Partage.Exceptions;
-using EpicurAPP_Partage.Interfaces;
+using EpicurAppLogic.Interfaces;
 using EpicurAPP_Partage.Models;
 
 namespace EpicurAppLogic.Services
@@ -84,7 +84,7 @@ namespace EpicurAppLogic.Services
             try
             {
                 // Appelle la méthode Delete du DAO
-                _clientRepository.Delete(id);
+                _clientRepository.SupprimerClient(id);
             }
             catch (Exception ex)
             {

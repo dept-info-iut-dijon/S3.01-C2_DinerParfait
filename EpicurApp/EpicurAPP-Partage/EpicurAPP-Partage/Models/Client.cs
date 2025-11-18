@@ -1,5 +1,4 @@
-﻿using EpicurApp_API.Models;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace EpicurAPP_Partage.Models
 {
@@ -32,7 +31,14 @@ namespace EpicurAPP_Partage.Models
         //Identifiant unique du client
         public int Id { get;  set; }
 
-        public string PlatsNonApprecies { get; set; }
+        /// <summary>
+        /// Liste des plats que le client n'apprécie pas.
+        /// </summary>
+        public List<Plat> PlatsNonApprecies { get; set; } = new List<Plat>();
+
+        /// <summary>
+        /// Préférences alimentaires du client.
+        /// </summary>
         public string Preferences { get; set; }
 
         //Historique des repas du client

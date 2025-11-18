@@ -1,5 +1,5 @@
 using Moq;
-using EpicurAPP_Partage.Interfaces;
+using EpicurAppLogic.Interfaces;
 using EpicurAPP_Partage.Exceptions;
 using EpicurAPP_Partage.Models;
 using EpicurAppLogic.Services;

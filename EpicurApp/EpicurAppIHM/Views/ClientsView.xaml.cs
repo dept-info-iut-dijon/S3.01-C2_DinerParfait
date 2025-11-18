@@ -1,6 +1,4 @@
 ﻿using EpicurAPP_Partage.Models;
-using EpicurAppIHM.Services;
-using System;
 using System.Collections.ObjectModel;
 using System.Net.Http;
 using System.Net.Http.Json;
@@ -10,12 +8,19 @@ using System.Windows.Input;
 
 namespace EpicurAppIHM.Views
 {
+    /// <summary>
+    /// Page d'affichage client
+    /// </summary>
     public partial class ClientsView : UserControl
     {
         public ObservableCollection<Client> Clients { get; set; } = new ObservableCollection<Client>();
 
         //Client HTTP local
         private readonly HttpClient _httpClient;
+
+        /// <summary>
+        /// Intancie la page d'affichage client
+        /// </summary>
 
         public ClientsView()
         {
@@ -34,6 +39,10 @@ namespace EpicurAppIHM.Views
             ChargerClients();
         }
 
+        /// <summary>
+        /// Charge les clients
+        /// </summary>
+        /// <exception cref="Exception">Erreur du chargement client</exception>
         public async void ChargerClients()
         {
             try
@@ -53,6 +62,9 @@ namespace EpicurAppIHM.Views
             }
         }
 
+        /// <summary>
+        /// Affiche une fiche client
+        /// </summary>
         private void DataGridClients_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
             if (DataGridClients.SelectedItem is Client clientSelectionne)
@@ -66,6 +78,9 @@ namespace EpicurAppIHM.Views
             }
         }
 
+        /// <summary>
+        /// Affiche la fiche de creation client
+        /// </summary>
         private void NouveauClient_Click(object sender, RoutedEventArgs e)
         {
             // Ouvrir la fiche client en mode création

@@ -1,7 +1,7 @@
 ﻿using Moq;
 using EpicurApp.Logic.Services;
-using EpicurAPP_Partage.Interfaces;
-using EpicurApp_API.Models;
+using EpicurAppLogic.Interfaces;
+using EpicurAPP_Partage.Models;
 using EpicurAPP_Partage.Exceptions;
 
 public class MenuServiceTests
