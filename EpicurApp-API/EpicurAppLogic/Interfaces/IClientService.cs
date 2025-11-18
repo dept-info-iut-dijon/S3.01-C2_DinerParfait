@@ -18,5 +18,6 @@ namespace EpicurAppLogic.Interfaces
         Client ObtenirClientParId(int id);
         Task<Client> ObtenirClientAvecHistoriqueAsync(int id);
         void AjouterAllergenesAuClient(int id, List<int> allergeneIds);
+        void ModifierClient(Client client);
     }
 }
