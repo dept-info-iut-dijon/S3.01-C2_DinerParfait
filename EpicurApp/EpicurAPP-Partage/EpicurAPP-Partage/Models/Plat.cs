@@ -1,4 +1,4 @@
-﻿namespace EpicurApp_API.Models
+﻿namespace EpicurAPP_Partage.Models
 {
     /// <summary>
     /// Représente un plat avec ses informations et ingrédients.

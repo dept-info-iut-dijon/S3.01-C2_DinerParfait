@@ -13,7 +13,7 @@ namespace EpicurAppLogic.Interfaces
         /// </summary>
         /// <param name="id">Identifiant du client.</param>
         /// <returns>Le client trouvé.</returns>
-        /// <exception cref="EpicurApp_API.Exceptions.EntityNotFoundException">Si le client n'existe pas.</exception>
+        /// <exception cref="EpicurAPP_Partage.Exceptions.EntityNotFoundException">Si le client n'existe pas.</exception>
         Client GetById(int id);
 
         /// <summary>
@@ -21,7 +21,7 @@ namespace EpicurAppLogic.Interfaces
         /// </summary>
         /// <param name="id">Identifiant du client.</param>
         /// <returns>Le client avec son historique de menus.</returns>
-        /// <exception cref="EpicurApp_API.Exceptions.EntityNotFoundException">Si le client n'existe pas.</exception>
+        /// <exception cref="EpicurAPP_Partage.Exceptions.EntityNotFoundException">Si le client n'existe pas.</exception>
         Task<Client> GetByIdWithHistoryAsync(int id);
 
         /// <summary>

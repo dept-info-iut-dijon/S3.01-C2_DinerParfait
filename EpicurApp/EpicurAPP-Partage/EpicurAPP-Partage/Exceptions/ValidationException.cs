@@ -1,4 +1,4 @@
-namespace EpicurApp_API.Exceptions
+namespace EpicurAPP_Partage.Exceptions
 {
     /// <summary>
     /// Exception levée lorsqu'une validation échoue.

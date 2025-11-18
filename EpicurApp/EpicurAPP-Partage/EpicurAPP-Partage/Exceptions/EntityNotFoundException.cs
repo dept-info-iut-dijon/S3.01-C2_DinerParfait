@@ -1,4 +1,4 @@
-namespace EpicurApp_API.Exceptions
+namespace EpicurAPP_Partage.Exceptions
 {
     /// <summary>
     /// Exception levée lorsqu'une entité recherchée n'est pas trouvée dans la base de données.

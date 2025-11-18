@@ -1,4 +1,4 @@
-namespace EpicurApp_API.Models
+namespace EpicurAPP_Partage.Models
 {
     /// <summary>
     /// Énumération des catégories de plats selon les différents services d'un menu gastronomique.

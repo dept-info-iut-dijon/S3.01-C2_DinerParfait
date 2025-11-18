@@ -2,7 +2,7 @@
 using Moq;
 using EpicurApp.Logic.Services;
 using EpicurAppLogic.Interfaces;
-using EpicurApp_API.Models;
+using EpicurAPP_Partage.Models;
 using EpicurAPP_Partage.Exceptions;
 using System;
 using System.Collections.Generic;

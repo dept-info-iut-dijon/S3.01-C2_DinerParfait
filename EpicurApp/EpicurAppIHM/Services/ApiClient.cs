@@ -8,12 +8,12 @@ namespace EpicurAppIHM.Services
     /// </summary>
     public class ApiClient
     {
-        private static HttpClient? _httpClient;
+        private HttpClient? _httpClient;
 
         /// <summary>
         /// Obtient l'instance HttpClient configurée pour communiquer avec l'API.
         /// </summary>
-        public static HttpClient Instance
+        public HttpClient HttpClient
         {
             get
             {

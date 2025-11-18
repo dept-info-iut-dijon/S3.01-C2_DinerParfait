@@ -3,6 +3,7 @@ using EpicurApp_API.DAO;
 using EpicurApp_API.Configuration;
 using EpicurAppLogic.Interfaces;
 using EpicurAppLogic.Services;
+using EpicurApp_API.Data;
 
 WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 
@@ -22,6 +23,7 @@ builder.Services.AddScoped<IMenuService, MenuService>();
 builder.Services.AddControllers().AddJsonOptions(options =>
 {
     options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
+    options.JsonSerializerOptions.PropertyNamingPolicy = null; // Utiliser PascalCase au lieu de camelCase
 });
 
 builder.Services.AddEndpointsApiExplorer();
@@ -43,7 +45,6 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
-    app.UseHttpsRedirection();
 }
 
 app.UseAuthorization();

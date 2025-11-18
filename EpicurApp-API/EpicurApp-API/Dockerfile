@@ -1,29 +1,26 @@
 
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 WORKDIR /app
-EXPOSE 8080
 EXPOSE 8081
 
 # Variables d'environnement pour les ports et l'environnement
 ENV ASPNETCORE_ENVIRONMENT=Production
-ENV ASPNETCORE_HTTP_PORTS=8080
-ENV ASPNETCORE_HTTPS_PORTS=8081
-ENV ASPNETCORE_URLS="https://*:8081;http://*:8080"
+ENV ASPNETCORE_HTTP_PORTS=8081
+ENV ASPNETCORE_URLS="http://*:8081"
 
-RUN mkdir -p /https && chown app:app /https && chown app:app /app
+RUN chown app:app /app
 USER app
 
 # Image pour la compilation
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet dev-certs https --trust
 WORKDIR /src
 
 # Copier les fichiers .csproj avec l'arborescence d'origine
 COPY ["EpicurApp-API/EpicurApp-API/EpicurApp-API.csproj", "EpicurApp-API/EpicurApp-API/"]
 COPY ["EpicurApp-API/EpicurAppLogic/EpicurAppLogic.csproj", "EpicurApp-API/EpicurAppLogic/"]
 # Copier le projet de partage
-COPY ["EpicurAPP-Partage/EpicurAPP-Partage/EpicurAPP-Partage.csproj", "EpicurAPP-Partage/EpicurAPP-Partage/"]
+COPY ["EpicurApp/EpicurAPP-Partage/EpicurAPP-Partage/EpicurAPP-Partage.csproj", "EpicurApp/EpicurAPP-Partage/EpicurAPP-Partage/"]
 
 # Restaurer les dépendances depuis l'API
 RUN dotnet restore "EpicurApp-API/EpicurApp-API/EpicurApp-API.csproj"
@@ -31,7 +28,7 @@ RUN dotnet restore "EpicurApp-API/EpicurApp-API/EpicurApp-API.csproj"
 # Copier tout le code source en conservant l'arborescence
 COPY ["EpicurApp-API/EpicurApp-API/", "EpicurApp-API/EpicurApp-API/"]
 COPY ["EpicurApp-API/EpicurAppLogic/", "EpicurApp-API/EpicurAppLogic/"]
-COPY ["EpicurAPP-Partage/EpicurAPP-Partage/", "EpicurAPP-Partage/EpicurAPP-Partage/"]
+COPY ["EpicurApp/EpicurAPP-Partage/EpicurAPP-Partage/", "EpicurApp/EpicurAPP-Partage/EpicurAPP-Partage/"]
 
 # Compiler le projet
 WORKDIR "/src/EpicurApp-API/EpicurApp-API"
@@ -46,8 +43,6 @@ RUN dotnet publish "EpicurApp-API.csproj" -c $BUILD_CONFIGURATION -o /app/publis
 # Image finale
 FROM base AS final
 WORKDIR /app
-ENV ASPNETCORE_Kestrel__Certificates__Default__Path="/https/thecertif.pfx"
-COPY --from=publish --chmod=555 --chown=app:app /root/.dotnet/corefx/cryptography/x509stores/my/* /https/thecertif.pfx
 COPY --from=publish --chown=app:app /app/publish .
 
 RUN chmod 664 /app/epicurapp.db || true

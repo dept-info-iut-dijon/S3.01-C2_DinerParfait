@@ -11,7 +11,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\EpicurAPP-Partage\EpicurAPP-Partage\EpicurAPP-Partage.csproj" />
+	  <ProjectReference Include="..\..\EpicurApp\EpicurAPP-Partage\EpicurAPP-Partage\EpicurAPP-Partage.csproj" />
   </ItemGroup>
 
 </Project>

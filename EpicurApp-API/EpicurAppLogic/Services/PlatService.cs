@@ -1,4 +1,4 @@
-﻿using EpicurApp_API.Models;
+﻿using EpicurAPP_Partage.Models;
 using EpicurAPP_Partage.Exceptions;
 using EpicurAppLogic.Interfaces;
 using System;

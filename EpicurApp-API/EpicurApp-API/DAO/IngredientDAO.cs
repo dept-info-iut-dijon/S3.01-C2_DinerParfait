@@ -10,11 +10,11 @@ namespace EpicurApp_API.DAO
     /// </summary>
     public class IngredientDAO : IIngredientDAO
     {
-        private readonly DatabaseConfiguration _dbConfig;
+        private readonly string _connectionString;
 
         public IngredientDAO(DatabaseConfiguration dbConfig)
         {
-            _dbConfig = dbConfig;
+            _connectionString = dbConfig.GetConnectionString();
         }
 
         /// <summary>
@@ -25,7 +25,7 @@ namespace EpicurApp_API.DAO
             List<Ingredient> ingredients = new List<Ingredient>();
             const string query = "SELECT Id, Nom, Description FROM Ingredients ORDER BY Nom;";
 
-            using (SqliteConnection connection = _dbConfig.CreateConnection())
+            using (SqliteConnection connection = new SqliteConnection(_connectionString))
             {
                 connection.Open();
 
@@ -56,7 +56,7 @@ namespace EpicurApp_API.DAO
         {
             const string query = "SELECT Id, Nom, Description FROM Ingredients WHERE Id = @Id;";
 
-            using (SqliteConnection connection = _dbConfig.CreateConnection())
+            using (SqliteConnection connection = new SqliteConnection(_connectionString))
             {
                 connection.Open();
 
@@ -97,7 +97,7 @@ namespace EpicurApp_API.DAO
                                   WHERE pi.PlatId = @PlatId
                                   ORDER BY i.Nom;";
 
-            using (SqliteConnection connection = _dbConfig.CreateConnection())
+            using (SqliteConnection connection = new SqliteConnection(_connectionString))
             {
                 connection.Open();
 
@@ -132,7 +132,7 @@ namespace EpicurApp_API.DAO
         {
             const string query = "INSERT INTO Ingredients (Nom, Description) VALUES (@Nom, @Description);";
 
-            using (SqliteConnection connection = _dbConfig.CreateConnection())
+            using (SqliteConnection connection = new SqliteConnection(_connectionString))
             {
                 connection.Open();
 
@@ -154,7 +154,7 @@ namespace EpicurApp_API.DAO
         /// </summary>
         public void AssocierIngredientsAuPlat(int platId, List<int> ingredientIds)
         {
-            using (SqliteConnection connection = _dbConfig.CreateConnection())
+            using (SqliteConnection connection = new SqliteConnection(_connectionString))
             {
                 connection.Open();
 

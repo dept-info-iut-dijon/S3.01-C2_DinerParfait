@@ -1,5 +1,4 @@
-﻿using EpicurApp_API.Models;
-using EpicurAppLogic.Interfaces;
+﻿using EpicurAppLogic.Interfaces;
 using EpicurAPP_Partage.Models;
 using Microsoft.Data.Sqlite;
 using EpicurApp_API.Configuration;

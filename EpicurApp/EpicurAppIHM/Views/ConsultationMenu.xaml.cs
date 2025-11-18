@@ -1,7 +1,4 @@
 ﻿using EpicurAPP_Partage.Models;
-using EpicurAppIHM.Services;
-using System;
-using System.Collections.Generic;
 using System.Net.Http.Json;
 using System.Windows;
 
@@ -11,6 +8,10 @@ namespace EpicurAppIHM.Views
     {
         private int _menuId;
 
+        /// <summary>
+        /// Intancie la fenetre avec les menus
+        /// </summary>
+        /// <param name="menuId">Le menu cible</param>
         public ConsultationMenu(int menuId)
         {
             InitializeComponent();
@@ -18,6 +19,10 @@ namespace EpicurAppIHM.Views
             ChargerMenu();
         }
 
+        /// <summary>
+        /// Charge les menus
+        /// </summary>
+        /// <exception cref="Exception">Erreur de chargement des menus</exception>
         private async void ChargerMenu()
         {
             try
@@ -57,7 +62,12 @@ namespace EpicurAppIHM.Views
             }
         }
 
-        // Méthode pour obtenir le nom d'un plat depuis la liste
+        /// <summary>
+        /// Obtient le nom d'un plat depuis la liste
+        /// </summary>
+        /// <param name="plats">plats disponibles</param>
+        /// <param name="platId">plat cible</param>
+        /// <returns>Nom du plat cible</returns>
         private string ObtenirNomPlat(List<Plat> plats, int? platId)
         {
             if (platId == null || plats == null)
@@ -67,6 +77,9 @@ namespace EpicurAppIHM.Views
             return plat?.Nom ?? "-";
         }
 
+        /// <summary>
+        /// Ferme la fenetre actuelle
+        /// </summary>
         private void Fermer_Click(object sender, RoutedEventArgs e)
         {
             this.Close();

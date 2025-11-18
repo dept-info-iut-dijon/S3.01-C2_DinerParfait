@@ -1,4 +1,4 @@
-﻿using EpicurApp_API.Models;
+﻿using EpicurAPP_Partage.Models;
 using Microsoft.Data.Sqlite;
 using System.Collections.Generic;
 using System;

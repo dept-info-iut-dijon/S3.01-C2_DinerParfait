@@ -1,22 +1,34 @@
 ﻿using EpicurAPP_Partage.Models;
-using System;
-using System.Collections.Generic;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Windows;
 using System.Windows.Controls;
-using EpicurAppIHM.Services;
 using MenuModel = EpicurAPP_Partage.Models.Menu;
 
 namespace EpicurAppIHM.Views
 {
+    /// <summary>
+    /// Fiche de création menu
+    /// </summary>
     public partial class CreationMenu : Window
     {
+        /// <summary>
+        /// Le client http de l'api
+        /// </summary>
         private HttpClient _httpClient;
+        /// <summary>
+        /// Liste des plats
+        /// </summary>
         private List<Plat> tousLesPlats;
+        /// <summary>
+        /// Id du brouillon du menu
+        /// </summary>
         private int? _menuBrouillonId;
 
+        /// <summary>
+        /// Intancie la fiche de creation menu
+        /// </summary>
         public CreationMenu()
         {
             InitializeComponent();
@@ -31,6 +43,10 @@ namespace EpicurAppIHM.Views
             btnValider.Click += ValiderMenu;
         }
 
+        /// <summary>
+        /// Charge les plats
+        /// </summary>
+        /// <exception cref="Exception">API introuvable par le client</exception>
         private void ChargerPlats()
         {
             try
@@ -51,10 +67,13 @@ namespace EpicurAppIHM.Views
             }
             catch
             {
-                MessageBox.Show("Impossible de contacter l'API.\nVérifiez qu'elle est bien lancée (ex: http://localhost:8080)", "Erreur de connexion", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show("Impossible de contacter l'API.\nVérifiez qu'elle est bien lancée (ex: https://localhost:8081)", "Erreur de connexion", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
+        /// <summary>
+        /// Remplit la combobox avec toutes les catégories de plats
+        /// </summary>
         private void RemplirComboBox()
         {
             ConfigurerComboBox(cmbAmuseGueule, "AmuseBouche");
@@ -66,12 +85,17 @@ namespace EpicurAppIHM.Views
             ConfigurerComboBox(cmbDessert, "Dessert");
         }
 
+        /// <summary>
+        /// Configure une ComboBox avec les plats d'une catégorie donnée
+        /// </summary>
+        /// <param name="comboBox">combobox cible</param>
+        /// <param name="categorieStr">catégorie du pla</param>
         private void ConfigurerComboBox(ComboBox comboBox, string categorieStr)
         {
             List<Plat> platsClasse = new List<Plat>();
 
             // Convertir la string en enum CategoriePlat
-            if (!Enum.TryParse<CategoriePlat>(categorie, out CategoriePlat categorieEnum))
+            if (!Enum.TryParse<CategoriePlat>(categorieStr, out CategoriePlat categorieEnum))
             {
                 return;
             }
@@ -92,24 +116,39 @@ namespace EpicurAppIHM.Views
             comboBox.SelectedIndex = -1;
         }
 
+        /// <summary>
+        /// Compare deux plats par leur nom
+        /// </summary>
+        /// <param name="p1">1er plat a comparer</param>
+        /// <param name="p2">2eme plat a comparer</param>
+        /// <returns>renvoie le plat qui est le plus "grand"</returns>
         private int ComparerPlatsParNom(Plat p1, Plat p2)
         {
-            if (p1 == null && p2 == null) return 0;
-            if (p1 == null) return -1;
-            if (p2 == null) return 1;
+            int res;
+            if (p1 == null && p2 == null) res = 0;
+            if (p1 == null) res = -1;
+            if (p2 == null) res = 1;
 
-            if (p1.Nom == null && p2.Nom == null) return 0;
-            if (p1.Nom == null) return -1;
-            if (p2.Nom == null) return 1;
+            if (p1.Nom == null && p2.Nom == null) res = 0;
+            if (p1.Nom == null) res = -1;
+            if (p2.Nom == null) res = 1;
 
-            return p1.Nom.CompareTo(p2.Nom);
+            res = p1.Nom.CompareTo(p2.Nom);
+            return res;
         }
 
+        /// <summary>
+        /// Réinitialise la sélection des plats
+        /// </summary>
         private void Annuler(object sender, RoutedEventArgs e)
         {
             ReinitialiserSelection();
         }
 
+        /// <summary>
+        /// vérifie qu'au moins un plat est sélectionné
+        /// </summary>
+        /// <returns>True si au moins un plat est selectionnée sinon faux</returns>
         private bool ValidationMenu()
         {
             if (cmbAmuseGueule.SelectedItem == null &&
@@ -127,11 +166,17 @@ namespace EpicurAppIHM.Views
             return true;
         }
 
+        /// <summary>
+        /// Enregistre le brouillon du menu
+        /// </summary>
         private void EnregistrerBrouillon(object sender, RoutedEventArgs e)
         {
             EnregistrerMenu("Brouillon", false);
         }
 
+        /// <summary>
+        /// Valide le menu
+        /// </summary>
         private void ValiderMenu(object sender, RoutedEventArgs e)
         {
             if (!ValidationMenu())
@@ -140,6 +185,9 @@ namespace EpicurAppIHM.Views
             EnregistrerMenu("Validé", true);
         }
 
+        /// <summary>
+        /// Charge le brouillon du menu
+        /// </summary>
         private void ChargerBrouillon()
         {
             try
@@ -178,6 +226,12 @@ namespace EpicurAppIHM.Views
             }
         }
 
+        /// <summary>
+        /// Enregistre le menu 
+        /// </summary>
+        /// <param name="statut">menu brouillon ou validé</param>
+        /// <param name="estValidation">Si le menu va etre enregistré en mode validé</param>
+        /// <exception cref="Exception">Erreur lors de l'enregistrement</exception>
         private void EnregistrerMenu(string statut, bool estValidation)
         {
             btnAnnuler.IsEnabled = false;
@@ -286,6 +340,11 @@ namespace EpicurAppIHM.Views
             }
         }
 
+        /// <summary>
+        /// Construit un menu à partir des sélections de l'utilisateur
+        /// </summary>
+        /// <param name="statut">si le menu est validé ou brouillon</param>
+        /// <returns></returns>
         private MenuModel ConstruireMenu(string statut)
         {
             MenuModel menu = new MenuModel();
@@ -305,11 +364,21 @@ namespace EpicurAppIHM.Views
             return menu;
         }
 
+        /// <summary>
+        /// Obtient le plat sélectionné dans une ComboBox
+        /// </summary>
+        /// <param name="comboBox">Combobox cible</param>
+        /// <returns></returns>
         private static Plat? ObtenirPlatSelectionne(ComboBox comboBox)
         {
             return comboBox.SelectedItem as Plat;
         }
 
+        /// <summary>
+        /// Obtient la valeur sélectionnée dans une ComboBox
+        /// </summary>
+        /// <param name="comboBox">combobox cible</param>
+        /// <returns></returns>
         private static int? ObtenirValeurSelectionnee(ComboBox comboBox)
         {
             if (comboBox.SelectedValue == null)
@@ -330,6 +399,9 @@ namespace EpicurAppIHM.Views
             return null;
         }
 
+        /// <summary>
+        /// Reinitialise la sélection des plats
+        /// </summary>
         private void ReinitialiserSelection()
         {
             cmbAmuseGueule.SelectedIndex = -1;

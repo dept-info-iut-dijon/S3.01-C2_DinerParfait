@@ -1,10 +1,17 @@
 using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Configuration;
 
-namespace EpicurApp_API.DAO
+namespace EpicurApp_API.Data
 {
+    /// <summary>
+    /// Classe responsable de l'initialisation de la base de données.
+    /// </summary>
     public static class DatabaseInitializer
     {
+        /// <summary>
+        /// Initialise la base de données en créant les tables nécessaires et en insérant des données initiales.
+        /// </summary>
+        /// <param name="configuration">Configuration de la db</param>
         public static void Initialize(IConfiguration configuration)
         {
             var connectionString = configuration.GetConnectionString("DefaultConnection")
@@ -44,6 +51,14 @@ namespace EpicurApp_API.DAO
                         FOREIGN KEY (AllergeneId) REFERENCES Allergenes(Id) ON DELETE CASCADE
                     );";
 
+                // Table Ingredients
+                var createIngredientsTable = @"
+                    CREATE TABLE IF NOT EXISTS Ingredients (
+                        Id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        Nom TEXT NOT NULL,
+                        Description TEXT
+                    );";
+
                 // Table Plats
                 var createPlatsTable = @"
                     CREATE TABLE IF NOT EXISTS Plats (
@@ -51,6 +66,16 @@ namespace EpicurApp_API.DAO
                         Nom TEXT NOT NULL,
                         Categorie TEXT NOT NULL,
                         IngredientsPrincipaux TEXT
+                    );";
+
+                // Table de liaison PlatIngredient
+                var createPlatIngredientTable = @"
+                    CREATE TABLE IF NOT EXISTS PlatIngredient (
+                        PlatId INTEGER NOT NULL,
+                        IngredientId INTEGER NOT NULL,
+                        PRIMARY KEY (PlatId, IngredientId),
+                        FOREIGN KEY (PlatId) REFERENCES Plats(Id) ON DELETE CASCADE,
+                        FOREIGN KEY (IngredientId) REFERENCES Ingredients(Id) ON DELETE CASCADE
                     );";
 
                 // Table Menus
@@ -101,6 +126,9 @@ namespace EpicurApp_API.DAO
                     command.CommandText = createAllergenesTable;
                     command.ExecuteNonQuery();
 
+                    command.CommandText = createIngredientsTable;
+                    command.ExecuteNonQuery();
+
                     command.CommandText = createClientsTable;
                     command.ExecuteNonQuery();
 
@@ -108,6 +136,9 @@ namespace EpicurApp_API.DAO
                     command.ExecuteNonQuery();
 
                     command.CommandText = createPlatsTable;
+                    command.ExecuteNonQuery();
+
+                    command.CommandText = createPlatIngredientTable;
                     command.ExecuteNonQuery();
 
                     command.CommandText = createMenusTable;
@@ -121,12 +152,17 @@ namespace EpicurApp_API.DAO
                 }
 
                 SeedAllergenes(connection);
+                SeedIngredients(connection);
                 SeedPlats(connection);
                 SeedClients(connection);
                 SeedMenus(connection);
             }
         }
 
+        /// <summary>
+        /// Méthode pour insérer des allergènes prédéfinis dans la table Allergenes.
+        /// </summary>
+        /// <param name="connection">connexion a la db</param>
         private static void SeedAllergenes(SqliteConnection connection)
         {
             using (var transaction = connection.BeginTransaction())
@@ -176,6 +212,82 @@ namespace EpicurApp_API.DAO
             }
         }
 
+        /// <summary>
+        /// Méthode pour insérer des ingrédients prédéfinis dans la table Ingredients.
+        /// </summary>
+        /// <param name="connection">connexion a la db</param>
+        private static void SeedIngredients(SqliteConnection connection)
+        {
+            using (var transaction = connection.BeginTransaction())
+            {
+                using (var countCommand = new SqliteCommand("SELECT COUNT(*) FROM Ingredients;", connection, transaction))
+                {
+                    long count = (long)(countCommand.ExecuteScalar() ?? 0);
+                    if (count > 0)
+                    {
+                        transaction.Commit();
+                        return;
+                    }
+                }
+
+                var ingredients = new (string Nom, string Description)[]
+                {
+                    ("Tomates", "Tomates fraîches"),
+                    ("Basilic", "Herbe aromatique"),
+                    ("Huile d'olive", "Huile végétale"),
+                    ("Saumon fumé", "Poisson fumé"),
+                    ("Avocat", "Fruit exotique"),
+                    ("Citron vert", "Agrume"),
+                    ("Prosecco", "Vin pétillant italien"),
+                    ("Aperol", "Apéritif italien"),
+                    ("Eau pétillante", "Boisson gazeuse"),
+                    ("Framboise", "Fruit rouge"),
+                    ("Myrtille", "Fruit rouge"),
+                    ("Citron", "Agrume"),
+                    ("Potiron", "Légume d'automne"),
+                    ("Crème fraîche", "Produit laitier"),
+                    ("Muscade", "Épice"),
+                    ("Dorade", "Poisson blanc"),
+                    ("Agrumes", "Fruits"),
+                    ("Ciboulette", "Herbe aromatique"),
+                    ("Magret de canard", "Viande"),
+                    ("Miel", "Produit sucré"),
+                    ("Romarin", "Herbe aromatique"),
+                    ("Riz arborio", "Céréale"),
+                    ("Cèpes", "Champignons"),
+                    ("Parmesan", "Fromage italien"),
+                    ("Comté", "Fromage français"),
+                    ("Brie", "Fromage français"),
+                    ("Roquefort", "Fromage bleu"),
+                    ("Chèvre", "Fromage de chèvre"),
+                    ("Miel d'acacia", "Miel doux"),
+                    ("Noix", "Fruit à coque"),
+                    ("Meringue italienne", "Préparation sucrée"),
+                    ("Chocolat noir", "Cacao"),
+                    ("Crème", "Produit laitier"),
+                    ("Œufs", "Produit animal")
+                };
+
+                using (var insertCommand = new SqliteCommand("INSERT INTO Ingredients (Nom, Description) VALUES (@Nom, @Description);", connection, transaction))
+                {
+                    insertCommand.Parameters.Add(new SqliteParameter("@Nom", SqliteType.Text));
+                    insertCommand.Parameters.Add(new SqliteParameter("@Description", SqliteType.Text));
+
+                    foreach (var ingredient in ingredients)
+                    {
+                        insertCommand.Parameters["@Nom"].Value = ingredient.Nom;
+                        insertCommand.Parameters["@Description"].Value = ingredient.Description;
+                        insertCommand.ExecuteNonQuery();
+                    }
+                }
+
+                transaction.Commit();
+            }
+        }
+        /// <summary>
+        /// Méthode pour insérer des plats prédéfinis dans la table Plats.
+        /// </summary>
+        /// <param name="connection">connexion a la db</param>
         private static void SeedPlats(SqliteConnection connection)
         {
             using (var transaction = connection.BeginTransaction())
@@ -227,6 +339,10 @@ namespace EpicurApp_API.DAO
             }
         }
 
+        /// <summary>
+        /// Méthode pour insérer des clients prédéfinis dans la table Clients.
+        /// </summary>
+        /// <param name="connection">connexion a la db</param>
         private static void SeedClients(SqliteConnection connection)
         {
             using (var transaction = connection.BeginTransaction())
@@ -302,6 +418,10 @@ namespace EpicurApp_API.DAO
             }
         }
 
+        /// <summary>
+        /// Méthode pour insérer des menus prédéfinis dans la table Menus.
+        /// </summary>
+        /// <param name="connection">connexion a la db</param>
         private static void SeedMenus(SqliteConnection connection)
         {
             using (var transaction = connection.BeginTransaction())
@@ -344,13 +464,13 @@ namespace EpicurApp_API.DAO
                         insertCommand.Parameters["@Nom"].Value = menu.Nom;
                         insertCommand.Parameters["@Date"].Value = menu.Date;
                         insertCommand.Parameters["@Statut"].Value = menu.Statut;
-                        insertCommand.Parameters["@AmuseBoucheId"].Value = menu.AmuseBoucheId.HasValue ? (object)menu.AmuseBoucheId.Value : DBNull.Value;
-                        insertCommand.Parameters["@BoissonAperitifId"].Value = menu.BoissonId.HasValue ? (object)menu.BoissonId.Value : DBNull.Value;
-                        insertCommand.Parameters["@EntreeId"].Value = menu.EntreeId.HasValue ? (object)menu.EntreeId.Value : DBNull.Value;
-                        insertCommand.Parameters["@PlatPrincipalId"].Value = menu.PlatId.HasValue ? (object)menu.PlatId.Value : DBNull.Value;
-                        insertCommand.Parameters["@VinId"].Value = menu.VinId.HasValue ? (object)menu.VinId.Value : DBNull.Value;
-                        insertCommand.Parameters["@FromageId"].Value = menu.FromageId.HasValue ? (object)menu.FromageId.Value : DBNull.Value;
-                        insertCommand.Parameters["@DessertId"].Value = menu.DessertId.HasValue ? (object)menu.DessertId.Value : DBNull.Value;
+                        insertCommand.Parameters["@AmuseBoucheId"].Value = menu.AmuseBoucheId.HasValue ? menu.AmuseBoucheId.Value : DBNull.Value;
+                        insertCommand.Parameters["@BoissonAperitifId"].Value = menu.BoissonId.HasValue ? menu.BoissonId.Value : DBNull.Value;
+                        insertCommand.Parameters["@EntreeId"].Value = menu.EntreeId.HasValue ? menu.EntreeId.Value : DBNull.Value;
+                        insertCommand.Parameters["@PlatPrincipalId"].Value = menu.PlatId.HasValue ? menu.PlatId.Value : DBNull.Value;
+                        insertCommand.Parameters["@VinId"].Value = menu.VinId.HasValue ? menu.VinId.Value : DBNull.Value;
+                        insertCommand.Parameters["@FromageId"].Value = menu.FromageId.HasValue ? menu.FromageId.Value : DBNull.Value;
+                        insertCommand.Parameters["@DessertId"].Value = menu.DessertId.HasValue ? menu.DessertId.Value : DBNull.Value;
                         insertCommand.ExecuteNonQuery();
                     }
                 }

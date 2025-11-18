@@ -1,6 +1,4 @@
-﻿using EpicurApp_API.Models;
-
-namespace EpicurAPP_Partage.Models
+﻿namespace EpicurAPP_Partage.Models
 {
     /// <summary>
     /// Représente un menu composé de plusieurs plats.
