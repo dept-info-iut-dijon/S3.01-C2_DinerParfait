@@ -154,6 +154,7 @@ namespace EpicurAppIHM.Views
             txtPreferences.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#3a3a3a"));
 
             btnCreer.Visibility = Visibility.Collapsed;
+            btnHistorique.Visibility = Visibility.Visible; // Afficher le bouton Historique
             btnAnnuler.Content = "Fermer";
             btnAnnuler.Width = 180;
         }
@@ -347,6 +348,18 @@ namespace EpicurAppIHM.Views
                 btnCreer.IsEnabled = true;
                 btnCreer.Content = "Créer le client";
             }
+        }
+
+        /// <summary>
+        /// Ouvre la fenêtre d'historique des repas pour ce client
+        /// </summary>
+        private void VoirHistorique(object sender, RoutedEventArgs e)
+        {
+            if (!_clientId.HasValue) return;
+
+            string nomComplet = $"{txtPrenom.Text} {txtNom.Text}";
+            HistoriqueRepas fenetreHistorique = new HistoriqueRepas(_clientId.Value, nomComplet);
+            fenetreHistorique.ShowDialog();
         }
     }
 }
