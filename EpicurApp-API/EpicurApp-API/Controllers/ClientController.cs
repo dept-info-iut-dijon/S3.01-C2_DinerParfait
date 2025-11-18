@@ -102,6 +102,36 @@ public class ClientController : ControllerBase
         }
     }
 
+
+    /// <summary>
+    /// Modifie un client existant.
+    /// </summary>
+    /// <param name="id">Id du client</param>
+    /// <param name="client">Données modifiées</param>
+    /// <returns>Client modifié</returns>
+    [HttpPut("{id}")]
+    public IActionResult ModifierClient(int id, [FromBody] Client client)
+    {
+        try
+        {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+
+            _clientService.ModifierClient(client);
+            return Ok(client);
+        }
+        catch (InvalidFieldException ex)
+        {
+            return BadRequest(ex.Message);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, "Erreur lors de la modification : " + ex.Message);
+        }
+    }
+
     /// <summary>
     /// Associe une liste d'allergènes à un client.
     /// </summary>

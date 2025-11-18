@@ -198,7 +198,9 @@ namespace EpicurApp_API.DAO
             using (var connection = new SqliteConnection(_connectionString))
             {
                 connection.Open();
-                string deleteAllergies = "DELETE FROM ClientAllergene WHERE ClientId = @Id";    //Supprimer les liens avec les allergenes
+
+                //Supprimer les liens avec les allergenes
+                string deleteAllergies = "DELETE FROM ClientAllergene WHERE ClientId = @Id";
                 using (var cmd1 = new SqliteCommand(deleteAllergies, connection))
                 {
                     cmd1.Parameters.AddWithValue("@Id", id);

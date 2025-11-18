@@ -12,7 +12,7 @@ namespace EpicurAppIHM.Views
         /// </summary>
         public MainWindow()
         {
-            InitializeComponent();
+            InitializeComponent();  
         }
     }
 }

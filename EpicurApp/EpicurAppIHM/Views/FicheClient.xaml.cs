@@ -24,41 +24,28 @@ namespace EpicurAppIHM.Views
         /// L'ID du client en consultation/modification
         /// </summary>
         private int? _clientId;
-        /// <summary>
-        /// Indique si la fiche est en mode consultation (lecture seule)
-        /// </summary>
-        private bool _modeConsultation;
+        private bool _modeModification;
 
-        /// <summary>
-        /// instance la fenetre de fiche client en mode création
-        /// </summary>
         public FicheClient()
         {
             InitializeComponent();
             _httpClient = App.ApiClient.HttpClient;
-            _modeConsultation = false;
+            _modeModification = false;
             ChargerAllergenes();
         }
 
-        /// <summary>
-        /// Instance la fenetre de fiche client en mode consultation
-        /// </summary>
-        /// <param name="clientId">client cible</param>
-        /// <param name="modeConsultation">mode de lecture seule</param>
         public FicheClient(int clientId, bool modeConsultation = true)
         {
             InitializeComponent();
             _httpClient = App.ApiClient.HttpClient;
             _clientId = clientId;
-            _modeConsultation = modeConsultation;
+            _modeModification = true;
+
+            this.Title = "Modification Fiche Client";
+            btnCreer.Content = "Modifier";
 
             ChargerAllergenes();
             ChargerClient();
-
-            if (_modeConsultation)
-            {
-                ConfigurerModeConsultation();
-            }
         }
 
         /// <summary>
@@ -70,7 +57,6 @@ namespace EpicurAppIHM.Views
             try
             {
                 allergenes = await _httpClient.GetFromJsonAsync<List<Allergene>>("Allergenes");
-
                 allergenes.Insert(0, new Allergene { Id = -1, Nom = "Aucun", Description = "" });
 
                 cmbAllergenes.ItemsSource = allergenes;
@@ -83,10 +69,7 @@ namespace EpicurAppIHM.Views
             }
         }
 
-        /// <summary>
-        /// Charge les données du client depuis l'API
-        /// </summary>
-        /// <exception cref="Exception">erreur de chargement du client</exception>
+
         private async void ChargerClient()
         {
             if (!_clientId.HasValue) return;
@@ -112,16 +95,14 @@ namespace EpicurAppIHM.Views
                     : string.Empty;
                 txtPreferences.Text = client.Preferences;
 
-              
-
                 if (client.Allergenes != null && client.Allergenes.Count > 0)
                 {
-                    cmbAllergenes.ItemsSource = client.Allergenes;
-                    cmbAllergenes.SelectedIndex = 0; 
-                }
-                else
-                {
-                    cmbAllergenes.ItemsSource = null;
+                    var allergeneClient = client.Allergenes.First();
+                    var allergeneItem = allergenes.FirstOrDefault(a => a.Id == allergeneClient.Id);
+                    if (allergeneItem != null)
+                    {
+                        cmbAllergenes.SelectedItem = allergeneItem;
+                    }
                 }
             }
             catch (Exception ex)
@@ -132,9 +113,8 @@ namespace EpicurAppIHM.Views
             }
         }
 
-        /// <summary>
-        /// Configure la fenêtre en mode consultation (lecture seule)
-        /// </summary>
+
+
         private void ConfigurerModeConsultation()
         {
             this.Title = "Consultation Client";
@@ -159,12 +139,8 @@ namespace EpicurAppIHM.Views
             btnSupprimer.Visibility = Visibility.Visible;       //Affiche le bouton "Supprimer"
         }
 
-        /// <summary>
-        /// Validation du prénom
-        /// </summary>
         private void ValiderPrenom(object sender, RoutedEventArgs e)
         {
-            if (_modeConsultation) return;
             string prenom = txtPrenom.Text.Trim();
             if (!string.IsNullOrEmpty(prenom) && !Regex.IsMatch(prenom, @"^[a-zA-ZÀ-ÿ\s'-]+$"))
             {
@@ -185,7 +161,6 @@ namespace EpicurAppIHM.Views
         /// <param name="e"></param>
         private void ValiderNom(object sender, RoutedEventArgs e)
         {
-            if (_modeConsultation) return;
             string nom = txtNom.Text.Trim();
             if (!string.IsNullOrEmpty(nom) && !Regex.IsMatch(nom, @"^[a-zA-ZÀ-ÿ\s'-]+$"))
             {
@@ -204,7 +179,6 @@ namespace EpicurAppIHM.Views
         /// </summary>
         private void ValiderEmail(object sender, RoutedEventArgs e)
         {
-            if (_modeConsultation) return;
             string email = txtEmail.Text.Trim();
             if (!string.IsNullOrEmpty(email) && !Regex.IsMatch(email, @"^[^@\s]+@[^@\s]+\.[^@\s]+$"))
             {
@@ -223,7 +197,6 @@ namespace EpicurAppIHM.Views
         /// </summary>
         private void ValiderTelephone(object sender, RoutedEventArgs e)
         {
-            if (_modeConsultation) return;
             string telephone = txtTelephone.Text.Trim().Replace(" ", "").Replace("-", "");
             if (!string.IsNullOrEmpty(telephone) && !Regex.IsMatch(telephone, @"^0[1-9]\d{8}$"))
             {
@@ -256,24 +229,7 @@ namespace EpicurAppIHM.Views
         /// </summary>
         private void Annuler(object sender, RoutedEventArgs e)
         {
-            if (_modeConsultation) { this.Close(); return; }
-
-            txtPrenom.Clear();
-            txtNom.Clear();
-            txtEmail.Clear();
-            txtTelephone.Clear();
-            txtPlatsNonApprecies.Clear();
-            txtPreferences.Clear();
-
-            borderPrenom.BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#D4AF37"));
-            borderNom.BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#D4AF37"));
-            borderEmail.BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#D4AF37"));
-            borderTelephone.BorderBrush = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#D4AF37"));
-
-            erreurPrenom.Visibility = Visibility.Collapsed;
-            erreurNom.Visibility = Visibility.Collapsed;
-            erreurEmail.Visibility = Visibility.Collapsed;
-            erreurTelephone.Visibility = Visibility.Collapsed;
+            this.Close();
         }
 
         /// <summary>
@@ -292,8 +248,73 @@ namespace EpicurAppIHM.Views
                 return;
             }
 
-            btnCreer.IsEnabled = false;
-            btnCreer.Content = "Création en cours...";
+            // MODE MODIFICATION
+            if (_modeModification)
+            {
+                var confirmation = MessageBox.Show("Voulez-vous enregistrer les modifications ?",
+                                                 "Confirmation", MessageBoxButton.YesNo, MessageBoxImage.Question);
+
+                if (confirmation != MessageBoxResult.Yes)
+                    return;
+
+                btnCreer.IsEnabled = false;
+                btnCreer.Content = "Modification en cours...";
+
+                try
+                {
+                    Client clientModifie = new Client
+                    {
+                        Id = _clientId.Value,
+                        Nom = txtNom.Text.Trim(),
+                        Prenom = txtPrenom.Text.Trim(),
+                        Telephone = txtTelephone.Text.Trim().Replace(" ", "").Replace("-", ""),
+                        Email = txtEmail.Text.Trim(),
+                        //PlatsNonApprecies = txtPlatsNonApprecies.Text.Trim(),
+                        Preferences = txtPreferences.Text.Trim()
+                    };
+
+                    HttpResponseMessage response = await _httpClient.PutAsJsonAsync($"Client/{_clientId.Value}", clientModifie);
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        int? allergeneIdSelectionne = (cmbAllergenes.SelectedItem as Allergene)?.Id;
+
+                        if (allergeneIdSelectionne.HasValue && allergeneIdSelectionne.Value != -1)
+                        {
+                            await _httpClient.PostAsJsonAsync($"Client/{_clientId.Value}/allergenes", new List<int> { allergeneIdSelectionne.Value });
+                        }
+
+                        MessageBox.Show("Modifications enregistrées",
+                                        "Succès", MessageBoxButton.OK, MessageBoxImage.Information);
+                        this.DialogResult = true;
+                        this.Close();
+                    }
+                    else
+                    {
+                        string errorContent = await response.Content.ReadAsStringAsync();
+                        MessageBox.Show($"Erreur : {errorContent}", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
+                }
+                catch (HttpRequestException)
+                {
+                    MessageBox.Show("Impossible de contacter l'API.\nVérifiez qu'elle est bien lancée",
+                                    "Erreur de connexion", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Erreur : {ex.Message}", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+                finally
+                {
+                    btnCreer.IsEnabled = true;
+                    btnCreer.Content = "Modifier";
+                }
+            }
+            // MODE CRÉATION
+            else
+            {
+                btnCreer.IsEnabled = false;
+                btnCreer.Content = "Création en cours...";
 
             try
             {
@@ -303,50 +324,48 @@ namespace EpicurAppIHM.Views
                     Prenom = txtPrenom.Text.Trim(),
                     Telephone = txtTelephone.Text.Trim().Replace(" ", "").Replace("-", ""),
                     Email = txtEmail.Text.Trim(),
-                    // PlatsNonApprecies est maintenant List<Plat>, initialisé à vide
-                    // Le texte libre sera stocké dans Preferences pour le moment
-                    PlatsNonApprecies = new List<Plat>(),
-                    Preferences = txtPreferences.Text.Trim() +
-                        (string.IsNullOrWhiteSpace(txtPlatsNonApprecies.Text) ? "" : "\nPlats non appréciés: " + txtPlatsNonApprecies.Text.Trim())
+                    //PlatsNonApprecies = txtPlatsNonApprecies.Text.Trim(),
+                    Preferences = txtPreferences.Text.Trim()
                 };
 
-                HttpResponseMessage response = await _httpClient.PostAsJsonAsync("Client", client);
+                    HttpResponseMessage response = await _httpClient.PostAsJsonAsync("Client", client);
 
-                if (response.IsSuccessStatusCode)
-                {
-                    Client clientCree = await response.Content.ReadFromJsonAsync<Client>();
-
-                    int? allergeneIdSelectionne = (cmbAllergenes.SelectedItem as Allergene)?.Id;
-
-                    if (allergeneIdSelectionne.HasValue && clientCree != null)
+                    if (response.IsSuccessStatusCode)
                     {
-                        await _httpClient.PostAsJsonAsync($"Client/{clientCree.Id}/allergenes", new List<int> { allergeneIdSelectionne.Value });
-                    }
+                        Client clientCree = await response.Content.ReadFromJsonAsync<Client>();
 
-                    MessageBox.Show($"Client {client.Prenom} {client.Nom} créé avec succès !",
-                                    "Succès", MessageBoxButton.OK, MessageBoxImage.Information);
-                    this.DialogResult = true;
-                    this.Close();
+                        int? allergeneIdSelectionne = (cmbAllergenes.SelectedItem as Allergene)?.Id;
+
+                        if (allergeneIdSelectionne.HasValue && allergeneIdSelectionne.Value != -1 && clientCree != null)
+                        {
+                            await _httpClient.PostAsJsonAsync($"Client/{clientCree.Id}/allergenes", new List<int> { allergeneIdSelectionne.Value });
+                        }
+
+                        MessageBox.Show($"Client {client.Prenom} {client.Nom} créé avec succès !",
+                                        "Succès", MessageBoxButton.OK, MessageBoxImage.Information);
+                        this.DialogResult = true;
+                        this.Close();
+                    }
+                    else
+                    {
+                        string errorContent = await response.Content.ReadAsStringAsync();
+                        MessageBox.Show($"Erreur : {errorContent}", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
+                    }
                 }
-                else
+                catch (HttpRequestException)
                 {
-                    string errorContent = await response.Content.ReadAsStringAsync();
-                    MessageBox.Show($"Erreur : {errorContent}", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show("Impossible de contacter l'API.\nVérifiez qu'elle est bien lancée",
+                                    "Erreur de connexion", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
-            }
-            catch (HttpRequestException)
-            {
-                MessageBox.Show("Impossible de contacter l'API.\nVérifiez qu'elle est bien lancée",
-                                "Erreur de connexion", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Erreur : {ex.Message}", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
-            }
-            finally
-            {
-                btnCreer.IsEnabled = true;
-                btnCreer.Content = "Créer le client";
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Erreur : {ex.Message}", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+                finally
+                {
+                    btnCreer.IsEnabled = true;
+                    btnCreer.Content = "Créer le client";
+                }
             }
         }
 

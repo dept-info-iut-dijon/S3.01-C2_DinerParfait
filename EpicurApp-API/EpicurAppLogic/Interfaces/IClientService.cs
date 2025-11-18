@@ -23,5 +23,6 @@ namespace EpicurAppLogic.Interfaces
         /// </summary>
         /// <param name="id">L'ID du client à supprimer.</param>
         void Delete(int id);
+        void ModifierClient(Client client);
     }
 }
