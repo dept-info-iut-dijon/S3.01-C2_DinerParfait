@@ -56,7 +56,10 @@
 
 
         <!-- Boutons Nouveau Client et supprimer client -->
-        <!-- A faire-->
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,15">
+            <Button x:Name="btnNouveauClient" Content="+ Nouveau Client" Width="200" Background="#D4AF37" Foreground="White" Style="{StaticResource EpicurAppButtonStyle}" Click="NouveauClient_Click"/>
+            <Button x:Name="btnSupprimerClient" Content="Supprimer le client sélectionné" Width="240" Margin="10,0,0,0" Background="#EF4444" Foreground="White" Style="{StaticResource EpicurAppButtonStyle}" Click="SupprimerClient_Click"/>
+        </StackPanel>
 
 
         <!-- DataGrid des clients -->
