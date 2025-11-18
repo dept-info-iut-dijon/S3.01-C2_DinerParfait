@@ -88,7 +88,7 @@ namespace EpicurAppLogic.Services
             }
             catch (Exception ex)
             {
-                throw new ApplicationException("Erreur lors de la suppression dans le service.", ex);
+                throw new ApplicationException($"Erreur service : {ex.Message}", ex);
             }
         }
 

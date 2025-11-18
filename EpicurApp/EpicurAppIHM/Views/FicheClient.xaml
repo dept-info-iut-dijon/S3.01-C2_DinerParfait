@@ -116,8 +116,7 @@
             </ScrollViewer>
 
             <!-- Boutons -->
-            <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Center" 
-                       Margin="0,20,0,0">
+            <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,20,0,0">
                 <Button x:Name="btnAnnuler" Content="Annuler" Width="130" Height="45" 
                        Margin="0,0,15,0" Background="Transparent" Foreground="#D4AF37" 
                        BorderBrush="#D4AF37" BorderThickness="2" FontSize="15" 
@@ -125,6 +124,7 @@
                 <Button x:Name="btnCreer" Content="Créer le client" Width="180" Height="45"
                        Background="#D4AF37" Foreground="#1a1a1a" BorderThickness="0"
                        FontSize="15" FontWeight="Bold" Cursor="Hand" Click="CreerClient"/>
+                <Button x:Name="btnSupprimer" Content="Supprimer" Width="130" Height="45" Margin="15,0,15,0" Background="#EF4444" Foreground="White" BorderThickness="0" FontSize="15" FontWeight="Bold" Cursor="Hand" Visibility="Collapsed" Click="SupprimerClient"/>
             </StackPanel>
         </Grid>
     </Border>

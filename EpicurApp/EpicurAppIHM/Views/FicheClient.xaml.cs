@@ -153,9 +153,10 @@ namespace EpicurAppIHM.Views
             txtPlatsNonApprecies.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#3a3a3a"));
             txtPreferences.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#3a3a3a"));
 
-            btnCreer.Visibility = Visibility.Collapsed;
-            btnAnnuler.Content = "Fermer";
+            btnCreer.Visibility = Visibility.Collapsed;     //Cache le bouton créer
+            btnAnnuler.Content = "Fermer";  
             btnAnnuler.Width = 180;
+            btnSupprimer.Visibility = Visibility.Visible;       //Affiche le bouton "Supprimer"
         }
 
         /// <summary>
@@ -346,6 +347,43 @@ namespace EpicurAppIHM.Views
             {
                 btnCreer.IsEnabled = true;
                 btnCreer.Content = "Créer le client";
+            }
+        }
+
+        /// <summary>
+        /// Supprime le client actuel
+        /// </summary>
+        private async void SupprimerClient(object sender, RoutedEventArgs e)
+        {
+            if (!_clientId.HasValue) return;
+
+            //Confirmation de suppressio,
+            var result = MessageBox.Show($"Êtes-vous sûr de vouloir supprimer ce client ({txtPrenom.Text} {txtNom.Text}) ?","Confirmation de suppression", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+
+            if (result == MessageBoxResult.No) return;
+
+            //Appel API
+            try
+            {
+                var response = await _httpClient.DeleteAsync($"Client/{_clientId}");
+
+                if (response.IsSuccessStatusCode)
+                {
+                    MessageBox.Show("Client supprimé avec succès.", "Succès", MessageBoxButton.OK, MessageBoxImage.Information);
+
+                    // Ferme la fenêtre et renvoie un résultat positif
+                    this.DialogResult = true;
+                    this.Close();
+                }
+                else
+                {
+                    string error = await response.Content.ReadAsStringAsync();
+                    MessageBox.Show($"Erreur lors de la suppression : {error}", "Erreur API", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erreur technique : {ex.Message}", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
     }

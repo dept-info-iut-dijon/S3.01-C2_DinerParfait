@@ -195,15 +195,30 @@ namespace EpicurApp_API.DAO
         /// <param name="id">Identifiant du client à supprimer.</param>
         public void SupprimerClient(int id)
         {
-            const string query = "DELETE FROM Clients WHERE Id = @Id;";
-
             using (var connection = new SqliteConnection(_connectionString))
             {
                 connection.Open();
-                using (var command = new SqliteCommand(query, connection))
+                string deleteAllergies = "DELETE FROM ClientAllergene WHERE ClientId = @Id";    //Supprimer les liens avec les allergenes
+                using (var cmd1 = new SqliteCommand(deleteAllergies, connection))
                 {
-                    command.Parameters.AddWithValue("@Id", id);
-                    command.ExecuteNonQuery();
+                    cmd1.Parameters.AddWithValue("@Id", id);
+                    cmd1.ExecuteNonQuery();
+                }
+
+                //Supprimer les liens avec les menus
+                string deleteMenus = "DELETE FROM ClientMenu WHERE ClientId = @Id";
+                using (var cmd2 = new SqliteCommand(deleteMenus, connection))
+                {
+                    cmd2.Parameters.AddWithValue("@Id", id);
+                    cmd2.ExecuteNonQuery();
+                }
+
+                //Supprimer le client
+                string deleteClient = "DELETE FROM Clients WHERE Id = @Id;";
+                using (var cmd3 = new SqliteCommand(deleteClient, connection))
+                {
+                    cmd3.Parameters.AddWithValue("@Id", id);
+                    cmd3.ExecuteNonQuery();
                 }
             }
         }
