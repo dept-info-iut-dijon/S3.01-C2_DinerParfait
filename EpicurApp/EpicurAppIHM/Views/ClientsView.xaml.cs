@@ -26,15 +26,9 @@ namespace EpicurAppIHM.Views
         {
             InitializeComponent();
 
-            var handler = new HttpClientHandler
-            {
-                ServerCertificateCustomValidationCallback = HttpClientHandler.DangerousAcceptAnyServerCertificateValidator
-            };
-
-            _httpClient = new HttpClient(handler)
-            {
-                BaseAddress = new Uri("https://localhost:7068/")
-            };
+            // Utilisation du service ApiClient centralisé
+            _httpClient = App.ApiClient.HttpClient;
+            
             DataGridClients.ItemsSource = Clients;
             ChargerClients();
         }
@@ -119,7 +113,7 @@ namespace EpicurAppIHM.Views
             //Appel à l'API
             try
             {
-                HttpResponseMessage response = await _httpClient.DeleteAsync($"Client/{ clientSelectionne.Id}");
+                HttpResponseMessage response = await _httpClient.DeleteAsync($"Client/{clientSelectionne.Id}");
 
                 if (response.IsSuccessStatusCode)
                 {
