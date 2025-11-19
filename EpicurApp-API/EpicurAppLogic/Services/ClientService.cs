@@ -113,7 +113,7 @@ namespace EpicurAppLogic.Services
                 _clientRepository.ModifierClient(client);
 
                 // Log de la modification dans un fichier texte
-                string logPath = "modifications_clients.log";
+                string logPath = "LogsClients.log";
                 string champsStr = champsModifies.Count > 0 ? string.Join(", ", champsModifies) : "Aucun";
                 string logEntry = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] Modification - Client ID {client.Id} - {client.Prenom} {client.Nom} - {champsStr}\n";
                 System.IO.File.AppendAllText(logPath, logEntry);
@@ -128,15 +128,26 @@ namespace EpicurAppLogic.Services
         {
             try
             {
+                // Récupérer les informations du client avant suppression pour le log
+                var clientASupprimer = _clientRepository.RechercherClientParId(id);
+                
+                if (clientASupprimer == null)
+                {
+                    throw new Exception($"Client avec l'id {id} introuvable.");
+                }
+
                 // Appelle la méthode Delete du DAO
                 _clientRepository.SupprimerClient(id);
+
+                // Log de la suppression dans le fichier LogsClients.log
+                string logPath = "LogsClients.log";
+                string logEntry = $"[{DateTime.Now:yyyy-MM-dd HH:mm:ss}] Suppression - Client ID {clientASupprimer.Id}\n";
+                System.IO.File.AppendAllText(logPath, logEntry);
             }
             catch (Exception ex)
             {
                 throw new ApplicationException($"Erreur service : {ex.Message}", ex);
             }
         }
-    }
-
-    
+    }  
 }
