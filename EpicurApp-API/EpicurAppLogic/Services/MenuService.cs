@@ -2,17 +2,30 @@
 using EpicurAppLogic.Interfaces;
 using EpicurAPP_Partage.Models;
 
-namespace EpicurApp.Logic.Services
+namespace EpicurAppLogic.Services
 {
+    /// <summary>
+    /// Service des menus
+    /// </summary>
     public class MenuService : IMenuService
     {
         private IMenuDAO _menuRepository;
 
+        /// <summary>
+        /// Constructeur de la classe MenuService
+        /// </summary>
+        /// <param name="menuRepository">Le DAO pour interagir avec le menu</param>
         public MenuService(IMenuDAO menuRepository)
         {
             _menuRepository = menuRepository;
         }
 
+        /// <summary>
+        /// Ajoute un nouveau menu
+        /// </summary>
+        /// <param name="menu">menu a ajouter</param>
+        /// <exception cref="InvalidFieldException">statut ou nom du menu invalide</exception>
+        /// <exception cref="ApplicationException">Impossible d'ajouter le menu</exception>
         public void AjouterMenu(Menu menu)
         {
             if (menu.Statut != "Brouillon" && menu.Statut != "Validé")
@@ -35,6 +48,12 @@ namespace EpicurApp.Logic.Services
             }
         }
 
+        /// <summary>
+        /// Donne un menu par son id
+        /// </summary>
+        /// <param name="id">id du menu cherché</param>
+        /// <returns>le menu avec l'id correspondant</returns>
+        /// <exception cref="ApplicationException">Impossible de trouver le menu</exception>
         public Menu? GetById(int id)
         {
             try
@@ -47,6 +66,11 @@ namespace EpicurApp.Logic.Services
             }
         }
 
+        /// <summary>
+        /// Liste tous les menus
+        /// </summary>
+        /// <returns>Une liste de tout les menus</returns>
+        /// <exception cref="ApplicationException">Impossible derecuperer les menus</exception>
         public List<Menu> GetAll()
         {
             try
@@ -59,6 +83,13 @@ namespace EpicurApp.Logic.Services
             }
         }
 
+        /// <summary>
+        /// Ajoute des plats à un menu
+        /// </summary>
+        /// <param name="menuId">id du menu a completer</param>
+        /// <param name="platIds">id des plats a ajouter au menu</param>
+        /// <exception cref="InvalidFieldException">Menu ne peut etre vide</exception>
+        /// <exception cref="ApplicationException">Impossible d'ajouter les plats au menu</exception>
         public void AjouterPlatsAuMenu(int menuId, List<int> platIds)
         {
             if (platIds == null || platIds.Count == 0)
@@ -76,7 +107,12 @@ namespace EpicurApp.Logic.Services
             }
         }
 
-            public Menu? GetDernierBrouillon()
+        /// <summary>
+        /// Donne le dernier menu brouillon
+        /// </summary>
+        /// <returns>Le dernier menu enstatut brouillon</returns>
+        /// <exception cref="ApplicationException">Impossible de recuperer le brouillon</exception>
+        public Menu? GetDernierBrouillon()
         {
             try
             {
@@ -88,6 +124,12 @@ namespace EpicurApp.Logic.Services
             }
         }
 
+        /// <summary>
+        /// Met à jour un menu
+        /// </summary>
+        /// <param name="menu">Menu a mettre a jour</param>
+        /// <exception cref="InvalidFieldException">Informations du menuinsuffisantes id,nom</exception>
+        /// <exception cref="ApplicationException">Impossible de mettre a jour le menu</exception>
         public void MettreAJourMenu(Menu menu)
         {
             if (menu == null)
@@ -117,6 +159,11 @@ namespace EpicurApp.Logic.Services
             }
         }
 
+        /// <summary>
+        /// Validate le statut du menu
+        /// </summary>
+        /// <param name="statut">statut du menu</param>
+        /// <exception cref="InvalidFieldException">Statut du menu invalide</exception>
         private static void ValiderStatut(string statut)
         {
             if (string.IsNullOrWhiteSpace(statut))

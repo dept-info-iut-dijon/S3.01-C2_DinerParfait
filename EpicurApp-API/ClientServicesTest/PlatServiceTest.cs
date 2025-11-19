@@ -1,11 +1,8 @@
-﻿using Xunit;
-using Moq;
-using EpicurApp.Logic.Services;
+﻿using Moq;
 using EpicurAppLogic.Interfaces;
 using EpicurAPP_Partage.Models;
 using EpicurAPP_Partage.Exceptions;
-using System;
-using System.Collections.Generic;
+using EpicurAppLogic.Services;
 
 public class PlatServiceTests
 {

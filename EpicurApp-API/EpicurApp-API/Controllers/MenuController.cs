@@ -4,7 +4,7 @@ using EpicurAppLogic.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using System.Diagnostics;
 
-namespace EpicurApp_API.DAO.Controllers
+namespace EpicurApp_API.Controllers
 {
     [ApiController]
     [Route("[controller]")]

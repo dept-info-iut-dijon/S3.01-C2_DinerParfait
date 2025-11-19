@@ -1,4 +1,3 @@
-using EpicurApp.Logic.Services;
 using EpicurApp_API.DAO;
 using EpicurApp_API.Configuration;
 using EpicurAppLogic.Interfaces;

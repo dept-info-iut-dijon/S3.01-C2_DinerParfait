@@ -14,7 +14,7 @@ namespace EpicurApp_API.Data
         /// <param name="configuration">Configuration de la db</param>
         public static void Initialize(IConfiguration configuration)
         {
-            var connectionString = configuration.GetConnectionString("DefaultConnection")
+            string connectionString = configuration.GetConnectionString("DefaultConnection")
                 ?? "Data Source=epicurapp.db";
 
             using (var connection = new SqliteConnection(connectionString))
@@ -22,7 +22,7 @@ namespace EpicurApp_API.Data
                 connection.Open();
 
                 // Table Allergenes
-                var createAllergenesTable = @"
+                string createAllergenesTable = @"
                     CREATE TABLE IF NOT EXISTS Allergenes (
                         Id INTEGER PRIMARY KEY AUTOINCREMENT,
                         Nom TEXT NOT NULL,
@@ -30,7 +30,7 @@ namespace EpicurApp_API.Data
                     );";
 
                 // Table Clients 
-                var createClientsTable = @"
+                string createClientsTable = @"
                     CREATE TABLE IF NOT EXISTS Clients (
                         Id INTEGER PRIMARY KEY AUTOINCREMENT,
                         Nom TEXT NOT NULL,
@@ -42,7 +42,7 @@ namespace EpicurApp_API.Data
                     );";
 
                 // Table de liaison ClientAllergene 
-                var createClientAllergeneTable = @"
+                string createClientAllergeneTable = @"
                     CREATE TABLE IF NOT EXISTS ClientAllergene (
                         ClientId INTEGER NOT NULL,
                         AllergeneId INTEGER NOT NULL,
@@ -52,7 +52,7 @@ namespace EpicurApp_API.Data
                     );";
 
                 // Table Ingredients
-                var createIngredientsTable = @"
+                string createIngredientsTable = @"
                     CREATE TABLE IF NOT EXISTS Ingredients (
                         Id INTEGER PRIMARY KEY AUTOINCREMENT,
                         Nom TEXT NOT NULL,
@@ -60,7 +60,7 @@ namespace EpicurApp_API.Data
                     );";
 
                 // Table Plats
-                var createPlatsTable = @"
+                string createPlatsTable = @"
                     CREATE TABLE IF NOT EXISTS Plats (
                         Id INTEGER PRIMARY KEY AUTOINCREMENT,
                         Nom TEXT NOT NULL,
@@ -69,7 +69,7 @@ namespace EpicurApp_API.Data
                     );";
 
                 // Table de liaison PlatIngredient
-                var createPlatIngredientTable = @"
+                string createPlatIngredientTable = @"
                     CREATE TABLE IF NOT EXISTS PlatIngredient (
                         PlatId INTEGER NOT NULL,
                         IngredientId INTEGER NOT NULL,
@@ -79,7 +79,7 @@ namespace EpicurApp_API.Data
                     );";
 
                 // Table Menus
-                var createMenusTable = @"
+                string createMenusTable = @"
                     CREATE TABLE IF NOT EXISTS Menus (
                         Id INTEGER PRIMARY KEY AUTOINCREMENT,
                         Nom TEXT NOT NULL,
@@ -102,7 +102,7 @@ namespace EpicurApp_API.Data
                     );";
 
                 // Table MenuPlat
-                var createMenuPlatTable = @"
+                string createMenuPlatTable = @"
                     CREATE TABLE IF NOT EXISTS MenuPlat (
                         MenuId INTEGER NOT NULL,
                         PlatId INTEGER NOT NULL,
@@ -112,7 +112,7 @@ namespace EpicurApp_API.Data
                     );";
 
                 // Table ClientMenu (pour l'historique)
-                var createClientMenuTable = @"
+                string createClientMenuTable = @"
                     CREATE TABLE IF NOT EXISTS ClientMenu (
                         ClientId INTEGER NOT NULL,
                         MenuId INTEGER NOT NULL,
