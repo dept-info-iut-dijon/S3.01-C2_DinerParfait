@@ -63,6 +63,11 @@ namespace EpicurAppLogic.Services
         /// <exception cref="ApplicationException">Ajout impossible des allergenes</exception>
         public void AjouterAllergenesAuClient(int clientId, List<int> allergeneIds)
         {
+            if (allergeneIds == null || allergeneIds.Count == 0)
+            {
+                throw new InvalidFieldException("La liste des allergènes ne peut pas être vide.");
+            }
+
             try
             {
                 _allergeneDAO.AjouterAllergenesAuClient(clientId, allergeneIds);
