@@ -1,39 +1,28 @@
 using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.Configuration;
-using System.IO;
-using System;
 
 namespace EpicurApp_API.Data
 {
+    /// <summary>
+    /// Classe responsable de l'initialisation de la base de données.
+    /// </summary>
     public static class DatabaseInitializer
     {
+        /// <summary>
+        /// Initialise la base de données en créant les tables nécessaires et en insérant des données initiales.
+        /// </summary>
+        /// <param name="configuration">Configuration de la db</param>
         public static void Initialize(IConfiguration configuration)
         {
-            var connectionString = configuration.GetConnectionString("DefaultConnection")
+            string connectionString = configuration.GetConnectionString("DefaultConnection")
                 ?? "Data Source=epicurapp.db";
-
-
-            //Pour les probleme avec la liste de course on repart sur une nouvele base 
-            var dbFileName = connectionString.Replace("Data Source=", "").Trim();
-            if (File.Exists(dbFileName))
-            {
-                try
-                {
-                    File.Delete(dbFileName);
-                }
-                catch (Exception)
-                {
-                    
-                }
-            }
-            
 
             using (var connection = new SqliteConnection(connectionString))
             {
                 connection.Open();
 
-                // Tables de base
-                var createAllergenesTable = @"
+                // Table Allergenes
+                string createAllergenesTable = @"
                     CREATE TABLE IF NOT EXISTS Allergenes (
                         Id INTEGER PRIMARY KEY AUTOINCREMENT,
                         Nom TEXT NOT NULL,
@@ -41,7 +30,7 @@ namespace EpicurApp_API.Data
                     );";
 
                 // Table Clients 
-                var createClientsTable = @"
+                string createClientsTable = @"
                     CREATE TABLE IF NOT EXISTS Clients (
                         Id INTEGER PRIMARY KEY AUTOINCREMENT,
                         Nom TEXT NOT NULL,
@@ -53,7 +42,7 @@ namespace EpicurApp_API.Data
                     );";
 
                 // Table de liaison ClientAllergene 
-                var createClientAllergeneTable = @"
+                string createClientAllergeneTable = @"
                     CREATE TABLE IF NOT EXISTS ClientAllergene (
                         ClientId INTEGER NOT NULL,
                         AllergeneId INTEGER NOT NULL,
@@ -63,7 +52,7 @@ namespace EpicurApp_API.Data
                     );";
 
                 // Table Ingredients
-                var createIngredientsTable = @"
+                string createIngredientsTable = @"
                     CREATE TABLE IF NOT EXISTS Ingredients (
                         Id INTEGER PRIMARY KEY AUTOINCREMENT,
                         Nom TEXT NOT NULL,
@@ -72,7 +61,7 @@ namespace EpicurApp_API.Data
                     );";
 
                 // Table Plats
-                var createPlatsTable = @"
+                string createPlatsTable = @"
                     CREATE TABLE IF NOT EXISTS Plats (
                         Id INTEGER PRIMARY KEY AUTOINCREMENT,
                         Nom TEXT NOT NULL,
@@ -81,7 +70,7 @@ namespace EpicurApp_API.Data
                     );";
 
                 // Table de liaison PlatIngredient
-                var createPlatIngredientTable = @"
+                string createPlatIngredientTable = @"
                     CREATE TABLE IF NOT EXISTS PlatIngredient (
                         PlatId INTEGER NOT NULL,
                         IngredientId INTEGER NOT NULL,
@@ -91,7 +80,7 @@ namespace EpicurApp_API.Data
                     );";
 
                 // Table Menus
-                var createMenusTable = @"
+                string createMenusTable = @"
                     CREATE TABLE IF NOT EXISTS Menus (
                         Id INTEGER PRIMARY KEY AUTOINCREMENT,
                         Nom TEXT NOT NULL,
@@ -114,7 +103,7 @@ namespace EpicurApp_API.Data
                     );";
 
                 // Table MenuPlat
-                var createMenuPlatTable = @"
+                string createMenuPlatTable = @"
                     CREATE TABLE IF NOT EXISTS MenuPlat (
                         MenuId INTEGER NOT NULL,
                         PlatId INTEGER NOT NULL,
@@ -124,7 +113,7 @@ namespace EpicurApp_API.Data
                     );";
 
                 // Table ClientMenu (pour l'historique)
-                var createClientMenuTable = @"
+                string createClientMenuTable = @"
                     CREATE TABLE IF NOT EXISTS ClientMenu (
                         ClientId INTEGER NOT NULL,
                         MenuId INTEGER NOT NULL,
@@ -133,26 +122,57 @@ namespace EpicurApp_API.Data
                         FOREIGN KEY (MenuId) REFERENCES Menus(Id)
                     );";
 
+                // Table Repas (historique détaillé des repas avec retours)
+                var createRepasTable = @"
+                    CREATE TABLE IF NOT EXISTS Repas (
+                        Id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        ClientId INTEGER NOT NULL,
+                        MenuId INTEGER NOT NULL,
+                        Date DATETIME NOT NULL,
+                        Retours TEXT,
+                        FOREIGN KEY (ClientId) REFERENCES Clients(Id) ON DELETE CASCADE,
+                        FOREIGN KEY (MenuId) REFERENCES Menus(Id) ON DELETE CASCADE
+                    );";
+
                 using (var command = connection.CreateCommand())
                 {
-                    // Exécution des créations de table
-                    command.CommandText = createAllergenesTable; command.ExecuteNonQuery();
-                    command.CommandText = createIngredientsTable; command.ExecuteNonQuery();
-                    command.CommandText = createClientsTable; command.ExecuteNonQuery();
-                    command.CommandText = createClientAllergeneTable; command.ExecuteNonQuery();
-                    command.CommandText = createPlatsTable; command.ExecuteNonQuery();
-                    command.CommandText = createPlatIngredientTable; command.ExecuteNonQuery();
-                    command.CommandText = createMenusTable; command.ExecuteNonQuery();
-                    command.CommandText = createMenuPlatTable; command.ExecuteNonQuery();
-                    command.CommandText = createClientMenuTable; command.ExecuteNonQuery();
+                    command.CommandText = createAllergenesTable;
+                    command.ExecuteNonQuery();
+
+                    command.CommandText = createIngredientsTable;
+                    command.ExecuteNonQuery();
+
+                    command.CommandText = createClientsTable;
+                    command.ExecuteNonQuery();
+
+                    command.CommandText = createClientAllergeneTable;
+                    command.ExecuteNonQuery();
+
+                    command.CommandText = createPlatsTable;
+                    command.ExecuteNonQuery();
+
+                    command.CommandText = createPlatIngredientTable;
+                    command.ExecuteNonQuery();
+
+                    command.CommandText = createMenusTable;
+                    command.ExecuteNonQuery();
+
+                    command.CommandText = createMenuPlatTable;
+                    command.ExecuteNonQuery();
+
+                    command.CommandText = createClientMenuTable;
+                    command.ExecuteNonQuery();
+
+                    command.CommandText = createRepasTable;
+                    command.ExecuteNonQuery();
                 }
 
-                // Remplissage des données
                 SeedAllergenes(connection);
                 SeedIngredients(connection);
                 SeedPlats(connection);
                 SeedClients(connection);
                 SeedMenus(connection);
+                SeedRepas(connection);
             }
         }
 
@@ -172,29 +192,40 @@ namespace EpicurApp_API.Data
                         transaction.Commit();
                         return;
                     }
-
-                    var allergenes = new (string Nom, string Description)[]
-                   {
-                    ("Gluten", "Céréales contenant du gluten"), ("Crustacés", "Crustacés"),
-                    ("Œufs", "Œufs"), ("Poissons", "Poissons"), ("Arachides", "Arachides"),
-                    ("Soja", "Soja"), ("Lait", "Lait"), ("Fruits à coque", "Noix etc."),
-                    ("Céleri", "Céleri"), ("Moutarde", "Moutarde"), ("Graines de sésame", "Sésame"),
-                    ("Sulfites", "Sulfites"), ("Lupin", "Lupin"), ("Mollusques", "Mollusques")
-                   };
-
-                    using (var insertCommand = new SqliteCommand("INSERT INTO Allergenes (Nom, Description) VALUES (@Nom, @Description);", connection, transaction))
-                    {
-                        insertCommand.Parameters.Add(new SqliteParameter("@Nom", SqliteType.Text));
-                        insertCommand.Parameters.Add(new SqliteParameter("@Description", SqliteType.Text));
-                        foreach (var item in allergenes)
-                        {
-                            insertCommand.Parameters["@Nom"].Value = item.Nom;
-                            insertCommand.Parameters["@Description"].Value = item.Description;
-                            insertCommand.ExecuteNonQuery();
-                        }
-                    }
-                    transaction.Commit();
                 }
+
+                var allergenes = new (string Nom, string Description)[]
+                {
+                    ("Gluten", "Céréales contenant du gluten (blé, seigle, orge, avoine)"),
+                    ("Crustacés", "Crustacés et produits à base de crustacés"),
+                    ("Œufs", "Œufs et produits à base d'œufs"),
+                    ("Poissons", "Poissons et produits à base de poissons"),
+                    ("Arachides", "Arachides et produits à base d'arachides"),
+                    ("Soja", "Soja et produits à base de soja"),
+                    ("Lait", "Lait et produits à base de lait (lactose inclus)"),
+                    ("Fruits à coque", "Amandes, noisettes, noix, noix de cajou, etc."),
+                    ("Céleri", "Céleri et produits à base de céleri"),
+                    ("Moutarde", "Moutarde et produits à base de moutarde"),
+                    ("Graines de sésame", "Graines de sésame et produits dérivés"),
+                    ("Sulfites", "Anhydride sulfureux et sulfites (>10mg/kg)"),
+                    ("Lupin", "Lupin et produits à base de lupin"),
+                    ("Mollusques", "Mollusques et produits à base de mollusques")
+                };
+
+                using (var insertCommand = new SqliteCommand("INSERT INTO Allergenes (Nom, Description) VALUES (@Nom, @Description);", connection, transaction))
+                {
+                    insertCommand.Parameters.Add(new SqliteParameter("@Nom", SqliteType.Text));
+                    insertCommand.Parameters.Add(new SqliteParameter("@Description", SqliteType.Text));
+
+                    foreach (var allergene in allergenes)
+                    {
+                        insertCommand.Parameters["@Nom"].Value = allergene.Nom;
+                        insertCommand.Parameters["@Description"].Value = allergene.Description;
+                        insertCommand.ExecuteNonQuery();
+                    }
+                }
+
+                transaction.Commit();
             }
         }
 
@@ -439,6 +470,58 @@ namespace EpicurApp_API.Data
                 {
                     insertCM.ExecuteNonQuery();
                 }
+                transaction.Commit();
+            }
+        }
+
+        /// <summary>
+        /// Méthode pour insérer des repas de test dans la table Repas.
+        /// </summary>
+        /// <param name="connection">connexion a la db</param>
+        private static void SeedRepas(SqliteConnection connection)
+        {
+            using (var transaction = connection.BeginTransaction())
+            {
+                using (var countCommand = new SqliteCommand("SELECT COUNT(*) FROM Repas;", connection, transaction))
+                {
+                    long count = (long)(countCommand.ExecuteScalar() ?? 0);
+                    if (count > 0)
+                    {
+                        transaction.Commit();
+                        return;
+                    }
+                }
+
+                var repas = new (int ClientId, int MenuId, string Date, string? Retours)[]
+                {
+                    (1, 1, "2024-11-15 12:00:00", "Excellent repas, très satisfait du menu découverte"),
+                    (1, 2, "2024-11-10 19:00:00", "Bon menu végétarien, mais un peu épicé pour moi"),
+                    (1, 3, "2024-11-05 12:30:00", null),
+                    (2, 2, "2024-11-16 20:00:00", "Parfait ! J'adore la cuisine végétarienne"),
+                    (3, 1, "2024-11-15 19:30:00", "Le magret de canard était excellent"),
+                    (4, 3, "2024-11-18 12:00:00", "Dessert incroyable, je recommande"),
+                    (5, 2, "2024-11-16 13:00:00", null)
+                };
+
+                using (var insertCommand = new SqliteCommand(
+                    "INSERT INTO Repas (ClientId, MenuId, Date, Retours) VALUES (@ClientId, @MenuId, @Date, @Retours);",
+                    connection, transaction))
+                {
+                    insertCommand.Parameters.Add(new SqliteParameter("@ClientId", SqliteType.Integer));
+                    insertCommand.Parameters.Add(new SqliteParameter("@MenuId", SqliteType.Integer));
+                    insertCommand.Parameters.Add(new SqliteParameter("@Date", SqliteType.Text));
+                    insertCommand.Parameters.Add(new SqliteParameter("@Retours", SqliteType.Text));
+
+                    foreach (var r in repas)
+                    {
+                        insertCommand.Parameters["@ClientId"].Value = r.ClientId;
+                        insertCommand.Parameters["@MenuId"].Value = r.MenuId;
+                        insertCommand.Parameters["@Date"].Value = r.Date;
+                        insertCommand.Parameters["@Retours"].Value = r.Retours ?? (object)DBNull.Value;
+                        insertCommand.ExecuteNonQuery();
+                    }
+                }
+
                 transaction.Commit();
             }
         }
