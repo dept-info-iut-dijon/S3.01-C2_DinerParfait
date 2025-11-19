@@ -35,7 +35,7 @@ namespace EpicurAppIHM.Views
         {
             try
             {
-                var menus = await App.ApiClient.HttpClient.GetFromJsonAsync<List<MenuModel>>("Menu/GetAll");
+                var menus = await App.ApiClient.HttpClient.GetFromJsonAsync<List<MenuModel>>("Menu");
                 if (menus != null)
                 {
                     Menus.Clear();

@@ -113,7 +113,6 @@ namespace EpicurApp_API.DAO
                 using (SqliteConnection connection = new SqliteConnection(_connectionString))
                 {
                     connection.Open();
-                    Console.WriteLine(" Connexion ouverte");
 
                     string query = "SELECT Id, Nom, Prenom, Email, Telephone, PlatsNonApprecies, Preferences FROM Clients ORDER BY Nom, Prenom";
 
@@ -139,7 +138,6 @@ namespace EpicurApp_API.DAO
                         }
                     }
 
-                    Console.WriteLine($" {clients.Count} clients récupérés");
 
                 
                 }

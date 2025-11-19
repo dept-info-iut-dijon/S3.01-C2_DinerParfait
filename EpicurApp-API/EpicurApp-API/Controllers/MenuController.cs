@@ -1,9 +1,9 @@
-﻿using EpicurAppLogic.Interfaces;
-using EpicurAPP_Partage.Models;
+﻿using EpicurAPP_Partage.Models;
 using EpicurAPP_Partage.Exceptions;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System;
+using EpicurAppLogic.Interfaces;
 
 namespace EpicurApp_API.Controllers
 {
@@ -22,7 +22,15 @@ namespace EpicurApp_API.Controllers
         [HttpGet]
         public ActionResult<List<Menu>> GetAll()
         {
-            return Ok(_menuService.GetAll());
+            try
+            {
+                var menus = _menuService.GetAll();
+                return Ok(menus);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Erreur lors de la récupération des menus: {ex.Message}");
+            }
         }
 
         // GET: api/Menu/5
