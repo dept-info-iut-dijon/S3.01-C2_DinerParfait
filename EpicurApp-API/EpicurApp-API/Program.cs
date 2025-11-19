@@ -10,10 +10,12 @@ WebApplicationBuilder builder = WebApplication.CreateBuilder(args);
 builder.Services.AddSingleton<DatabaseConfiguration>();
 
 // Enregistrement des DAO
+builder.Services.AddScoped<IIngredientDAO, IngredientDAO>();
 builder.Services.AddScoped<IPlatDAO, PlatDAO>();
 builder.Services.AddScoped<AllergeneDAO>();
 builder.Services.AddScoped<IClientDAO, ClientDAO>();
 builder.Services.AddScoped<IMenuDAO, MenuDAO>();
+
 
 // Enregistrement des services
 builder.Services.AddScoped<IClientService, ClientService>();
@@ -22,7 +24,7 @@ builder.Services.AddScoped<IMenuService, MenuService>();
 builder.Services.AddControllers().AddJsonOptions(options =>
 {
     options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
-    options.JsonSerializerOptions.PropertyNamingPolicy = null; // Utiliser PascalCase au lieu de camelCase
+    options.JsonSerializerOptions.PropertyNamingPolicy = null; 
 });
 
 builder.Services.AddEndpointsApiExplorer();

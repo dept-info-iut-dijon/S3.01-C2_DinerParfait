@@ -1,6 +1,6 @@
 ﻿using Xunit;
 using Moq;
-using EpicurApp.Logic.Services;
+using EpicurAppLogic.Services;
 using EpicurAppLogic.Interfaces;
 using EpicurAPP_Partage.Models;
 using EpicurAPP_Partage.Exceptions;
