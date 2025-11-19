@@ -14,144 +14,130 @@ namespace EpicurApp_API.Controllers
         /// </summary>
         private readonly IClientService _clientService;
 
-    /// <summary>
-    /// Constructeur : injection du service client.
-    /// </summary>
-    public ClientController(IClientService clientService)
-    {
-        _clientService = clientService;
-    }
-
-    /// <summary>
-    /// Récupère tous les clients enregistrés dans la base.
-    /// </summary>
-    /// <returns>Liste de clients</returns>
-    [HttpGet]
-    public IActionResult GetAllClients()
-    {
-        try
+        /// <summary>
+        /// Constructeur : injection du service client.
+        /// </summary>
+        public ClientController(IClientService clientService)
         {
-            // Récupération de tous les clients via le service
-            List<Client> clients = _clientService.ObtenirTousLesClients();
-
-            // Renvoie un code 200 avec les données
-            return Ok(clients);
+            _clientService = clientService;
         }
-        catch (Exception)
-        {
-            // En cas d’erreur, renvoie un code 500
-            return StatusCode(500, "Erreur lors de la récupération des clients.");
-        }
-    }
 
-    /// <summary>
-    /// Récupère un client grâce à son identifiant.
-    /// </summary>
-    /// <param name="id">Id du client</param>
-    /// <returns>Client correspondant</returns>
-    [HttpGet("{id}")]
-    public IActionResult GetClient(int id)
-    {
-        try
+        /// <summary>
+        /// Récupère tous les clients enregistrés dans la base.
+        /// </summary>
+        /// <returns>Liste de clients</returns>
+        [HttpGet]
+        public IActionResult GetAllClients()
         {
-            // Récupération d’un client par son id
-            Client client = _clientService.ObtenirClientParId(id);
-
-            return Ok(client);
-        }
-        catch (Exception)
-        {
-            return StatusCode(500, "Erreur lors de la récupération du client.");
-        }
-    }
-
-    /// <summary>
-    /// Crée un nouveau client.
-    /// </summary>
-    /// <param name="client">Données du client</param>
-    /// <returns>Client créé</returns>
-    [HttpPost]
-    public IActionResult CreerClient([FromBody] Client client)
-    {
-        try
-        {
-            // Vérifie que le modèle reçu respecte les règles de validation
-            if (!ModelState.IsValid)
+            try
             {
-                return BadRequest(ModelState);
+                // Récupération de tous les clients via le service
+                List<Client> clients = _clientService.ObtenirTousLesClients();
+
+                // Renvoie un code 200 avec les données
+                return Ok(clients);
             }
-
-            // Appel du service pour l’ajouter
-            _clientService.AjouterClient(client);
-
-            // Renvoie le client créé
-            return Ok(client);
-        }
-        catch (InvalidFieldException ex)
-        {
-            // Si un champ obligatoire est invalide → erreur 400
-            return BadRequest(ex.Message);
-        }
-        catch (ApplicationException ex)
-        {
-            // Erreur applicative (DAO, service,…)
-            return StatusCode(500, ex.Message);
-        }
-        catch (Exception ex)
-        {
-            // Toute autre erreur interne
-            return StatusCode(500, "Erreur interne : " + ex.Message);
-        }
-    }
-
-
-    /// <summary>
-    /// Modifie un client existant.
-    /// </summary>
-    /// <param name="id">Id du client</param>
-    /// <param name="client">Données modifiées</param>
-    /// <returns>Client modifié</returns>
-    [HttpPut("{id}")]
-    public IActionResult ModifierClient(int id, [FromBody] Client client)
-    {
-        try
-        {
-            if (!ModelState.IsValid)
+            catch (Exception)
             {
-                return BadRequest(ModelState);
+                // En cas d'erreur, renvoie un code 500
+                return StatusCode(500, "Erreur lors de la récupération des clients.");
             }
+        }
 
-            _clientService.ModifierClient(client);
-            return Ok(client);
-        }
-        catch (InvalidFieldException ex)
+        /// <summary>
+        /// Récupère un client grâce à son identifiant.
+        /// </summary>
+        /// <param name="id">Id du client</param>
+        /// <returns>Client correspondant</returns>
+        [HttpGet("{id}")]
+        public IActionResult GetClient(int id)
         {
-            return BadRequest(ex.Message);
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, "Erreur lors de la modification : " + ex.Message);
-        }
-    }
+            try
+            {
+                // Récupération d'un client par son id
+                Client client = _clientService.ObtenirClientParId(id);
 
-    /// <summary>
-    /// Associe une liste d'allergènes à un client.
-    /// </summary>
-    /// <param name="id">Id du client</param>
-    /// <param name="allergeneIds">Liste des Ids d’allergènes</param>
-    /// <returns>Résultat HTTP</returns>
-    [HttpPost("{id}/allergenes")]
-    public IActionResult AssocierAllergenes(int id, [FromBody] List<int> allergeneIds)
-    {
-        try
+                return Ok(client);
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, "Erreur lors de la récupération du client.");
+            }
+        }
+
+        /// <summary>
+        /// Crée un nouveau client.
+        /// </summary>
+        /// <param name="client">Données du client</param>
+        /// <returns>Client créé</returns>
+        [HttpPost]
+        public IActionResult CreerClient([FromBody] Client client)
         {
-            // Appel du service pour associer les allergènes
-            _clientService.AjouterAllergenesAuClient(id, allergeneIds);
+            try
+            {
+                // Vérifie que le modèle reçu respecte les règles de validation
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
+
+                // Appel du service pour l'ajouter
+                _clientService.AjouterClient(client);
+
+                // Renvoie le client créé
+                return Ok(client);
+            }
+            catch (InvalidFieldException ex)
+            {
+                // Si un champ obligatoire est invalide → erreur 400
+                return BadRequest(ex.Message);
+            }
+            catch (ApplicationException ex)
+            {
+                // Erreur applicative (DAO, service,…)
+                return StatusCode(500, ex.Message);
+            }
+            catch (Exception ex)
+            {
+                // Toute autre erreur interne
+                return StatusCode(500, "Erreur interne : " + ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// Modifie un client existant.
+        /// </summary>
+        /// <param name="id">Id du client</param>
+        /// <param name="client">Données modifiées</param>
+        /// <returns>Client modifié</returns>
+        [HttpPut("{id}")]
+        public IActionResult ModifierClient(int id, [FromBody] Client client)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(ModelState);
+                }
+
+                _clientService.ModifierClient(client);
+                return Ok(client);
+            }
+            catch (InvalidFieldException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "Erreur lors de la modification : " + ex.Message);
+            }
+        }
+
         /// <summary>
         /// Associe une liste d'allergènes à un client.
         /// </summary>
         /// <param name="id">Id du client</param>
-        /// <param name="allergeneIds">Liste des Ids d’allergènes</param>
+        /// <param name="allergeneIds">Liste des Ids d'allergènes</param>
         /// <returns>Résultat HTTP</returns>
         [HttpPost("{id}/allergenes")]
         public IActionResult AssocierAllergenes(int id, [FromBody] List<int> allergeneIds)
@@ -171,25 +157,25 @@ namespace EpicurApp_API.Controllers
                 );
             }
         }
-    }
 
-    /// <summary>
-    /// Supprime un client de la base de données en fonction de son ID.
-    /// </summary>
-    /// <param name="id">L'ID du client à supprimer.</param>
-    /// <returns>Code 204 si succès, ou un code d'erreur.</returns>
-    [HttpDelete("{id}")]
-    public IActionResult DeleteClient(int id)
-    {
-        try
+        /// <summary>
+        /// Supprime un client de la base de données en fonction de son ID.
+        /// </summary>
+        /// <param name="id">L'ID du client à supprimer.</param>
+        /// <returns>Code 204 si succès, ou un code d'erreur.</returns>
+        [HttpDelete("{id}")]
+        public IActionResult DeleteClient(int id)
         {
-            _clientService.Delete(id);
+            try
+            {
+                _clientService.Delete(id);
 
-            return Ok();
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, ex.Message);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
     }
 }

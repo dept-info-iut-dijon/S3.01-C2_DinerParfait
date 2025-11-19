@@ -1,7 +1,6 @@
 ﻿using EpicurAPP_Partage.Exceptions;
 using EpicurAppLogic.Interfaces;
 using EpicurAPP_Partage.Models;
-using EpicurAppLogic.Interfaces;
 
 namespace EpicurAppLogic.Services
 {
