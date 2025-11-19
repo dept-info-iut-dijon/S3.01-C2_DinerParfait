@@ -25,7 +25,7 @@ namespace Test
         [Fact]
         public void GetAll_RetourneTousLesAllergenes()
         {
-            var allergenesAttendus = new List<Allergene>
+            List<Allergene> allergenesAttendus = new List<Allergene>
         {
             new Allergene { Id = 1, Nom = "Gluten", Description = "Céréales contenant du gluten" },
             new Allergene { Id = 2, Nom = "Lactose", Description = "Produits laitiers" },
@@ -34,7 +34,7 @@ namespace Test
 
             _mockAllergeneDAO.Setup(dao => dao.GetAll()).Returns(allergenesAttendus);
 
-            var resultat = _allergeneService.GetAll();
+            List<Allergene> resultat = _allergeneService.GetAll();
 
             Assert.NotNull(resultat);
             Assert.Equal(3, resultat.Count);
@@ -47,7 +47,7 @@ namespace Test
         public void GetAll_RetourneListeVide_QuandAucunAllergene()
         {
             _mockAllergeneDAO.Setup(dao => dao.GetAll()).Returns(new List<Allergene>());
-            var resultat = _allergeneService.GetAll();
+            List<Allergene> resultat = _allergeneService.GetAll();
             Assert.NotNull(resultat);
             Assert.Empty(resultat);
         }
@@ -78,7 +78,7 @@ namespace Test
         public void GetAllergenesByClient_RetourneAllergenesClient()
         {
             int clientId = 5;
-            var allergenesClient = new List<Allergene>
+            List<Allergene> allergenesClient = new List<Allergene>
         {
             new Allergene { Id = 1, Nom = "Gluten", Description = "Céréales" },
             new Allergene { Id = 3, Nom = "Arachides", Description = "Cacahuètes" }
@@ -86,7 +86,7 @@ namespace Test
 
             _mockAllergeneDAO.Setup(dao => dao.GetAllergenesByClient(clientId)).Returns(allergenesClient);
 
-            var resultat = _allergeneService.GetAllergenesByClient(clientId);
+            List<Allergene> resultat = _allergeneService.GetAllergenesByClient(clientId);
 
             Assert.NotNull(resultat);
             Assert.Equal(2, resultat.Count);
@@ -101,7 +101,7 @@ namespace Test
             int clientId = 10;
             _mockAllergeneDAO.Setup(dao => dao.GetAllergenesByClient(clientId)).Returns(new List<Allergene>());
 
-            var resultat = _allergeneService.GetAllergenesByClient(clientId);
+            List<Allergene> resultat = _allergeneService.GetAllergenesByClient(clientId);
 
             Assert.NotNull(resultat);
             Assert.Empty(resultat);
@@ -133,7 +133,7 @@ namespace Test
         public void AjouterAllergenesAuClient_AjouteCorrectement()
         {
             int clientId = 5;
-            var allergeneIds = new List<int> { 1, 3, 5 };
+            List<int> allergeneIds = new List<int> { 1, 3, 5 };
 
             _mockAllergeneDAO.Setup(dao => dao.AjouterAllergenesAuClient(clientId, allergeneIds));
 
@@ -146,7 +146,7 @@ namespace Test
         public void AjouterAllergenesAuClient_LanceInvalidFieldException_QuandListeVide()
         {
             int clientId = 5;
-            var allergeneIds = new List<int>();
+            List<int> allergeneIds = new List<int>();
 
             InvalidFieldException exceptionVoulue = null;
             try
@@ -188,7 +188,7 @@ namespace Test
         public void AjouterAllergenesAuClient_LanceApplicationException_QuandErreurDAO()
         {
             int clientId = 5;
-            var allergeneIds = new List<int> { 1, 3 };
+            List<int> allergeneIds = new List<int> { 1, 3 };
             Exception exceptionDAO = new Exception("Erreur SQLite");
 
             _mockAllergeneDAO.Setup(dao => dao.AjouterAllergenesAuClient(clientId, allergeneIds)).Throws(exceptionDAO);
@@ -211,7 +211,7 @@ namespace Test
         [Fact]
         public void AjouterAllergene_AjouteCorrectement()
         {
-            var allergene = new Allergene { Nom = "Soja", Description = "Produits à base de soja" };
+            Allergene allergene = new Allergene { Nom = "Soja", Description = "Produits à base de soja" };
 
             _mockAllergeneDAO.Setup(dao => dao.AjouterAllergene(allergene));
             _allergeneService.AjouterAllergene(allergene);
@@ -221,7 +221,7 @@ namespace Test
         [Fact]
         public void AjouterAllergene_LanceInvalidFieldException_QuandNomNull()
         {
-            var allergeneInvalide = new Allergene { Nom = null, Description = "Description" };
+            Allergene allergeneInvalide = new Allergene { Nom = null, Description = "Description" };
 
             InvalidFieldException exceptionVoulue = null;
             try
@@ -241,8 +241,8 @@ namespace Test
         [Fact]
         public void AjouterAllergene_LanceInvalidFieldException_QuandNomVide()
         {
-            var allergeneInvalide = new Allergene { Nom = "   ", Description = "Description" };
-
+            Allergene allergeneInvalide = new Allergene { Nom = "   ", Description = "Description" };
+                
             InvalidFieldException exceptionVoulue = null;
             try
             {
@@ -261,7 +261,7 @@ namespace Test
         [Fact]
         public void AjouterAllergene_LanceApplicationException_QuandErreurDAO()
         {
-            var allergene = new Allergene { Nom = "Soja", Description = "Produits à base de soja" };
+            Allergene allergene = new Allergene { Nom = "Soja", Description = "Produits à base de soja" };
             Exception exceptionDAO = new Exception("Erreur SQLite");
 
             _mockAllergeneDAO.Setup(dao => dao.AjouterAllergene(allergene)).Throws(exceptionDAO);

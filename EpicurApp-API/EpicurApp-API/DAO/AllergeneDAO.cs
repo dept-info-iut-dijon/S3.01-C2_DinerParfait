@@ -26,7 +26,7 @@ namespace EpicurApp_API.DAO
         /// <returns>Liste de tous les allergènes.</returns>
         public List<Allergene> GetAll()
         {
-            var allergenes = new List<Allergene>();
+            List<Allergene> allergenes = new List<Allergene>();
             using (var connection = new SqliteConnection(_connectionString))
             {
                 connection.Open();
@@ -56,7 +56,7 @@ namespace EpicurApp_API.DAO
         /// <returns>Liste des allergènes du client.</returns>
         public List<Allergene> GetAllergenesByClient(int clientId)
         {
-            var allergenes = new List<Allergene>();
+            List<Allergene> allergenes = new List<Allergene>();
             using (var connection = new SqliteConnection(_connectionString))
             {
                 connection.Open();

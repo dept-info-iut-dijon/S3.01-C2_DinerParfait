@@ -6,10 +6,17 @@ using System.Collections.Generic;
 
 namespace EpicurAppLogic.Services
 {
+    /// <summary>
+    /// Classe de service pour les plats
+    /// </summary>
     public class PlatService : IPlatService
     {
         private readonly IPlatDAO _platDAO;
 
+        /// <summary>
+        /// Constructeur de la classe PlatService
+        /// </summary>
+        /// <param name="platDAO">DAO pour interagir avec les plats</param>
         public PlatService(IPlatDAO platDAO)
         {
             _platDAO = platDAO;
@@ -40,7 +47,7 @@ namespace EpicurAppLogic.Services
         {
             try
             {
-                var plat = _platDAO.GetById(id);
+                Plat? plat = _platDAO.GetById(id);
                 if (plat == null)
                 {
                     throw new Exception($"Le plat avec l'id {id} n'existe pas.");

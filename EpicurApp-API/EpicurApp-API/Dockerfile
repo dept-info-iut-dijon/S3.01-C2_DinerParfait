@@ -3,7 +3,8 @@ FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 WORKDIR /app
 EXPOSE 8081
 
-# Variables d'environnement pour les ports et l'environnement
+# 
+iables d'environnement pour les ports et l'environnement
 ENV ASPNETCORE_ENVIRONMENT=Production
 ENV ASPNETCORE_HTTP_PORTS=8081
 ENV ASPNETCORE_URLS="http://*:8081"
