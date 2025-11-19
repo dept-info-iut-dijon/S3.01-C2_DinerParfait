@@ -121,6 +121,18 @@ namespace EpicurApp_API.Data
                         FOREIGN KEY (MenuId) REFERENCES Menus(Id)
                     );";
 
+                // Table Repas (historique détaillé des repas avec retours)
+                var createRepasTable = @"
+                    CREATE TABLE IF NOT EXISTS Repas (
+                        Id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        ClientId INTEGER NOT NULL,
+                        MenuId INTEGER NOT NULL,
+                        Date DATETIME NOT NULL,
+                        Retours TEXT,
+                        FOREIGN KEY (ClientId) REFERENCES Clients(Id) ON DELETE CASCADE,
+                        FOREIGN KEY (MenuId) REFERENCES Menus(Id) ON DELETE CASCADE
+                    );";
+
                 using (var command = connection.CreateCommand())
                 {
                     command.CommandText = createAllergenesTable;
@@ -149,6 +161,9 @@ namespace EpicurApp_API.Data
 
                     command.CommandText = createClientMenuTable;
                     command.ExecuteNonQuery();
+
+                    command.CommandText = createRepasTable;
+                    command.ExecuteNonQuery();
                 }
 
                 SeedAllergenes(connection);
@@ -156,6 +171,7 @@ namespace EpicurApp_API.Data
                 SeedPlats(connection);
                 SeedClients(connection);
                 SeedMenus(connection);
+                SeedRepas(connection);
             }
         }
 
@@ -497,6 +513,58 @@ namespace EpicurApp_API.Data
                         insertMenuCommand.Parameters["@ClientId"].Value = assignment.ClientId;
                         insertMenuCommand.Parameters["@MenuId"].Value = assignment.MenuId;
                         insertMenuCommand.ExecuteNonQuery();
+                    }
+                }
+
+                transaction.Commit();
+            }
+        }
+
+        /// <summary>
+        /// Méthode pour insérer des repas de test dans la table Repas.
+        /// </summary>
+        /// <param name="connection">connexion a la db</param>
+        private static void SeedRepas(SqliteConnection connection)
+        {
+            using (var transaction = connection.BeginTransaction())
+            {
+                using (var countCommand = new SqliteCommand("SELECT COUNT(*) FROM Repas;", connection, transaction))
+                {
+                    long count = (long)(countCommand.ExecuteScalar() ?? 0);
+                    if (count > 0)
+                    {
+                        transaction.Commit();
+                        return;
+                    }
+                }
+
+                var repas = new (int ClientId, int MenuId, string Date, string? Retours)[]
+                {
+                    (1, 1, "2024-11-15 12:00:00", "Excellent repas, très satisfait du menu découverte"),
+                    (1, 2, "2024-11-10 19:00:00", "Bon menu végétarien, mais un peu épicé pour moi"),
+                    (1, 3, "2024-11-05 12:30:00", null),
+                    (2, 2, "2024-11-16 20:00:00", "Parfait ! J'adore la cuisine végétarienne"),
+                    (3, 1, "2024-11-15 19:30:00", "Le magret de canard était excellent"),
+                    (4, 3, "2024-11-18 12:00:00", "Dessert incroyable, je recommande"),
+                    (5, 2, "2024-11-16 13:00:00", null)
+                };
+
+                using (var insertCommand = new SqliteCommand(
+                    "INSERT INTO Repas (ClientId, MenuId, Date, Retours) VALUES (@ClientId, @MenuId, @Date, @Retours);",
+                    connection, transaction))
+                {
+                    insertCommand.Parameters.Add(new SqliteParameter("@ClientId", SqliteType.Integer));
+                    insertCommand.Parameters.Add(new SqliteParameter("@MenuId", SqliteType.Integer));
+                    insertCommand.Parameters.Add(new SqliteParameter("@Date", SqliteType.Text));
+                    insertCommand.Parameters.Add(new SqliteParameter("@Retours", SqliteType.Text));
+
+                    foreach (var r in repas)
+                    {
+                        insertCommand.Parameters["@ClientId"].Value = r.ClientId;
+                        insertCommand.Parameters["@MenuId"].Value = r.MenuId;
+                        insertCommand.Parameters["@Date"].Value = r.Date;
+                        insertCommand.Parameters["@Retours"].Value = r.Retours ?? (object)DBNull.Value;
+                        insertCommand.ExecuteNonQuery();
                     }
                 }
 

@@ -105,7 +105,7 @@ namespace EpicurApp_API.Controllers
         }
 
         /// <summary>
-        /// Modifie un client existant.
+        /// Modifie un client existant (US 1.3).
         /// </summary>
         /// <param name="id">Id du client</param>
         /// <param name="client">Données modifiées</param>
@@ -159,10 +159,41 @@ namespace EpicurApp_API.Controllers
         }
 
         /// <summary>
-        /// Supprime un client de la base de données en fonction de son ID.
+        /// Récupère l'historique des repas d'un client (US 1.5).
+        /// </summary>
+        /// <param name="id">Id du client</param>
+        /// <returns>Liste des repas triés par date décroissante</returns>
+        [HttpGet("{id}/repas")]
+        public IActionResult ObtenirHistoriqueRepas(int id)
+        {
+            try
+            {
+                // Récupération de l'historique des repas via le service
+                var repas = _clientService.ObtenirHistoriqueRepas(id);
+
+                // Si la liste est vide, on renvoie un message approprié
+                if (repas == null || repas.Count == 0)
+                {
+                    return Ok(new
+                    {
+                        message = "Aucun repas enregistré",
+                        repas = new List<object>()
+                    });
+                }
+
+                return Ok(repas);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Erreur lors de la récupération de l'historique des repas : {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Supprime un client de la base de données en fonction de son ID (US 1.4).
         /// </summary>
         /// <param name="id">L'ID du client à supprimer.</param>
-        /// <returns>Code 204 si succès, ou un code d'erreur.</returns>
+        /// <returns>Code 200 si succès, ou un code d'erreur.</returns>
         [HttpDelete("{id}")]
         public IActionResult DeleteClient(int id)
         {

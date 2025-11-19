@@ -14,6 +14,7 @@ builder.Services.AddScoped<IPlatDAO, PlatDAO>();
 builder.Services.AddScoped<AllergeneDAO>();
 builder.Services.AddScoped<IClientDAO, ClientDAO>();
 builder.Services.AddScoped<IMenuDAO, MenuDAO>();
+builder.Services.AddScoped<IRepasDAO, RepasDAO>();
 
 // Enregistrement des services
 builder.Services.AddScoped<IClientService, ClientService>();
