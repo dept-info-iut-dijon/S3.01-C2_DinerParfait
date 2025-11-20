@@ -41,11 +41,11 @@ namespace EpicurAppIHM.Views
         {
             try
             {
-                var clients = await _httpClient.GetFromJsonAsync<List<Client>>("Client");
+                List<Client> clients = await _httpClient.GetFromJsonAsync<List<Client>>("Client");
                 if (clients != null)
                 {
                     Clients.Clear();
-                    foreach (var client in clients)
+                    foreach (Client client in clients)
                         Clients.Add(client);
                 }
             }
@@ -63,8 +63,8 @@ namespace EpicurAppIHM.Views
         {
             if (DataGridClients.SelectedItem is Client clientSelectionne)
             {
-                var ficheClient = new FicheClient(clientSelectionne.Id);
-                var result = ficheClient.ShowDialog();
+                FicheClient ficheClient = new FicheClient(clientSelectionne.Id);
+                bool? result = ficheClient.ShowDialog();
 
                 if (result == true)
                 {
@@ -79,8 +79,8 @@ namespace EpicurAppIHM.Views
         private void NouveauClient_Click(object sender, RoutedEventArgs e)
         {
             // Ouvrir la fiche client en mode création
-            var ficheClient = new FicheClient();
-            var result = ficheClient.ShowDialog();
+            FicheClient ficheClient = new FicheClient();
+            bool? result = ficheClient.ShowDialog();
 
             // Recharger la liste si un client a été créé
             if (result == true)

@@ -35,11 +35,11 @@ namespace EpicurAppIHM.Views
         {
             try
             {
-                var menus = await App.ApiClient.HttpClient.GetFromJsonAsync<List<MenuModel>>("Menu");
+                List<MenuModel> menus = await App.ApiClient.HttpClient.GetFromJsonAsync<List<MenuModel>>("Menu");
                 if (menus != null)
                 {
                     Menus.Clear();
-                    foreach (var menu in menus)
+                    foreach (MenuModel menu in menus)
                         Menus.Add(menu);
                 }
             }
@@ -58,7 +58,7 @@ namespace EpicurAppIHM.Views
             if (ListBoxMenus.SelectedItem is MenuModel menuSelectionne)
             {
                 // Ouvrir la fenêtre de consultation du menu (lecture seule)
-                var ficheMenu = new ConsultationMenu(menuSelectionne.Id);
+                ConsultationMenu ficheMenu = new ConsultationMenu(menuSelectionne.Id);
                 ficheMenu.ShowDialog();
 
                 // Recharger la liste après fermeture
@@ -71,7 +71,7 @@ namespace EpicurAppIHM.Views
         /// </summary>
         private void NouveauMenu_Click(object sender, RoutedEventArgs e)
         {
-            var creationMenu = new CreationMenu();
+            CreationMenu creationMenu = new CreationMenu();
             creationMenu.Closed += (s, args) => ChargerMenus(); // Recharger quand la fenêtre se ferme
             creationMenu.ShowDialog();
         }

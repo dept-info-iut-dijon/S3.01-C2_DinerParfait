@@ -42,7 +42,7 @@ namespace EpicurAppIHM.Views
         private void OuvrirEtiquettes_Click(object sender, RoutedEventArgs e)
         {
             // Créer une nouvelle instance de la fenêtre
-            var fenetreEtiquettes = new EtiquettesView();
+            EtiquettesView fenetreEtiquettes = new EtiquettesView();
 
             //L'afficher
             fenetreEtiquettes.ShowDialog();

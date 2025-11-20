@@ -228,7 +228,7 @@ namespace EpicurAppIHM.Views
             lstAllergenes.IsEnabled = true;
 
             // Restaurer l'apparence normale des champs
-            var normalBackground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#2a2a2a"));
+            SolidColorBrush normalBackground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#2a2a2a"));
             txtPrenom.Background = normalBackground;
             txtNom.Background = normalBackground;
             txtEmail.Background = normalBackground;
