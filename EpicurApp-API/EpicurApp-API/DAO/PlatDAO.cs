@@ -2,6 +2,7 @@
 using Microsoft.Data.Sqlite;
 using System.Collections.Generic;
 using System;
+using System.Linq;
 using EpicurAppLogic.Interfaces;
 using EpicurApp_API.Configuration;
 
@@ -13,14 +14,17 @@ namespace EpicurApp_API.DAO
     public class PlatDAO : IPlatDAO
     {
         private readonly string _connexionString;
+        private readonly IIngredientDAO _ingredientDAO;
 
         /// <summary>
         /// Initialise une nouvelle instance de PlatDAO.
         /// </summary>
         /// <param name="databaseConfiguration">Configuration de la base de données.</param>
-        public PlatDAO(DatabaseConfiguration databaseConfiguration)
+        /// <param name="ingredientDAO">DAO des ingrédients pour la gestion des ingrédients liés aux plats.</param>
+        public PlatDAO(DatabaseConfiguration databaseConfiguration, IIngredientDAO ingredientDAO)
         {
             _connexionString = databaseConfiguration.GetConnectionString();
+            _ingredientDAO = ingredientDAO;
         }
 
         /// <summary>
@@ -30,7 +34,7 @@ namespace EpicurApp_API.DAO
         public List<Plat> GetAll()
         {
             List<Plat> plats = new List<Plat>();
-            const string query = "SELECT Id, Nom, Categorie, IngredientsPrincipaux FROM Plats ORDER BY Categorie, Nom;";
+            const string query = "SELECT Id, Nom, Categorie FROM Plats ORDER BY Categorie, Nom;";
 
             using (SqliteConnection connexion = new SqliteConnection(_connexionString))
             {
@@ -40,11 +44,13 @@ namespace EpicurApp_API.DAO
                 {
                     while (reader.Read())
                     {
-                        plats.Add(MapperPlatDepuisReader(reader));
+                        var plat = MapperPlatDepuisReader(reader);
+                        // Remplissage de la List<Ingredient> via le DAO injecté
+                        plat.IngredientsPrincipaux = _ingredientDAO.GetIngredientsByPlatId(plat.Id);
+                        plats.Add(plat);
                     }
                 }
             }
-
             return plats;
         }
 
@@ -56,7 +62,7 @@ namespace EpicurApp_API.DAO
         public Plat? GetById(int id)
         {
             Plat? plat = null;
-            const string query = "SELECT Id, Nom, Categorie, IngredientsPrincipaux FROM Plats WHERE Id = @Id;";
+            const string query = "SELECT Id, Nom, Categorie FROM Plats WHERE Id = @Id;";
 
             using (SqliteConnection connection = new SqliteConnection(_connexionString))
             {
@@ -70,11 +76,12 @@ namespace EpicurApp_API.DAO
                         if (reader.Read())
                         {
                             plat = MapperPlatDepuisReader(reader);
+                            // Remplissage de la liste
+                            plat.IngredientsPrincipaux = _ingredientDAO.GetIngredientsByPlatId(plat.Id);
                         }
                     }
                 }
             }
-
             return plat;
         }
 
@@ -84,7 +91,8 @@ namespace EpicurApp_API.DAO
         /// <param name="plat">Le plat à ajouter.</param>
         public void Add(Plat plat)
         {
-            const string query = "INSERT INTO Plats (Nom, Categorie, IngredientsPrincipaux) VALUES (@Nom, @Categorie, @IngredientsPrincipaux);";
+            // On insert le plat. La colonne IngredientsPrincipaux (texte) est laissée vide ou par défaut.
+            const string query = "INSERT INTO Plats (Nom, Categorie, IngredientsPrincipaux) VALUES (@Nom, @Categorie, '');";
 
             using (SqliteConnection connection = new SqliteConnection(_connexionString))
             {
@@ -93,14 +101,19 @@ namespace EpicurApp_API.DAO
                 {
                     command.Parameters.AddWithValue("@Nom", plat.Nom);
                     command.Parameters.AddWithValue("@Categorie", plat.Categorie.ToString());
-                    command.Parameters.AddWithValue("@IngredientsPrincipaux",
-                        plat.IngredientsPrincipaux != null ? string.Join(", ", plat.IngredientsPrincipaux) : string.Empty);
 
                     command.ExecuteNonQuery();
 
                     command.CommandText = "SELECT last_insert_rowid();";
                     plat.Id = Convert.ToInt32(command.ExecuteScalar());
                 }
+            }
+
+            // Gestion de la table de liaison via IngredientDAO
+            if (plat.IngredientsPrincipaux != null && plat.IngredientsPrincipaux.Any())
+            {
+                var ids = plat.IngredientsPrincipaux.Select(i => i.Id).ToList();
+                _ingredientDAO.AssocierIngredientsAuPlat(plat.Id, ids);
             }
         }
 
@@ -110,7 +123,7 @@ namespace EpicurApp_API.DAO
         /// <param name="plat">Le plat avec les informations mises à jour.</param>
         public void Update(Plat plat)
         {
-            const string query = "UPDATE Plats SET Nom = @Nom, Categorie = @Categorie, IngredientsPrincipaux = @IngredientsPrincipaux WHERE Id = @Id;";
+            const string query = "UPDATE Plats SET Nom = @Nom, Categorie = @Categorie WHERE Id = @Id;";
 
             using (SqliteConnection connection = new SqliteConnection(_connexionString))
             {
@@ -120,11 +133,16 @@ namespace EpicurApp_API.DAO
                     command.Parameters.AddWithValue("@Id", plat.Id);
                     command.Parameters.AddWithValue("@Nom", plat.Nom);
                     command.Parameters.AddWithValue("@Categorie", plat.Categorie.ToString());
-                    command.Parameters.AddWithValue("@IngredientsPrincipaux",
-                        plat.IngredientsPrincipaux != null ? string.Join(", ", plat.IngredientsPrincipaux) : string.Empty);
 
                     command.ExecuteNonQuery();
                 }
+            }
+
+            // Mise à jour des liaisons
+            if (plat.IngredientsPrincipaux != null)
+            {
+                var ids = plat.IngredientsPrincipaux.Select(i => i.Id).ToList();
+                _ingredientDAO.AssocierIngredientsAuPlat(plat.Id, ids);
             }
         }
 
@@ -164,20 +182,12 @@ namespace EpicurApp_API.DAO
                 categorie = CategoriePlat.PlatPrincipal;
             }
 
-            // Conversion des ingrédients string en liste
-            string ingredientsString = reader.IsDBNull(3) ? string.Empty : reader.GetString(3);
-            List<string> ingredients = new List<string>();
-            if (!string.IsNullOrWhiteSpace(ingredientsString))
-            {
-                ingredients = new List<string>(ingredientsString.Split(new[] { ", " }, StringSplitOptions.RemoveEmptyEntries));
-            }
-
             return new Plat
             {
                 Id = reader.GetInt32(0),
                 Nom = reader.GetString(1),
                 Categorie = categorie,
-                IngredientsPrincipaux = ingredients
+                IngredientsPrincipaux = new List<Ingredient>()
             };
         }
     }

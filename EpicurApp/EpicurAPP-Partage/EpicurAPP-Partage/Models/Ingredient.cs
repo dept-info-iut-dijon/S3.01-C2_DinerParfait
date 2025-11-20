@@ -5,6 +5,15 @@ namespace EpicurAPP_Partage.Models
     /// </summary>
     public class Ingredient
     {
+        public enum CategorieIngredient
+        {
+            FruitLegume,
+            ViandePoisson,
+            Epicerie,
+            Cremerie,
+            Boisson,
+            Autre
+        }
         /// <summary>
         /// Identifiant unique de l'ingrédient.
         /// </summary>
@@ -24,5 +33,6 @@ namespace EpicurAPP_Partage.Models
         {
             return Nom;
         }
+        public CategorieIngredient Categorie { get; set; } = CategorieIngredient.Autre;
     }
 }

@@ -22,7 +22,7 @@ namespace EpicurAppIHM.Views
         /// <summary>
         /// Charge les menus
         /// </summary>
-        /// <exception cref="Exception">Erreur de chargement des menus</exception>
+        /// <exception cref="Exception">Erreur de chargement du menus</exception>
         private async void ChargerMenu()
         {
             try
@@ -78,8 +78,59 @@ namespace EpicurAppIHM.Views
         }
 
         /// <summary>
-        /// Ferme la fenetre actuelle
+        /// Génère et affiche la liste de courses pour le menu actuel
         /// </summary>
+        private async void GenererListeCourses_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                // Désactiver le bouton pendant la génération
+                btnGenererListeCourses.IsEnabled = false;
+                btnGenererListeCourses.Content = "Génération en cours...";
+
+                // Appeler l'API pour générer la liste de courses
+                var response = await App.ApiClient.HttpClient.GetAsync($"Menu/{_menuId}/courses");
+                
+                if (response.IsSuccessStatusCode)
+                {
+                    var listeCourses = await response.Content.ReadFromJsonAsync<List<ElementListeCourse>>();
+                    
+                    if (listeCourses != null && listeCourses.Any())
+                    {
+                        // Ouvrir la fenêtre d'affichage de la liste de courses
+                        var fenetreListeCourses = new AffichageListeCourses(listeCourses, txtNom.Text);
+                        fenetreListeCourses.ShowDialog();
+                    }
+                    else
+                    {
+                        MessageBox.Show("Aucun ingrédient trouvé pour ce menu.", "Information", 
+                            MessageBoxButton.OK, MessageBoxImage.Information);
+                    }
+                }
+                else
+                {
+                    MessageBox.Show("Erreur lors de la génération de la liste de courses.", "Erreur", 
+                        MessageBoxButton.OK, MessageBoxImage.Error);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erreur lors de la génération de la liste de courses : {ex.Message}", 
+                    "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
+            }
+            finally
+            {
+                // Réactiver le bouton
+                btnGenererListeCourses.IsEnabled = true;
+                btnGenererListeCourses.Content = "Générer la liste de courses";
+            }
+        }
+
+        /// <summary>
+        /// Ferme la fenetre
+        /// </summary>
+        /// <param name="sender">Envoie</param>
+        /// <param name="e">Argument</param>
         private void Fermer_Click(object sender, RoutedEventArgs e)
         {
             this.Close();

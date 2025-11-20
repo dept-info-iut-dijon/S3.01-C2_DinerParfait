@@ -69,21 +69,33 @@
                 </StackPanel>
             </ScrollViewer>
 
-            <!-- Bouton Fermer -->
-            <Button Grid.Row="3"
-                    x:Name="btnFermer"
-                    Content="Fermer"
-                    Width="150"
-                    Height="45"
-                    HorizontalAlignment="Center"
-                    Margin="0,20,0,0"
-                    Background="#D4AF37"
-                    Foreground="#1a1a1a"
-                    BorderThickness="0"
-                    FontSize="15"
-                    FontWeight="Bold"
-                    Cursor="Hand"
-                    Click="Fermer_Click"/>
+            <!-- Boutons -->
+            <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,20,0,0">
+                <Button x:Name="btnGenererListeCourses"
+                        Content="Générer la liste de courses"
+                        Width="200"
+                        Height="45"
+                        Margin="0,0,15,0"
+                        Background="#2E8B57"
+                        Foreground="White"
+                        BorderThickness="0"
+                        FontSize="13"
+                        FontWeight="Bold"
+                        Cursor="Hand"
+                        Click="GenererListeCourses_Click"/>
+                
+                <Button x:Name="btnFermer"
+                        Content="Fermer"
+                        Width="150"
+                        Height="45"
+                        Background="#D4AF37"
+                        Foreground="#1a1a1a"
+                        BorderThickness="0"
+                        FontSize="15"
+                        FontWeight="Bold"
+                        Cursor="Hand"
+                        Click="Fermer_Click"/>
+            </StackPanel>
         </Grid>
     </Border>
 </Window>
