@@ -35,5 +35,17 @@ namespace EpicurAppIHM.Views
        
             MenusViewControl.ChargerMenus();
         }
+
+        /// <summary>
+        /// Affiche la vue des étiquettes
+        /// </summary>
+        private void OuvrirEtiquettes_Click(object sender, RoutedEventArgs e)
+        {
+            // Créer une nouvelle instance de la fenêtre
+            var fenetreEtiquettes = new EtiquettesView();
+
+            //L'afficher
+            fenetreEtiquettes.ShowDialog();
+        }
     }
 }

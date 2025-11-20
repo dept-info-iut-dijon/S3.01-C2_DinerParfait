@@ -25,9 +25,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Resource Include="Police\arial.ttf">
+    <Content Include="Police\arial.ttf">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Resource>
+    </Content>
     <Resource Include="Police\PlayfairDisplay-Bold.ttf" />
     <Resource Include="Police\PlayfairDisplay-Italic.ttf" />
     <Resource Include="Police\PlayfairDisplay-Regular.ttf" />
