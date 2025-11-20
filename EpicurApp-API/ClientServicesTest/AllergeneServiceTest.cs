@@ -58,7 +58,7 @@ namespace Test
             Exception exceptionDAO = new Exception("Erreur SQLite");
             _mockAllergeneDAO.Setup(dao => dao.GetAll()).Throws(exceptionDAO);
 
-            ApplicationException exceptionVoulue = null;
+            ApplicationException? exceptionVoulue = null;
             try
             {
                 _allergeneService.GetAll();
@@ -114,7 +114,7 @@ namespace Test
             Exception exceptionDAO = new Exception("Erreur SQLite");
             _mockAllergeneDAO.Setup(dao => dao.GetAllergenesByClient(clientId)).Throws(exceptionDAO);
 
-            ApplicationException exceptionVoulue = null;
+            ApplicationException? exceptionVoulue = null;
             try
             {
                 _allergeneService.GetAllergenesByClient(clientId);
@@ -148,7 +148,7 @@ namespace Test
             int clientId = 5;
             List<int> allergeneIds = new List<int>();
 
-            InvalidFieldException exceptionVoulue = null;
+            InvalidFieldException? exceptionVoulue = null;
             try
             {
                 _allergeneService.AjouterAllergenesAuClient(clientId, allergeneIds);
@@ -167,12 +167,12 @@ namespace Test
         public void AjouterAllergenesAuClient_LanceInvalidFieldException_QuandListeNull()
         {
             int clientId = 5;
-            List<int> allergeneIds = null;
+            List<int>? allergeneIds = null;
 
-            InvalidFieldException exceptionVoulue = null;
+            InvalidFieldException? exceptionVoulue = null;
             try
             {
-                _allergeneService.AjouterAllergenesAuClient(clientId, allergeneIds);
+                _allergeneService.AjouterAllergenesAuClient(clientId, allergeneIds!);
             }
             catch (InvalidFieldException ex)
             {
@@ -193,7 +193,7 @@ namespace Test
 
             _mockAllergeneDAO.Setup(dao => dao.AjouterAllergenesAuClient(clientId, allergeneIds)).Throws(exceptionDAO);
 
-            ApplicationException exceptionVoulue = null;
+            ApplicationException? exceptionVoulue = null;
             try
             {
                 _allergeneService.AjouterAllergenesAuClient(clientId, allergeneIds);
@@ -221,9 +221,9 @@ namespace Test
         [Fact]
         public void AjouterAllergene_LanceInvalidFieldException_QuandNomNull()
         {
-            Allergene allergeneInvalide = new Allergene { Nom = null, Description = "Description" };
+            Allergene allergeneInvalide = new Allergene { Nom = null!, Description = "Description" };
 
-            InvalidFieldException exceptionVoulue = null;
+            InvalidFieldException? exceptionVoulue = null;
             try
             {
                 _allergeneService.AjouterAllergene(allergeneInvalide);
@@ -243,7 +243,7 @@ namespace Test
         {
             Allergene allergeneInvalide = new Allergene { Nom = "   ", Description = "Description" };
                 
-            InvalidFieldException exceptionVoulue = null;
+            InvalidFieldException? exceptionVoulue = null;
             try
             {
                 _allergeneService.AjouterAllergene(allergeneInvalide);
@@ -266,7 +266,7 @@ namespace Test
 
             _mockAllergeneDAO.Setup(dao => dao.AjouterAllergene(allergene)).Throws(exceptionDAO);
 
-            ApplicationException exceptionVoulue = null;
+            ApplicationException? exceptionVoulue = null;
             try
             {
                 _allergeneService.AjouterAllergene(allergene);

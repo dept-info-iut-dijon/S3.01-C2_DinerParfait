@@ -62,7 +62,7 @@ namespace EpicurApp_API.DAO
         /// </summary>
         /// <param name="id">Identifiant du client.</param>
         /// <returns>Le client trouvé ou null.</returns>
-        public Client GetById(int id)
+        public Client? GetById(int id)
         {
             using (var connection = new SqliteConnection(_connectionString))
             {
@@ -250,9 +250,9 @@ namespace EpicurApp_API.DAO
         /// </summary>
         /// <param name="id">Identifiant du client.</param>
         /// <returns>Le client avec ses allergènes ou null.</returns>
-        public Client RechercherClientParId(int id)
+        public Client? RechercherClientParId(int id)
         {
-            Client client = GetById(id); // charge les infos de base
+            Client? client = GetById(id); // charge les infos de base
 
             if (client != null)
             {
@@ -294,9 +294,9 @@ namespace EpicurApp_API.DAO
         /// </summary>
         /// <param name="id">Identifiant du client.</param>
         /// <returns>Le client avec son historique ou null.</returns>
-        public async Task<Client> GetByIdWithHistoryAsync(int id)
+        public async Task<Client?> GetByIdWithHistoryAsync(int id)
         {
-            Client client = null;
+            Client? client = null;
 
             using (var connection = new SqliteConnection(_connectionString))
             {

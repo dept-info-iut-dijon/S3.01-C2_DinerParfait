@@ -14,7 +14,7 @@ namespace EpicurAppLogic.Interfaces
         /// <param name="id">Identifiant du client.</param>
         /// <returns>Le client trouvé.</returns>
         /// <exception cref="EpicurAPP_Partage.Exceptions.EntityNotFoundException">Si le client n'existe pas.</exception>
-        Client GetById(int id);
+        Client? GetById(int id);
 
         /// <summary>
         /// Récupère un client avec son historique complet de menus.
@@ -22,7 +22,7 @@ namespace EpicurAppLogic.Interfaces
         /// <param name="id">Identifiant du client.</param>
         /// <returns>Le client avec son historique de menus.</returns>
         /// <exception cref="EpicurAPP_Partage.Exceptions.EntityNotFoundException">Si le client n'existe pas.</exception>
-        Task<Client> GetByIdWithHistoryAsync(int id);
+        Task<Client?> GetByIdWithHistoryAsync(int id);
 
         /// <summary>
         /// Récupère tous les clients.
@@ -54,7 +54,7 @@ namespace EpicurAppLogic.Interfaces
         /// <param name="clientId">Identifiant du client.</param>
         /// <param name="allergeneIds">Liste des identifiants d'allergènes à associer.</param>
         void AjouterAllergenesAuClient(int clientId, List<int> allergeneIds);
-        Client RechercherClientParId(int id);
+        Client? RechercherClientParId(int id);
     }
 }
 

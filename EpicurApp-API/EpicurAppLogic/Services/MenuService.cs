@@ -1,8 +1,6 @@
 ﻿using EpicurAppLogic.Interfaces;
 using EpicurAPP_Partage.Models;
-using System.Collections.Generic;
-using EpicurAPP_Partage.Exceptions; 
-using System.Linq;
+using EpicurAPP_Partage.Exceptions;
 
 namespace EpicurAppLogic.Services
 {
@@ -156,26 +154,26 @@ namespace EpicurAppLogic.Services
         /// <exception cref="InvalidFieldException">Menu non valide</exception>
         public List<ElementListeCourse> GenererListeCourses(int menuId)
         {
-            Menu menu = _menuDAO.GetById(menuId);
-            if (menu == null) 
+            Menu? menu = _menuDAO.GetById(menuId);
+            if (menu == null)
                 throw new InvalidFieldException($"Menu {menuId} introuvable.");
 
             List<int> idsPlats = new List<int?>
             {
-                menu.AmuseBouche?.Id, 
-                menu.BoissonAperitif?.Id, 
+                menu.AmuseBouche?.Id,
+                menu.BoissonAperitif?.Id,
                 menu.Entree?.Id,
-                menu.PlatPrincipal?.Id, 
-                menu.Vin?.Id, 
-                menu.Fromage?.Id, 
+                menu.PlatPrincipal?.Id,
+                menu.Vin?.Id,
+                menu.Fromage?.Id,
                 menu.Dessert?.Id
-            }.Where(id => id.HasValue).Select(id => id.Value).ToList();
+            }.Where(id => id.HasValue).Select(id => id!.Value).ToList();
 
             List<Ingredient> tousLesIngredients = new List<Ingredient>();
 
             foreach (int platId in idsPlats)
             {
-                Plat plat = _platDAO.GetById(platId);
+                Plat? plat = _platDAO.GetById(platId);
                 if (plat?.IngredientsPrincipaux != null)
                 {
                     tousLesIngredients.AddRange(plat.IngredientsPrincipaux);
@@ -209,6 +207,27 @@ namespace EpicurAppLogic.Services
             if (statut != "Brouillon" && statut != "Validé")
             {
                 throw new InvalidFieldException("Le statut du menu doit être 'Brouillon' ou 'Validé'.");
+            }
+        }
+
+        /// <summary>
+        /// Supprime un menu par son Id.
+        /// </summary>
+        /// <param name="id">Id du menu à supprimer</param>
+        /// <exception cref="InvalidFieldException">Id invalide</exception>
+        /// <exception cref="ApplicationException">Impossible de supprimer le menu</exception>
+        public void SupprimerMenu(int id)
+        {
+            if (id <= 0)
+                throw new InvalidFieldException("L'identifiant du menu est invalide.");
+
+            try
+            {
+                _menuDAO.SupprimerMenu(id);
+            }
+            catch (Exception ex)
+            {
+                throw new ApplicationException("Erreur lors de la suppression du menu.", ex);
             }
         }
     }

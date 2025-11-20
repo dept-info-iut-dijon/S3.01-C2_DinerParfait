@@ -66,12 +66,6 @@ namespace EpicurApp_API.DAO
 
                     command.ExecuteNonQuery();
                 }
-
-                using (SqliteCommand lastIdCommand = new SqliteCommand("SELECT last_insert_rowid();", connection))
-                {
-                    long lastId = (long)lastIdCommand.ExecuteScalar();
-                    menu.Id = Convert.ToInt32(lastId);
-                }
             }
         }
 
@@ -284,6 +278,26 @@ namespace EpicurApp_API.DAO
             menu.Dessert = dessertId.HasValue ? _platDAO.GetById(dessertId.Value) : null;
 
             return menu;
+        }
+
+        /// <summary>
+        /// Supprime un menu par son identifiant.
+        /// </summary>
+        /// <param name="id">Identifiant du menu à supprimer.</param>
+        public void SupprimerMenu(int id)
+        {
+            using (SqliteConnection connection = new SqliteConnection(_connectionString))
+            {
+                connection.Open();
+
+                string query = "DELETE FROM Menus WHERE Id = @Id";
+
+                using (SqliteCommand command = new SqliteCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@Id", id);
+                    command.ExecuteNonQuery();
+                }
+            }
         }
     }
 }

@@ -1,8 +1,6 @@
 ﻿using EpicurAPP_Partage.Models;
 using EpicurAPP_Partage.Exceptions;
 using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
-using System;
 using EpicurAppLogic.Interfaces;
 
 namespace EpicurApp_API.Controllers
@@ -24,7 +22,7 @@ namespace EpicurApp_API.Controllers
         {
             try
             {
-                var menus = _menuService.GetAll();
+                List<Menu> menus = _menuService.GetAll();
                 return Ok(menus);
             }
             catch (Exception ex)
@@ -37,7 +35,7 @@ namespace EpicurApp_API.Controllers
         [HttpGet("{id}")]
         public ActionResult<Menu> GetById(int id)
         {
-            var menu = _menuService.GetById(id);
+            Menu? menu = _menuService.GetById(id);
             if (menu == null) return NotFound();
             return Ok(menu);
         }
@@ -48,7 +46,7 @@ namespace EpicurApp_API.Controllers
         {
             try
             {
-                var liste = _menuService.GenererListeCourses(id);
+                List<ElementListeCourse> liste = _menuService.GenererListeCourses(id);
                 return Ok(liste);
             }
             catch (EntityNotFoundException)
@@ -90,6 +88,25 @@ namespace EpicurApp_API.Controllers
             catch (ValidationException ex)
             {
                 return BadRequest(ex.Message);
+            }
+        }
+
+        // DELETE: api/Menu/5
+        [HttpDelete("{id}")]
+        public ActionResult Delete(int id)
+        {
+            try
+            {
+                _menuService.SupprimerMenu(id);
+                return NoContent();
+            }
+            catch (InvalidFieldException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Erreur lors de la suppression du menu: {ex.Message}");
             }
         }
     }

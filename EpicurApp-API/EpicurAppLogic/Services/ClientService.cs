@@ -73,7 +73,7 @@ namespace EpicurAppLogic.Services
         {
             try
             {
-                Client client = _clientRepository.RechercherClientParId(id);
+                Client? client = _clientRepository.RechercherClientParId(id);
                 if (client == null)
                     throw new Exception($"Client avec l'id {id} introuvable.");
                 return client;
@@ -94,7 +94,7 @@ namespace EpicurAppLogic.Services
         {
             try
             {
-                Client client = await _clientRepository.GetByIdWithHistoryAsync(id);
+                Client? client = await _clientRepository.GetByIdWithHistoryAsync(id);
                 if (client == null)
                     throw new Exception($"Client avec l'id {id} introuvable.");
                 return client;
@@ -153,22 +153,22 @@ namespace EpicurAppLogic.Services
             try
             {
                 // Récupérer l'ancien client pour comparer
-                Client ancienClient = _clientRepository.RechercherClientParId(client.Id);
+                Client? ancienClient = _clientRepository.RechercherClientParId(client.Id);
 
                 // Trouver les champs modifiés avec anciennes et nouvelles valeurs
                 List<string> champsModifies = new List<string>();
 
-                if (ancienClient.Nom != client.Nom)
+                if (ancienClient != null && ancienClient.Nom != client.Nom)
                     champsModifies.Add($"Nom: {ancienClient.Nom} = {client.Nom}");
-                if (ancienClient.Prenom != client.Prenom)
+                if (ancienClient != null && ancienClient.Prenom != client.Prenom)
                     champsModifies.Add($"Prenom: {ancienClient.Prenom} = {client.Prenom}");
-                if (ancienClient.Email != client.Email)
+                if (ancienClient != null && ancienClient.Email != client.Email)
                     champsModifies.Add($"Email: {ancienClient.Email} = {client.Email}");
-                if (ancienClient.Telephone != client.Telephone)
+                if (ancienClient != null && ancienClient.Telephone != client.Telephone)
                     champsModifies.Add($"Telephone: {ancienClient.Telephone} = {client.Telephone}");
                 //if (ancienClient.PlatsNonApprecies != client.PlatsNonApprecies)
                 // champsModifies.Add($"PlatsNonApprecies: {ancienClient.PlatsNonApprecies} = {client.PlatsNonApprecies}");
-                if (ancienClient.Preferences != client.Preferences)
+                if (ancienClient != null && ancienClient.Preferences != client.Preferences)
                     champsModifies.Add($"Preferences: {ancienClient.Preferences} = {client.Preferences}");
 
                 // Mise à jour en base de données
@@ -196,7 +196,7 @@ namespace EpicurAppLogic.Services
             try
             {
                 // Récupérer les informations du client avant suppression pour le log
-                Client clientASupprimer = _clientRepository.RechercherClientParId(id);
+                Client? clientASupprimer = _clientRepository.RechercherClientParId(id);
 
                 if (clientASupprimer == null)
                 {
