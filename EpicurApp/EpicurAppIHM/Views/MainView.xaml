@@ -32,6 +32,14 @@
                             FontSize="16" FontWeight="SemiBold"
                             BorderThickness="0" Cursor="Hand"
                             Click="AfficherMenus"/>
+                    <Button x:Name="btnEtiquettes"
+                        Content="Éditer les Étiquettes"
+                        Width="200" Height="50"
+                        Background="#D4AF37" Foreground="White"
+                        FontSize="14" FontWeight="Bold"
+                        Margin="10"
+                        Cursor="Hand"
+                        Click="OuvrirEtiquettes_Click"/>
                 </StackPanel>
 
                 <TextBlock Grid.Column="1" Text="Epicur'app"
