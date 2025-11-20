@@ -87,18 +87,19 @@
                     <Rectangle Height="1" Fill="#8B1538" Margin="0,20,0,15"/>
 
                     <!-- Allergènes avec cases à cocher -->
-               
+
                     <Label Content="Allergènes" Foreground="#D4AF37" FontWeight="SemiBold" FontSize="13"/>
                     <Border BorderBrush="#D4AF37" BorderThickness="2" CornerRadius="8" Background="White" Padding="5">
-                        <Expander Header="Sélectionner les allergènes" Background="White" Foreground="Black">
-                            <ListBox x:Name="lstAllergenes" MaxHeight="150" Background="White" BorderThickness="0"
-                 ScrollViewer.VerticalScrollBarVisibility="Auto">
-                                <ListBox.ItemTemplate>
-                                    <DataTemplate>
-                                        <CheckBox Content="{Binding Nom}" Tag="{Binding Id}" Foreground="Black" Margin="5,3"/>
-                                    </DataTemplate>
-                                </ListBox.ItemTemplate>
-                            </ListBox>
+                        <Expander x:Name="expanderAllergenes" Header="Sélectionner les allergènes" Background="White" Foreground="Black" Expanded="ExpanderAllergenes_Expanded">
+                            <ScrollViewer MaxHeight="150" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                                <ItemsControl x:Name="lstAllergenes" Background="White">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <CheckBox Content="{Binding Nom}" Tag="{Binding Id}" Foreground="Black" Margin="5,3"/>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </ScrollViewer>
                         </Expander>
                     </Border>
 
@@ -134,7 +135,7 @@
                        BorderBrush="#D4AF37" BorderThickness="2" FontSize="14" 
                        FontWeight="SemiBold" Cursor="Hand" Click="Annuler"/>
 
-                <!-- Bouton Modifier (US 1.3) -->
+                <!-- Bouton Modifier -->
                 <Button x:Name="btnModifier" Content="Modifier" Width="110" Height="40"
                        Margin="0,0,10,0" Background="#D4AF37" Foreground="#1a1a1a" BorderThickness="0"
                        FontSize="14" FontWeight="Bold" Cursor="Hand" Click="ModifierClient" Visibility="Collapsed"/>
@@ -144,12 +145,12 @@
                        Margin="0,0,10,0" Background="#D4AF37" Foreground="#1a1a1a" BorderThickness="0"
                        FontSize="14" FontWeight="Bold" Cursor="Hand" Click="CreerClient"/>
 
-                <!-- Bouton Supprimer (US 1.4) -->
+                <!-- Bouton Supprimer -->
                 <Button x:Name="btnSupprimer" Content="Supprimer" Width="110" Height="40" 
                        Margin="0,0,10,0" Background="#EF4444" Foreground="White" BorderThickness="0" 
                        FontSize="14" FontWeight="Bold" Cursor="Hand" Visibility="Collapsed" Click="SupprimerClient"/>
 
-                <!-- Bouton Historique (US 1.5) - À DROITE -->
+                <!-- Bouton Historique -->
                 <Button x:Name="btnHistorique" Content="Historique" Width="110" Height="40"
                        Background="#8B1538" Foreground="White"
                        BorderBrush="#8B1538" BorderThickness="2" FontSize="14"

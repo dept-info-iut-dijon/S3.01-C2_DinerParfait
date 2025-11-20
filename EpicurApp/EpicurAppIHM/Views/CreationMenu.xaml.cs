@@ -29,16 +29,26 @@ namespace EpicurAppIHM.Views
         /// <summary>
         /// Intancie la fiche de creation menu
         /// </summary>
-        public CreationMenu()
+        /// <param name="menuId">ID du menu à charger (optionnel, charge le dernier brouillon si null)</param>
+        public CreationMenu(int? menuId = null)
         {
             InitializeComponent();
 
             _httpClient = App.ApiClient.HttpClient;
 
             ChargerPlats();
-            ChargerBrouillon();
+
+            if (menuId.HasValue)
+            {
+                ChargerMenu(menuId.Value);
+            }
+            else
+            {
+                ChargerBrouillon();
+            }
 
             btnAnnuler.Click += Annuler;
+            btnSupprimer.Click += SupprimerMenu;
             btnEnregistrerBrouillon.Click += EnregistrerBrouillon;
             btnValider.Click += ValiderMenu;
         }
@@ -186,6 +196,57 @@ namespace EpicurAppIHM.Views
         }
 
         /// <summary>
+        /// Charge un menu spécifique par son ID
+        /// </summary>
+        /// <param name="menuId">ID du menu à charger</param>
+        private void ChargerMenu(int menuId)
+        {
+            try
+            {
+                HttpResponseMessage response = _httpClient.GetAsync($"Menu/{menuId}").Result;
+
+                if (response.StatusCode == HttpStatusCode.NotFound)
+                {
+                    MessageBox.Show("Menu introuvable", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
+                    _menuBrouillonId = null;
+                    btnSupprimer.Visibility = Visibility.Collapsed;
+                    return;
+                }
+
+                response.EnsureSuccessStatusCode();
+
+                MenuModel? menu = response.Content.ReadFromJsonAsync<MenuModel>().Result;
+                if (menu != null)
+                {
+                    _menuBrouillonId = menu.Id;
+
+                    txtNomMenu.Text = menu.Nom;
+                    cmbAmuseGueule.SelectedValue = menu.AmuseBouche?.Id;
+                    cmbBoissonAperitif.SelectedValue = menu.BoissonAperitif?.Id;
+                    cmbEntree.SelectedValue = menu.Entree?.Id;
+                    cmbPlat.SelectedValue = menu.PlatPrincipal?.Id;
+                    cmbVin.SelectedValue = menu.Vin?.Id;
+                    cmbFromage.SelectedValue = menu.Fromage?.Id;
+                    cmbDessert.SelectedValue = menu.Dessert?.Id;
+
+                    btnSupprimer.Visibility = Visibility.Visible;
+                }
+                else
+                {
+                    _menuBrouillonId = null;
+                    btnSupprimer.Visibility = Visibility.Collapsed;
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erreur lors du chargement du menu : {ex.Message}",
+                    "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
+                _menuBrouillonId = null;
+                btnSupprimer.Visibility = Visibility.Collapsed;
+            }
+        }
+
+        /// <summary>
         /// Charge le brouillon du menu
         /// </summary>
         private void ChargerBrouillon()
@@ -207,6 +268,7 @@ namespace EpicurAppIHM.Views
                 {
                     _menuBrouillonId = menu.Id;
 
+                    txtNomMenu.Text = menu.Nom;
                     cmbAmuseGueule.SelectedValue = menu.AmuseBouche?.Id;
                     cmbBoissonAperitif.SelectedValue = menu.BoissonAperitif?.Id;
                     cmbEntree.SelectedValue = menu.Entree?.Id;
@@ -214,15 +276,19 @@ namespace EpicurAppIHM.Views
                     cmbVin.SelectedValue = menu.Vin?.Id;
                     cmbFromage.SelectedValue = menu.Fromage?.Id;
                     cmbDessert.SelectedValue = menu.Dessert?.Id;
+
+                    btnSupprimer.Visibility = Visibility.Visible;
                 }
                 else
                 {
                     _menuBrouillonId = null;
+                    btnSupprimer.Visibility = Visibility.Collapsed;
                 }
             }
             catch
             {
                 _menuBrouillonId = null;
+                btnSupprimer.Visibility = Visibility.Collapsed;
             }
         }
 
@@ -348,7 +414,7 @@ namespace EpicurAppIHM.Views
         private MenuModel ConstruireMenu(string statut)
         {
             MenuModel menu = new MenuModel();
-            menu.Nom = "Nouveau menu";
+            menu.Nom = string.IsNullOrWhiteSpace(txtNomMenu.Text) ? "Nouveau menu" : txtNomMenu.Text.Trim();
             menu.Date = DateTime.Now;
             menu.Statut = statut;
 
@@ -404,6 +470,7 @@ namespace EpicurAppIHM.Views
         /// </summary>
         private void ReinitialiserSelection()
         {
+            txtNomMenu.Text = "Nouveau menu";
             cmbAmuseGueule.SelectedIndex = -1;
             cmbBoissonAperitif.SelectedIndex = -1;
             cmbEntree.SelectedIndex = -1;
@@ -411,6 +478,62 @@ namespace EpicurAppIHM.Views
             cmbVin.SelectedIndex = -1;
             cmbFromage.SelectedIndex = -1;
             cmbDessert.SelectedIndex = -1;
+        }
+
+        /// <summary>
+        /// Supprime le menu/brouillon actuel
+        /// </summary>
+        private async void SupprimerMenu(object sender, RoutedEventArgs e)
+        {
+            if (!_menuBrouillonId.HasValue)
+            {
+                MessageBox.Show("Aucun menu à supprimer.", "Information",
+                    MessageBoxButton.OK, MessageBoxImage.Information);
+                return;
+            }
+
+            MessageBoxResult confirmation = MessageBox.Show(
+                "Êtes-vous sûr de vouloir supprimer ce menu ?\nCette action est irréversible.",
+                "Confirmation de suppression",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Warning);
+
+            if (confirmation == MessageBoxResult.Yes)
+            {
+                try
+                {
+                    btnSupprimer.IsEnabled = false;
+                    btnSupprimer.Content = "Suppression...";
+
+                    HttpResponseMessage response = await _httpClient.DeleteAsync($"Menu/{_menuBrouillonId}");
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        MessageBox.Show("Menu supprimé avec succès.", "Succès",
+                            MessageBoxButton.OK, MessageBoxImage.Information);
+
+                        _menuBrouillonId = null;
+                        ReinitialiserSelection();
+                        btnSupprimer.Visibility = Visibility.Collapsed;
+                        this.Close();
+                    }
+                    else
+                    {
+                        string errorDetails = await response.Content.ReadAsStringAsync();
+                        MessageBox.Show($"Erreur lors de la suppression du menu :\n{errorDetails}",
+                            "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
+                        btnSupprimer.IsEnabled = true;
+                        btnSupprimer.Content = "Supprimer";
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Erreur lors de la suppression du menu : {ex.Message}",
+                        "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
+                    btnSupprimer.IsEnabled = true;
+                    btnSupprimer.Content = "Supprimer";
+                }
+            }
         }
     }
 }

@@ -26,6 +26,10 @@ namespace EpicurAppIHM.Views
         /// </summary>
         private int? _clientId;
         private bool _modeModification;
+        /// <summary>
+        /// IDs des allergènes du client chargé
+        /// </summary>
+        private List<int> _allergenesClient = new List<int>();
 
         public FicheClient()
         {
@@ -67,7 +71,8 @@ namespace EpicurAppIHM.Views
         {
             try
             {
-                allergenes = await _httpClient.GetFromJsonAsync<List<Allergene>>("Allergenes");
+                List<Allergene> listeAllergenes = await _httpClient.GetFromJsonAsync<List<Allergene>>("Allergenes");
+                allergenes = listeAllergenes;
                 lstAllergenes.ItemsSource = allergenes;
             }
             catch (Exception ex)
@@ -105,7 +110,7 @@ namespace EpicurAppIHM.Views
                 // Plats non appréciés avec protection null
                 if (client.PlatsNonApprecies != null && client.PlatsNonApprecies.Count > 0)
                 {
-                    var nomsPlats = client.PlatsNonApprecies
+                    IEnumerable<string> nomsPlats = client.PlatsNonApprecies
                         .Where(p => p != null && !string.IsNullOrEmpty(p.Nom))
                         .Select(p => p.Nom);
                     txtPlatsNonApprecies.Text = string.Join(", ", nomsPlats);
@@ -115,25 +120,22 @@ namespace EpicurAppIHM.Views
                     txtPlatsNonApprecies.Text = string.Empty;
                 }
 
-                // Cocher les allergènes du client
+                // Stocker les IDs des allergènes du client
                 if (client.Allergenes != null && client.Allergenes.Count > 0)
                 {
-                    // Attendre que la liste soit chargée
-                    await Task.Delay(200);
+                    List<int> idsClient = client.Allergenes.Select(a => a.Id).ToList();
+                    _allergenesClient = idsClient;
 
-                    foreach (var item in lstAllergenes.Items)
-                    {
-                        var container = lstAllergenes.ItemContainerGenerator.ContainerFromItem(item) as ListBoxItem;
-                        if (container != null)
-                        {
-                            var checkBox = TrouverCheckBox(container);
-                            if (checkBox != null)
-                            {
-                                int allergeneId = (int)checkBox.Tag;
-                                checkBox.IsChecked = client.Allergenes.Any(a => a.Id == allergeneId);
-                            }
-                        }
-                    }
+                    // Mettre à jour le header de l'Expander
+                    int nbAllergenes = _allergenesClient.Count;
+                    expanderAllergenes.Header = nbAllergenes > 0
+                        ? $"Allergènes du client ({nbAllergenes})"
+                        : "Aucun allergène";
+                }
+                else
+                {
+                    _allergenesClient.Clear();
+                    expanderAllergenes.Header = "Aucun allergène";
                 }
             }
             catch (Exception ex)
@@ -151,15 +153,39 @@ namespace EpicurAppIHM.Views
         {
             for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
             {
-                var child = VisualTreeHelper.GetChild(parent, i);
+                DependencyObject child = VisualTreeHelper.GetChild(parent, i);
                 if (child is CheckBox checkBox)
                     return checkBox;
 
-                var result = TrouverCheckBox(child);
+                CheckBox result = TrouverCheckBox(child);
                 if (result != null)
                     return result;
             }
             return null;
+        }
+
+        /// <summary>
+        /// Gère l'expansion de l'Expander pour cocher les allergènes du client
+        /// </summary>
+        private void ExpanderAllergenes_Expanded(object sender, RoutedEventArgs e)
+        {
+            // Forcer la génération des conteneurs
+            lstAllergenes.UpdateLayout();
+
+            // Cocher les allergènes correspondants
+            foreach (object item in lstAllergenes.Items)
+            {
+                ContentPresenter container = lstAllergenes.ItemContainerGenerator.ContainerFromItem(item) as ContentPresenter;
+                if (container != null)
+                {
+                    CheckBox checkBox = TrouverCheckBox(container);
+                    if (checkBox != null && checkBox.Tag != null)
+                    {
+                        int allergeneId = (int)checkBox.Tag;
+                        checkBox.IsChecked = _allergenesClient.Contains(allergeneId);
+                    }
+                }
+            }
         }
 
         /// <summary>
@@ -169,12 +195,12 @@ namespace EpicurAppIHM.Views
         {
             List<int> ids = new List<int>();
 
-            foreach (var item in lstAllergenes.Items)
+            foreach (object item in lstAllergenes.Items)
             {
-                var container = lstAllergenes.ItemContainerGenerator.ContainerFromItem(item) as ListBoxItem;
+                ContentPresenter container = lstAllergenes.ItemContainerGenerator.ContainerFromItem(item) as ContentPresenter;
                 if (container != null)
                 {
-                    var checkBox = TrouverCheckBox(container);
+                    CheckBox checkBox = TrouverCheckBox(container);
                     if (checkBox != null && checkBox.IsChecked == true)
                     {
                         ids.Add((int)checkBox.Tag);
@@ -196,18 +222,25 @@ namespace EpicurAppIHM.Views
             txtPreferences.IsReadOnly = true;
             lstAllergenes.IsEnabled = false;
 
-            txtPrenom.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#3a3a3a"));
-            txtNom.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#3a3a3a"));
-            txtEmail.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#3a3a3a"));
-            txtTelephone.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#3a3a3a"));
-            txtPlatsNonApprecies.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#3a3a3a"));
-            txtPreferences.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#3a3a3a"));
+            SolidColorBrush couleurConsultation = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#3a3a3a"));
+            txtPrenom.Background = couleurConsultation;
+            txtNom.Background = couleurConsultation;
+            txtEmail.Background = couleurConsultation;
+            txtTelephone.Background = couleurConsultation;
+            txtPlatsNonApprecies.Background = couleurConsultation;
+            txtPreferences.Background = couleurConsultation;
+
+            // Mettre à jour le header de l'Expander selon le nombre d'allergènes
+            int nbAllergenes = _allergenesClient.Count;
+            expanderAllergenes.Header = nbAllergenes > 0
+                ? $"Allergènes du client ({nbAllergenes})"
+                : "Aucun allergène";
 
             // Configuration des boutons pour la consultation avec modification, suppression ET historique
             btnCreer.Visibility = Visibility.Collapsed;
-            btnHistorique.Visibility = Visibility.Visible; 
-            btnModifier.Visibility = Visibility.Visible;  
-            btnSupprimer.Visibility = Visibility.Visible;   
+            btnHistorique.Visibility = Visibility.Visible;
+            btnModifier.Visibility = Visibility.Visible;
+            btnSupprimer.Visibility = Visibility.Visible;
             btnAnnuler.Content = "Fermer";
         }
 
@@ -243,6 +276,9 @@ namespace EpicurAppIHM.Views
             btnCreer.Visibility = Visibility.Visible;
             btnCreer.Content = "Enregistrer";
             btnAnnuler.Content = "Annuler";
+
+            // Changer le header de l'Expander en mode modification
+            expanderAllergenes.Header = "Sélectionner les allergènes";
         }
 
         private void ValiderPrenom(object sender, RoutedEventArgs e)
@@ -335,7 +371,7 @@ namespace EpicurAppIHM.Views
             // Si on est en mode modification, retourner au mode consultation
             if (btnCreer.Visibility == Visibility.Visible && _modeModification && _clientId.HasValue)
             {
-                var result = MessageBox.Show("Voulez-vous abandonner les modifications ?",
+                MessageBoxResult result = MessageBox.Show("Voulez-vous abandonner les modifications ?",
                                            "Confirmation", MessageBoxButton.YesNo, MessageBoxImage.Question);
                 if (result == MessageBoxResult.Yes)
                 {
@@ -365,7 +401,7 @@ namespace EpicurAppIHM.Views
             // MODE MODIFICATION
             if (_modeModification)
             {
-                var confirmation = MessageBox.Show("Voulez-vous enregistrer les modifications ?",
+                MessageBoxResult confirmation = MessageBox.Show("Voulez-vous enregistrer les modifications ?",
                                                  "Confirmation", MessageBoxButton.YesNo, MessageBoxImage.Question);
 
                 if (confirmation != MessageBoxResult.Yes)
@@ -390,7 +426,6 @@ namespace EpicurAppIHM.Views
 
                     if (response.IsSuccessStatusCode)
                     {
-                        // Envoyer les allergènes cochés
                         List<int> allergenesCoches = GetAllergenesCoches();
                         await _httpClient.PostAsJsonAsync($"Client/{_clientId.Value}/allergenes", allergenesCoches);
 
@@ -443,7 +478,6 @@ namespace EpicurAppIHM.Views
                     {
                         Client clientCree = await response.Content.ReadFromJsonAsync<Client>();
 
-                        // Envoyer les allergènes cochés
                         List<int> allergenesCoches = GetAllergenesCoches();
                         if (clientCree != null && allergenesCoches.Count > 0)
                         {
@@ -485,14 +519,14 @@ namespace EpicurAppIHM.Views
         {
             if (!_clientId.HasValue) return;
 
-            //Confirmation de suppressio,
-            var result = MessageBox.Show($"Êtes-vous sûr de vouloir supprimer ce client ({txtPrenom.Text} {txtNom.Text}) ?","Confirmation de suppression", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+            MessageBoxResult result = MessageBox.Show($"Êtes-vous sûr de vouloir supprimer ce client ({txtPrenom.Text} {txtNom.Text}) ?",
+                                                      "Confirmation de suppression", MessageBoxButton.YesNo, MessageBoxImage.Warning);
 
             if (result == MessageBoxResult.No) return;
 
             try
             {
-                var response = await _httpClient.DeleteAsync($"Client/{_clientId}");
+                HttpResponseMessage response = await _httpClient.DeleteAsync($"Client/{_clientId}");
 
                 if (response.IsSuccessStatusCode)
                 {

@@ -120,9 +120,53 @@ namespace EpicurAppIHM.Views
             }
             finally
             {
-                // Réactiver le bouton
                 btnGenererListeCourses.IsEnabled = true;
                 btnGenererListeCourses.Content = "Générer la liste de courses";
+            }
+        }
+
+        /// <summary>
+        /// Supprime le menu actuel
+        /// </summary>
+        private async void Supprimer_Click(object sender, RoutedEventArgs e)
+        {
+            MessageBoxResult confirmation = MessageBox.Show(
+                "Êtes-vous sûr de vouloir supprimer ce menu ?\nCette action est irréversible.",
+                "Confirmation de suppression",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Warning);
+
+            if (confirmation == MessageBoxResult.Yes)
+            {
+                try
+                {
+                    btnSupprimer.IsEnabled = false;
+                    btnSupprimer.Content = "Suppression...";
+
+                    var response = await App.ApiClient.HttpClient.DeleteAsync($"Menu/{_menuId}");
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        MessageBox.Show("Menu supprimé avec succès.", "Succès",
+                            MessageBoxButton.OK, MessageBoxImage.Information);
+                        this.Close();
+                    }
+                    else
+                    {
+                        string errorDetails = await response.Content.ReadAsStringAsync();
+                        MessageBox.Show($"Erreur lors de la suppression du menu :\n{errorDetails}",
+                            "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
+                        btnSupprimer.IsEnabled = true;
+                        btnSupprimer.Content = "Supprimer";
+                    }
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show($"Erreur lors de la suppression du menu : {ex.Message}",
+                        "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
+                    btnSupprimer.IsEnabled = true;
+                    btnSupprimer.Content = "Supprimer";
+                }
             }
         }
 
