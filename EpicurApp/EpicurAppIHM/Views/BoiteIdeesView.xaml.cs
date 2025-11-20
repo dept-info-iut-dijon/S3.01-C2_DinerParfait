@@ -9,7 +9,7 @@ using System.Windows.Input;
 namespace EpicurAppIHM.Views
 {
     /// <summary>
-    /// Page d'affichage de la boîte à idées
+    /// Page d'affichage de la boite a idee
     /// </summary>
     public partial class BoiteIdeesView : UserControl
     {
@@ -48,7 +48,7 @@ namespace EpicurAppIHM.Views
         }
 
         /// <summary>
-        /// Ouvre la fiche pour créer une nouvelle idée
+        /// Ouvre la fiche pour créer une nv idée
         /// </summary>
         private void NouvelleIdee_Click(object sender, RoutedEventArgs e)
         {
@@ -62,7 +62,7 @@ namespace EpicurAppIHM.Views
         }
 
         /// <summary>
-        /// Ouvre la fiche pour modifier une idée existante
+        /// Ouvre la fiche pour modifier une idee
         /// </summary>
         private void DataGridIdees_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {

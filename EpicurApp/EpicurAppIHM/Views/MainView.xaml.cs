@@ -39,7 +39,7 @@ namespace EpicurAppIHM.Views
         }
 
         /// <summary>
-        /// Affiche la vue de la boîte à idées
+        /// Affiche la vue  boite a idees
         /// </summary>
         private void AfficherBoiteIdees(object sender, RoutedEventArgs e)
         {

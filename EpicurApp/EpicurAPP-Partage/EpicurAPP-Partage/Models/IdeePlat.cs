@@ -7,37 +7,37 @@ using System.Threading.Tasks;
 namespace EpicurAPP_Partage.Models
 {
     /// <summary>
-    /// Représente une idée de plat dans la boîte à idées du chef.
+    /// idée de plat
     /// </summary>
     public class IdeePlat
     {
         /// <summary>
-        /// Identifiant unique de l'idée.
+        /// Id unique
         /// </summary>
         public int Id { get; set; }
 
         /// <summary>
-        /// Titre de l'idée de plat.
+        /// Titre de plat
         /// </summary>
         public string Titre { get; set; } = "";
 
         /// <summary>
-        /// Description du plat envisagé.
+        /// Description du plat
         /// </summary>
         public string Description { get; set; } = "";
 
         /// <summary>
-        /// Catégorie du plat (Entrée, Plat principal, Dessert...).
+        /// Categorie du plat
         /// </summary>
         public string Categorie { get; set; } = "";
 
         /// <summary>
-        /// Notes personnelles du chef.
+        /// Notes du chef.
         /// </summary>
         public string Notes { get; set; } = "";
 
         /// <summary>
-        /// Date de création de l'idée.
+        /// Date de création
         /// </summary>
         public string DateCreation { get; set; } = "";
     }
