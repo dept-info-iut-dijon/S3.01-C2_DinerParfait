@@ -10,14 +10,17 @@ namespace EpicurAppLogic.Services
     public class ClientService : IClientService
     {
         private IClientDAO _clientRepository;
+        private IRepasDAO _repasRepository;
 
         /// <summary>
         /// Constructeur de la classe ClientService
         /// </summary>
         /// <param name="clientRepository">Le DAO pour interagir avec le client</param>
-        public ClientService(IClientDAO clientRepository)
+        /// <param name="repasRepository">Le DAO pour interagir avec les repas</param>
+        public ClientService(IClientDAO clientRepository, IRepasDAO repasRepository)
         {
             _clientRepository = clientRepository;
+            _repasRepository = repasRepository;
         }
 
         /// <summary>
@@ -30,7 +33,7 @@ namespace EpicurAppLogic.Services
         {
             if (string.IsNullOrWhiteSpace(client.Nom) || string.IsNullOrWhiteSpace(client.Prenom))
             {
-                throw new InvalidFieldException("Le nom et le prénom sont obligatoires.");
+                throw new InvalidFieldException("Le nom et le prenom sont obligatoires.");
             }
 
             try
@@ -113,10 +116,28 @@ namespace EpicurAppLogic.Services
         }
 
         /// <summary>
-        /// Modifie un client
+        /// Obtient l'historique des repas d'un client (US 1.5)
+        /// </summary>
+        /// <param name="clientId">id du client</param>
+        /// <returns>Liste des repas du client</returns>
+        /// <exception cref="ApplicationException">Erreur lors de la récupération</exception>
+        public List<Repas> ObtenirHistoriqueRepas(int clientId)
+        {
+            try
+            {
+                return _repasRepository.GetRepasByClientId(clientId);
+            }
+            catch (Exception ex)
+            {
+                throw new ApplicationException($"Erreur lors de la récupération de l'historique des repas pour le client {clientId}.", ex);
+            }
+        }
+
+        /// <summary>
+        /// Modifie un client (US 1.3)
         /// </summary>
         /// <param name="client">client a modifier</param>
-        /// <exception cref="InvalidFieldException">nom, prénom, email  doiven tre remplis</exception>
+        /// <exception cref="InvalidFieldException">nom, prénom, email doivent être remplis</exception>
         /// <exception cref="ApplicationException">Impossible de modifier le client</exception>
         public void ModifierClient(Client client)
         {
@@ -166,7 +187,7 @@ namespace EpicurAppLogic.Services
         }
 
         /// <summary>
-        /// Supprime un client par son id
+        /// Supprime un client par son id (US 1.4)
         /// </summary>
         /// <param name="id">id du client a supprimer</param>
         /// <exception cref="ApplicationException">Impossible de supprimer le client</exception>
@@ -176,7 +197,7 @@ namespace EpicurAppLogic.Services
             {
                 // Récupérer les informations du client avant suppression pour le log
                 Client clientASupprimer = _clientRepository.RechercherClientParId(id);
-                
+
                 if (clientASupprimer == null)
                 {
                     throw new Exception($"Client avec l'id {id} introuvable.");
@@ -195,5 +216,5 @@ namespace EpicurAppLogic.Services
                 throw new ApplicationException($"Erreur service : {ex.Message}", ex);
             }
         }
-    }  
+    }
 }

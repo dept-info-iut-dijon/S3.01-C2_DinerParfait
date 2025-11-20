@@ -95,15 +95,25 @@ namespace EpicurAppIHM.Views
                     return;
                 }
 
-                txtPrenom.Text = client.Prenom;
-                txtNom.Text = client.Nom;
-                txtEmail.Text = client.Email;
-                txtTelephone.Text = client.Telephone;
-                // Convertir la liste de plats en string pour l'affichage
-                txtPlatsNonApprecies.Text = client.PlatsNonApprecies != null && client.PlatsNonApprecies.Count > 0
-                    ? string.Join(", ", client.PlatsNonApprecies.Select(p => p.Nom))
-                    : string.Empty;
-                txtPreferences.Text = client.Preferences;
+                // Champs texte avec protection null
+                txtPrenom.Text = client.Prenom ?? string.Empty;
+                txtNom.Text = client.Nom ?? string.Empty;
+                txtEmail.Text = client.Email ?? string.Empty;
+                txtTelephone.Text = client.Telephone ?? string.Empty;
+                txtPreferences.Text = client.Preferences ?? string.Empty;
+
+                // Plats non appréciés avec protection null
+                if (client.PlatsNonApprecies != null && client.PlatsNonApprecies.Count > 0)
+                {
+                    var nomsPlats = client.PlatsNonApprecies
+                        .Where(p => p != null && !string.IsNullOrEmpty(p.Nom))
+                        .Select(p => p.Nom);
+                    txtPlatsNonApprecies.Text = string.Join(", ", nomsPlats);
+                }
+                else
+                {
+                    txtPlatsNonApprecies.Text = string.Empty;
+                }
 
                 // Cocher les allergènes du client
                 if (client.Allergenes != null && client.Allergenes.Count > 0)
@@ -128,7 +138,7 @@ namespace EpicurAppIHM.Views
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Erreur lors du chargement du client : " + ex.Message,
+                MessageBox.Show("Erreur lors du chargement du client : " + ex.Message + "\n\nStack: " + ex.StackTrace,
                                 "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
                 this.Close();
             }
@@ -193,15 +203,16 @@ namespace EpicurAppIHM.Views
             txtPlatsNonApprecies.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#3a3a3a"));
             txtPreferences.Background = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#3a3a3a"));
 
-            // Configuration des boutons pour la consultation avec modification et suppression
+            // Configuration des boutons pour la consultation avec modification, suppression ET historique
             btnCreer.Visibility = Visibility.Collapsed;
-            btnModifier.Visibility = Visibility.Visible;
-            btnSupprimer.Visibility = Visibility.Visible;
+            btnHistorique.Visibility = Visibility.Visible; 
+            btnModifier.Visibility = Visibility.Visible;  
+            btnSupprimer.Visibility = Visibility.Visible;   
             btnAnnuler.Content = "Fermer";
         }
 
         /// <summary>
-        /// Active le mode modification à partir du mode consultation
+        /// Active le mode modification à partir du mode consultation 
         /// </summary>
         private void ModifierClient(object sender, RoutedEventArgs e)
         {
@@ -226,7 +237,9 @@ namespace EpicurAppIHM.Views
             txtPreferences.Background = normalBackground;
 
             // Modifier les boutons
+            btnHistorique.Visibility = Visibility.Collapsed;
             btnModifier.Visibility = Visibility.Collapsed;
+            btnSupprimer.Visibility = Visibility.Collapsed;
             btnCreer.Visibility = Visibility.Visible;
             btnCreer.Content = "Enregistrer";
             btnAnnuler.Content = "Annuler";
@@ -466,14 +479,14 @@ namespace EpicurAppIHM.Views
         }
 
         /// <summary>
-        /// Supprime le client actuel
+        /// Supprime le client actuel 
         /// </summary>
         private async void SupprimerClient(object sender, RoutedEventArgs e)
         {
             if (!_clientId.HasValue) return;
 
-            var result = MessageBox.Show($"Êtes-vous sûr de vouloir supprimer ce client ({txtPrenom.Text} {txtNom.Text}) ?",
-                                        "Confirmation de suppression", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+            //Confirmation de suppressio,
+            var result = MessageBox.Show($"Êtes-vous sûr de vouloir supprimer ce client ({txtPrenom.Text} {txtNom.Text}) ?","Confirmation de suppression", MessageBoxButton.YesNo, MessageBoxImage.Warning);
 
             if (result == MessageBoxResult.No) return;
 
@@ -497,6 +510,18 @@ namespace EpicurAppIHM.Views
             {
                 MessageBox.Show($"Erreur technique : {ex.Message}", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
             }
+        }
+
+        /// <summary>
+        /// Ouvre la fenêtre d'historique des repas pour ce client 
+        /// </summary>
+        private void VoirHistorique(object sender, RoutedEventArgs e)
+        {
+            if (!_clientId.HasValue) return;
+
+            string nomComplet = $"{txtPrenom.Text} {txtNom.Text}";
+            HistoriqueRepas fenetreHistorique = new HistoriqueRepas(_clientId.Value, nomComplet);
+            fenetreHistorique.ShowDialog();
         }
     }
 }

@@ -138,10 +138,32 @@ namespace EpicurApp_API.DAO
                             clients.Add(client);
                         }
                     }
+                    // Charger les allergènes pour chaque client
+                    foreach (Client client in clients)
+                    {
+                        string allergeneQuery = @"SELECT a.Id, a.Nom, a.Description
+                                         FROM Allergenes a
+                                         INNER JOIN ClientAllergene ca ON a.Id = ca.AllergeneId
+                                         WHERE ca.ClientId = @ClientId";
 
-                    Console.WriteLine($" {clients.Count} clients récupérés");
-
-                
+                        using (SqliteCommand cmd = new SqliteCommand(allergeneQuery, connection))
+                        {
+                            cmd.Parameters.AddWithValue("@ClientId", client.Id);
+                            using (SqliteDataReader allergeneReader = cmd.ExecuteReader())
+                            {
+                                while (allergeneReader.Read())
+                                {
+                                    Allergene allergene = new Allergene
+                                    {
+                                        Id = allergeneReader.GetInt32(0),
+                                        Nom = allergeneReader.GetString(1),
+                                        Description = allergeneReader.IsDBNull(2) ? "" : allergeneReader.GetString(2)
+                                    };
+                                    client.Allergenes.Add(allergene);
+                                }
+                            }
+                        }
+                    }
                 }
 
                 return clients;
@@ -149,10 +171,15 @@ namespace EpicurApp_API.DAO
             catch (Exception ex)
             {
                 Console.WriteLine($" ERREUR: {ex.Message}");
-                Console.WriteLine($"StackTrace: {ex.StackTrace}");
                 throw;
             }
         }
+    
+
+
+
+               
+                
 
         /// <summary>
         /// Met à jour les informations d'un client existant.
