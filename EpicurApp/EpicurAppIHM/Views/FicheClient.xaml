@@ -86,12 +86,23 @@
                     <!-- Ligne de séparation -->
                     <Rectangle Height="1" Fill="#8B1538" Margin="0,20,0,15"/>
 
-                    <!-- Allergènes avec ComboBox -->
+                    <!-- Allergènes avec cases à cocher -->
+               
                     <Label Content="Allergènes" Foreground="#D4AF37" FontWeight="SemiBold" FontSize="13"/>
-                    <Border BorderBrush="#D4AF37" BorderThickness="2" CornerRadius="8" Background="#2a2a2a" Padding="5">
-                        <ComboBox x:Name="cmbAllergenes" Background="#2a2a2a" Foreground="White" BorderBrush="#D4AF37"
-                                  BorderThickness="0" DisplayMemberPath="Nom"/>
+                    <Border BorderBrush="#D4AF37" BorderThickness="2" CornerRadius="8" Background="White" Padding="5">
+                        <Expander Header="Sélectionner les allergènes" Background="White" Foreground="Black">
+                            <ListBox x:Name="lstAllergenes" MaxHeight="150" Background="White" BorderThickness="0"
+                 ScrollViewer.VerticalScrollBarVisibility="Auto">
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <CheckBox Content="{Binding Nom}" Tag="{Binding Id}" Foreground="Black" Margin="5,3"/>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </Expander>
                     </Border>
+
+
 
                     <!-- Plats non appréciés -->
                     <Label Content="Plats non appréciés" Foreground="#D4AF37" 
