@@ -1,5 +1,4 @@
 ﻿using EpicurAPP_Partage.Models;
-using EpicurAppIHM.Services;
 using iText.IO.Font;
 using iText.Kernel.Font;
 using iText.Kernel.Geom; // Pour PageSize
@@ -7,14 +6,10 @@ using iText.Kernel.Pdf;
 using iText.Layout;
 using iText.Layout.Element;
 using iText.Layout.Properties;
-using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using Path = System.IO.Path;
 
@@ -47,7 +42,7 @@ namespace EpicurAppIHM.Views
             try
             {
                 // Récupération des clients depuis l'API
-                var clients = await _httpClient.GetFromJsonAsync<List<Client>>("Client");
+                List<Client> clients = await _httpClient.GetFromJsonAsync<List<Client>>("Client");
 
                 if (clients != null)
                 {
@@ -67,7 +62,7 @@ namespace EpicurAppIHM.Views
         private void GenererPDF_Click(object sender, RoutedEventArgs e)
         {
             // Récupérer les invités cochés
-            var selection = Invites.Where(i => i.EstSelectionne).ToList();
+            List<InviteSelection> selection = Invites.Where(i => i.EstSelectionne).ToList();
 
             if (selection.Count == 0)
             {
@@ -76,7 +71,7 @@ namespace EpicurAppIHM.Views
             }
 
             //Demander où sauvegarder
-            var saveDialog = new Microsoft.Win32.SaveFileDialog
+            Microsoft.Win32.SaveFileDialog saveDialog = new Microsoft.Win32.SaveFileDialog
             {
                 Filter = "Fichiers PDF (*.pdf)|*.pdf",
                 FileName = $"Etiquettes_{DateTime.Now:yyyyMMdd_HHmm}.pdf"
@@ -92,79 +87,85 @@ namespace EpicurAppIHM.Views
         {
             try
             {
-                using var writer = new PdfWriter(cheminFichier);
-                using var pdf = new PdfDocument(writer);
-
-                // CONFIGURATION FORMAT A6
-                var document = new Document(pdf, PageSize.A6);
-                document.SetMargins(20, 20, 20, 20);
-
-                //GESTION POLICE
-                var cheminPolice = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Police", "arial.ttf");
-                if (!File.Exists(cheminPolice)) throw new FileNotFoundException("Police introuvable.");
-                var font = PdfFontFactory.CreateFont(cheminPolice, PdfEncodings.IDENTITY_H);
-
-                // Récupération des options
-                string dateEvent = datePickerEvenement.SelectedDate?.ToString("dd/MM/yyyy") ?? "";
-                string message = txtMessage.Text;
-
-                // BOUCLE SUR LES INVITÉS
-                for (int i = 0; i < selection.Count; i++)
+                PdfWriter writer = new PdfWriter(cheminFichier);
+                using (writer)
                 {
-                    var invite = selection[i];
-
-                    // Création du contenu de l'étiquette
-                    // On ajoute des sauts de ligne pour centrer verticalement
-                    document.Add(new Paragraph("\n\n"));
-
-                    // Prénom
-                    document.Add(new Paragraph(invite.Client.Prenom)
-                        .SetFont(font)
-                        .SetFontSize(18)
-                        .SetTextAlignment(iText.Layout.Properties.TextAlignment.CENTER)
-                        .SetFontColor(iText.Kernel.Colors.ColorConstants.GRAY));
-
-                    // NOM
-                    document.Add(new Paragraph(invite.Client.Nom.ToUpper())
-                        .SetFont(font)
-                        .SetFontSize(26)
-                        .SetTextAlignment(iText.Layout.Properties.TextAlignment.CENTER)
-                        .SetFontColor(new iText.Kernel.Colors.DeviceRgb(139, 21, 56))); // Couleur Bordeaux #8B1538
-
-                    // Ligne de séparation
-                    document.Add(new Paragraph("_________________")
-                        .SetTextAlignment(iText.Layout.Properties.TextAlignment.CENTER)
-                        .SetFontColor(iText.Kernel.Colors.ColorConstants.LIGHT_GRAY));
-
-                    // Message personnalisé
-                    if (!string.IsNullOrWhiteSpace(message))
+                    PdfDocument pdf = new PdfDocument(writer);
+                    using (pdf)
                     {
-                        document.Add(new Paragraph(message)
-                            .SetFont(font)
-                            .SetFontSize(12)
-                            .SetTextAlignment(iText.Layout.Properties.TextAlignment.CENTER)
-                            .SetMarginTop(10));
-                    }
+                        // CONFIGURATION FORMAT A6
+                        Document document = new Document(pdf, PageSize.A6);
+                        document.SetMargins(20, 20, 20, 20);
 
-                    // Date en bas
-                    if (!string.IsNullOrWhiteSpace(dateEvent))
-                    {
-                        // On positionne la date en bas de page
-                        document.Add(new Paragraph($"\n{dateEvent}")
-                            .SetFont(font)
-                            .SetFontSize(10)
-                            .SetTextAlignment(iText.Layout.Properties.TextAlignment.CENTER));
-                    }
+                        //GESTION POLICE
+                        string cheminPolice = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Police", "arial.ttf");
+                        if (!File.Exists(cheminPolice)) throw new FileNotFoundException("Police introuvable.");
+                        PdfFont font = PdfFontFactory.CreateFont(cheminPolice, PdfEncodings.IDENTITY_H);
 
-                    //Saut de page (sauf pour le dernier)
-                    //AreaBreakType.NEXT_PAGE crée une nouvelle page A6
-                    if (i < selection.Count - 1)
-                    {
-                        document.Add(new AreaBreak(AreaBreakType.NEXT_PAGE));
+                        // Récupération des options
+                        string dateEvent = datePickerEvenement.SelectedDate?.ToString("dd/MM/yyyy") ?? "";
+                        string message = txtMessage.Text;
+
+                        // BOUCLE SUR LES INVITÉS
+                        for (int i = 0; i < selection.Count; i++)
+                        {
+                            InviteSelection invite = selection[i];
+
+                            // Création du contenu de l'étiquette
+                            // On ajoute des sauts de ligne pour centrer verticalement
+                            document.Add(new Paragraph("\n\n"));
+
+                            // Prénom
+                            document.Add(new Paragraph(invite.Client.Prenom)
+                                .SetFont(font)
+                                .SetFontSize(18)
+                                .SetTextAlignment(iText.Layout.Properties.TextAlignment.CENTER)
+                                .SetFontColor(iText.Kernel.Colors.ColorConstants.GRAY));
+
+                            // NOM
+                            document.Add(new Paragraph(invite.Client.Nom.ToUpper())
+                                .SetFont(font)
+                                .SetFontSize(26)
+                                .SetTextAlignment(iText.Layout.Properties.TextAlignment.CENTER)
+                                .SetFontColor(new iText.Kernel.Colors.DeviceRgb(139, 21, 56))); // Couleur Bordeaux #8B1538
+
+                            // Ligne de séparation
+                            document.Add(new Paragraph("_________________")
+                                .SetTextAlignment(iText.Layout.Properties.TextAlignment.CENTER)
+                                .SetFontColor(iText.Kernel.Colors.ColorConstants.LIGHT_GRAY));
+
+                            // Message personnalisé
+                            if (!string.IsNullOrWhiteSpace(message))
+                            {
+                                document.Add(new Paragraph(message)
+                                    .SetFont(font)
+                                    .SetFontSize(12)
+                                    .SetTextAlignment(iText.Layout.Properties.TextAlignment.CENTER)
+                                    .SetMarginTop(10));
+                            }
+
+                            // Date en bas
+                            if (!string.IsNullOrWhiteSpace(dateEvent))
+                            {
+                                // On positionne la date en bas de page
+                                document.Add(new Paragraph($"\n{dateEvent}")
+                                    .SetFont(font)
+                                    .SetFontSize(10)
+                                    .SetTextAlignment(iText.Layout.Properties.TextAlignment.CENTER));
+                            }
+
+                            //Saut de page (sauf pour le dernier)
+                            //AreaBreakType.NEXT_PAGE crée une nouvelle page A6
+                            if (i < selection.Count - 1)
+                            {
+                                document.Add(new AreaBreak(AreaBreakType.NEXT_PAGE));
+                            }
+                        }
+
+                        document.Close();
                     }
                 }
 
-                document.Close();
                 MessageBox.Show("Étiquettes générées avec succès !", "Succès", MessageBoxButton.OK, MessageBoxImage.Information);
             }
             catch (Exception ex)
@@ -177,18 +178,5 @@ namespace EpicurAppIHM.Views
         {
             Close();
         }
-    }
-
-    /// <summary>
-    /// Classe Wrapper pour lier la case à cocher au client dans l'IHM
-    /// </summary>
-    public class InviteSelection
-    {
-        public Client Client { get; set; }
-        public bool EstSelectionne { get; set; }
-
-        // Propriétés directes pour faciliter le Binding XAML (ex: Binding="{Binding Nom}")
-        public string Nom => Client?.Nom;
-        public string Prenom => Client?.Prenom;
     }
 }

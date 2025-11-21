@@ -47,8 +47,8 @@ namespace EpicurAppIHM.Views
 
             try
             {
-                var idees = await _httpClient.GetFromJsonAsync<List<IdeePlat>>("IdeePlat");
-                var idee = idees?.FirstOrDefault(i => i.Id == _ideeId.Value);
+                List<IdeePlat> idees = await _httpClient.GetFromJsonAsync<List<IdeePlat>>("IdeePlat");
+                IdeePlat idee = idees != null ? idees.FirstOrDefault(i => i.Id == _ideeId.Value) : null;
 
                 if (idee == null)
                 {
@@ -142,14 +142,18 @@ namespace EpicurAppIHM.Views
         {
             if (!_ideeId.HasValue) return;
 
-            var result = MessageBox.Show("Êtes-vous sûr de vouloir supprimer cette idée ?",
-                                        "Confirmation", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+            MessageBoxResult result = MessageBox.Show(
+                "Êtes-vous sûr de vouloir supprimer cette idée ?",
+                "Confirmation",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Warning
+            );
 
             if (result == MessageBoxResult.No) return;
 
             try
             {
-                var response = await _httpClient.DeleteAsync($"IdeePlat/{_ideeId.Value}");
+                HttpResponseMessage response = await _httpClient.DeleteAsync($"IdeePlat/{_ideeId.Value}");
 
                 if (response.IsSuccessStatusCode)
                 {

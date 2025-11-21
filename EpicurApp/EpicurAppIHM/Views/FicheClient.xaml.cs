@@ -223,12 +223,29 @@ namespace EpicurAppIHM.Views
             lstAllergenes.IsEnabled = false;
 
             SolidColorBrush couleurConsultation = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#3a3a3a"));
-            txtPrenom.Background = couleurConsultation;
-            txtNom.Background = couleurConsultation;
-            txtEmail.Background = couleurConsultation;
-            txtTelephone.Background = couleurConsultation;
-            txtPlatsNonApprecies.Background = couleurConsultation;
-            txtPreferences.Background = couleurConsultation;
+            SolidColorBrush texteBlanc = new SolidColorBrush(Colors.White);
+
+            // Changer le background des Border au lieu des TextBox
+            borderPrenom.Background = couleurConsultation;
+            borderNom.Background = couleurConsultation;
+            borderEmail.Background = couleurConsultation;
+            borderTelephone.Background = couleurConsultation;
+            borderPlatsNonApprecies.Background = couleurConsultation;
+            borderPreferences.Background = couleurConsultation;
+            borderAllergenes.Background = couleurConsultation;
+
+            // Changer la couleur du texte en blanc
+            txtPrenom.Foreground = texteBlanc;
+            txtNom.Foreground = texteBlanc;
+            txtEmail.Foreground = texteBlanc;
+            txtTelephone.Foreground = texteBlanc;
+            txtPlatsNonApprecies.Foreground = texteBlanc;
+            txtPreferences.Foreground = texteBlanc;
+
+            // Changer les couleurs de l'expander et de la liste des allergènes
+            expanderAllergenes.Background = couleurConsultation;
+            expanderAllergenes.Foreground = texteBlanc;
+            lstAllergenes.Background = couleurConsultation;
 
             // Mettre à jour le header de l'Expander selon le nombre d'allergènes
             int nbAllergenes = _allergenesClient.Count;
@@ -261,13 +278,30 @@ namespace EpicurAppIHM.Views
             lstAllergenes.IsEnabled = true;
 
             // Restaurer l'apparence normale des champs
-            SolidColorBrush normalBackground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#2a2a2a"));
-            txtPrenom.Background = normalBackground;
-            txtNom.Background = normalBackground;
-            txtEmail.Background = normalBackground;
-            txtTelephone.Background = normalBackground;
-            txtPlatsNonApprecies.Background = normalBackground;
-            txtPreferences.Background = normalBackground;
+            SolidColorBrush normalBackground = new SolidColorBrush(Colors.White);
+            SolidColorBrush normalForeground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#475569"));
+
+            // Restaurer le background des Border
+            borderPrenom.Background = normalBackground;
+            borderNom.Background = normalBackground;
+            borderEmail.Background = normalBackground;
+            borderTelephone.Background = normalBackground;
+            borderPlatsNonApprecies.Background = normalBackground;
+            borderPreferences.Background = normalBackground;
+            borderAllergenes.Background = normalBackground;
+
+            // Restaurer la couleur du texte
+            txtPrenom.Foreground = normalForeground;
+            txtNom.Foreground = normalForeground;
+            txtEmail.Foreground = normalForeground;
+            txtTelephone.Foreground = normalForeground;
+            txtPlatsNonApprecies.Foreground = normalForeground;
+            txtPreferences.Foreground = normalForeground;
+
+            // Restaurer les couleurs de l'expander et de la liste des allergènes
+            expanderAllergenes.Background = normalBackground;
+            expanderAllergenes.Foreground = normalForeground;
+            lstAllergenes.Background = normalBackground;
 
             // Modifier les boutons
             btnHistorique.Visibility = Visibility.Collapsed;
@@ -556,6 +590,11 @@ namespace EpicurAppIHM.Views
             string nomComplet = $"{txtPrenom.Text} {txtNom.Text}";
             HistoriqueRepas fenetreHistorique = new HistoriqueRepas(_clientId.Value, nomComplet);
             fenetreHistorique.ShowDialog();
+        }
+
+        private void txtPrenom_TextChanged(object sender, TextChangedEventArgs e)
+        {
+
         }
     }
 }

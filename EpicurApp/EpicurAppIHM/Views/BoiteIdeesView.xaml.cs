@@ -32,11 +32,11 @@ namespace EpicurAppIHM.Views
         {
             try
             {
-                var idees = await _httpClient.GetFromJsonAsync<List<IdeePlat>>("IdeePlat");
+                List<IdeePlat> idees = await _httpClient.GetFromJsonAsync<List<IdeePlat>>("IdeePlat");
                 if (idees != null)
                 {
                     Idees.Clear();
-                    foreach (var idee in idees)
+                    foreach (IdeePlat idee in idees)
                         Idees.Add(idee);
                 }
             }
@@ -52,8 +52,8 @@ namespace EpicurAppIHM.Views
         /// </summary>
         private void NouvelleIdee_Click(object sender, RoutedEventArgs e)
         {
-            var ficheIdee = new FicheIdee();
-            var result = ficheIdee.ShowDialog();
+            FicheIdee ficheIdee = new FicheIdee();
+            bool? result = ficheIdee.ShowDialog();
 
             if (result == true)
             {
@@ -68,8 +68,8 @@ namespace EpicurAppIHM.Views
         {
             if (DataGridIdees.SelectedItem is IdeePlat ideeSelectionnee)
             {
-                var ficheIdee = new FicheIdee(ideeSelectionnee.Id);
-                var result = ficheIdee.ShowDialog();
+                FicheIdee ficheIdee = new FicheIdee(ideeSelectionnee.Id);
+                bool? result = ficheIdee.ShowDialog();
 
                 if (result == true)
                 {

@@ -15,7 +15,7 @@ using iText.IO.Font;
 namespace EpicurAppIHM.Views
 {
     /// <summary>
-    /// Fenêtre d'affichage de la liste de courses
+    /// FenÃªtre d'affichage de la liste de courses
     /// </summary>
     public partial class AffichageListeCourses : Window
     {
@@ -24,34 +24,31 @@ namespace EpicurAppIHM.Views
         public AffichageListeCourses(List<ElementListeCourse> listeCourses, string nomMenu)
         {
             InitializeComponent();
-            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance); // Pour supporter ISO-8859-1
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
             _listeCourses = listeCourses;
             txtMenuNom.Text = $"Menu : {nomMenu}";
             AfficherListeCourses();
         }
 
         /// <summary>
-        /// Affiche la liste de courses groupée par catégorie
+        /// Affiche la liste de courses groupÃ©e par catÃ©gorie
         /// </summary>
         private void AfficherListeCourses()
         {
             ICollectionView listeCoursesView = CollectionViewSource.GetDefaultView(_listeCourses);
-            
-            // Groupement par catégorie d'ingrédient
+
             listeCoursesView.GroupDescriptions.Clear();
             listeCoursesView.GroupDescriptions.Add(new PropertyGroupDescription("Ingredient.Categorie", new CategorieIngredientConverter()));
-            
-            // Tri par catégorie puis par nom
+
             listeCoursesView.SortDescriptions.Clear();
             listeCoursesView.SortDescriptions.Add(new SortDescription("Ingredient.Categorie", ListSortDirection.Ascending));
             listeCoursesView.SortDescriptions.Add(new SortDescription("Ingredient.Nom", ListSortDirection.Ascending));
-            
+
             ListViewListeCourses.ItemsSource = listeCoursesView;
-            
-            // Statistiques
+
             int nombreCategories = _listeCourses.GroupBy(e => e.Ingredient.Categorie).Count();
-            txtNombreIngredients.Text = $"{_listeCourses.Count} ingrédients";
-            txtNombreCategories.Text = $"{nombreCategories} catégorie(s)";
+            txtNombreIngredients.Text = $"{_listeCourses.Count} ingrÃ©dients";
+            txtNombreCategories.Text = $"{nombreCategories} catÃ©gorie(s)";
         }
 
         /// <summary>
@@ -70,15 +67,12 @@ namespace EpicurAppIHM.Views
             {
                 try
                 {
-                    // Créer le document PDF
                     using PdfWriter writer = new PdfWriter(saveDialog.FileName);
                     using PdfDocument pdf = new PdfDocument(writer);
                     Document document = new Document(pdf);
 
-                    // Police d'écriture
                     string cheminPolice = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Police", "arial.ttf");
 
-                    // Vérification
                     if (!System.IO.File.Exists(cheminPolice))
                     {
                         throw new FileNotFoundException($"Le fichier de police est introuvable ici : {cheminPolice}");
@@ -86,93 +80,86 @@ namespace EpicurAppIHM.Views
 
                     PdfFont font = PdfFontFactory.CreateFont(cheminPolice, iText.IO.Font.PdfEncodings.IDENTITY_H);
 
-                    // Titre principal
                     Paragraph titre = new Paragraph("LISTE DE COURSES")
                         .SetTextAlignment(iText.Layout.Properties.TextAlignment.CENTER)
                         .SetFontSize(18);
                     document.Add(titre);
-                    
-                    // Nom du menu
+
                     Paragraph nomMenu = new Paragraph(txtMenuNom.Text)
                         .SetTextAlignment(iText.Layout.Properties.TextAlignment.CENTER)
                         .SetFontSize(14)
                         .SetFont(font);
                     document.Add(nomMenu);
-                    
-                    // Ligne de séparation
+
                     document.Add(new Paragraph("_".Repeat(50))
                         .SetTextAlignment(iText.Layout.Properties.TextAlignment.CENTER)
                         .SetFontSize(12));
-                    
+
                     document.Add(new Paragraph("\n"));
-                    
-                    // Grouper par catégorie
+
                     IOrderedEnumerable<IGrouping<Ingredient.CategorieIngredient, ElementListeCourse>> parCategorie = _listeCourses.GroupBy(e => e.Ingredient.Categorie)
                                            .OrderBy(g => g.Key);
-            
-            CategorieIngredientConverter convertisseur = new CategorieIngredientConverter();
-            foreach (IGrouping<Ingredient.CategorieIngredient, ElementListeCourse> groupe in parCategorie)
-            {
-                string nomCategorie = (string)convertisseur.Convert(groupe.Key, null, null, null);
-                // Titre de catégorie
-                Paragraph titreCategorie = new Paragraph(nomCategorie)
-                    .SetFontSize(14)
-                    .SetBackgroundColor(iText.Kernel.Colors.ColorConstants.LIGHT_GRAY)
-                    .SetMarginTop(10);
-                document.Add(titreCategorie);
-                
-                // Liste des ingrédients
-                iText.Layout.Element.List liste = new iText.Layout.Element.List();
-                foreach (ElementListeCourse element in groupe.OrderBy(e => e.Ingredient.Nom))
-                {
-                    string texteIngredient = element.Ingredient.Nom;
-                    if (element.Quantite > 1)
-                        texteIngredient += $" (x{element.Quantite})";
 
-                    ListItem item = new ListItem(texteIngredient);
-                    item.SetFont(font);
-                    liste.Add(item);
+                    CategorieIngredientConverter convertisseur = new CategorieIngredientConverter();
+                    foreach (IGrouping<Ingredient.CategorieIngredient, ElementListeCourse> groupe in parCategorie)
+                    {
+                        string nomCategorie = (string)convertisseur.Convert(groupe.Key, null, null, null);
+                        Paragraph titreCategorie = new Paragraph(nomCategorie)
+                            .SetFontSize(14)
+                            .SetBackgroundColor(iText.Kernel.Colors.ColorConstants.LIGHT_GRAY)
+                            .SetMarginTop(10);
+                        document.Add(titreCategorie);
+
+                        iText.Layout.Element.List liste = new iText.Layout.Element.List();
+                        foreach (ElementListeCourse element in groupe.OrderBy(e => e.Ingredient.Nom))
+                        {
+                            string texteIngredient = element.Ingredient.Nom;
+                            if (element.Quantite > 1)
+                                texteIngredient += $" (x{element.Quantite})";
+
+                            ListItem item = new ListItem(texteIngredient);
+                            item.SetFont(font);
+                            liste.Add(item);
+                        }
+                        document.Add(liste);
+                    }
+
+                    document.Add(new Paragraph("\n"));
+                    document.Add(new Paragraph("_".Repeat(50))
+                        .SetTextAlignment(iText.Layout.Properties.TextAlignment.CENTER));
+
+                    Paragraph stats = new Paragraph($"Total: {_listeCourses.Count} ingrÃ©dients")
+                        .SetTextAlignment(iText.Layout.Properties.TextAlignment.CENTER)
+                        .SetFont(font);
+                    document.Add(stats);
+
+                    Paragraph dateGeneration = new Paragraph($"GÃ©nÃ©rÃ©e le {DateTime.Now:dd/MM/yyyy Ã  HH:mm}")
+                        .SetTextAlignment(iText.Layout.Properties.TextAlignment.CENTER)
+                        .SetFont(font)
+                        .SetFontSize(10);
+                    document.Add(dateGeneration);
+
+                    document.Close();
+
+                    MessageBox.Show("Liste de courses exportÃ©e en PDF avec succÃ¨s !", "SuccÃ¨s",
+                        MessageBoxButton.OK, MessageBoxImage.Information);
                 }
-                document.Add(liste);
+                catch (Exception ex)
+                {
+                    string debugInfo = $"Message: {ex.Message}\n\nInner: {ex.InnerException?.Message}\n\nStack: {ex.StackTrace}";
+                    MessageBox.Show(debugInfo, "Debug Info", MessageBoxButton.OK, MessageBoxImage.Error);
+                }
             }
-            
-            // Pied de page avec statistiques
-            document.Add(new Paragraph("\n"));
-            document.Add(new Paragraph("_".Repeat(50))
-                .SetTextAlignment(iText.Layout.Properties.TextAlignment.CENTER));
-            
-            Paragraph stats = new Paragraph($"Total: {_listeCourses.Count} ingrédients")
-                .SetTextAlignment(iText.Layout.Properties.TextAlignment.CENTER)
-                .SetFont(font);
-            document.Add(stats);
-            
-            Paragraph dateGeneration = new Paragraph($"Générée le {DateTime.Now:dd/MM/yyyy à HH:mm}")
-                .SetTextAlignment(iText.Layout.Properties.TextAlignment.CENTER)
-                .SetFont(font)
-                .SetFontSize(10);
-            document.Add(dateGeneration);
-            
-            document.Close();
-            
-            MessageBox.Show("Liste de courses exportée en PDF avec succès !", "Succès", 
-                MessageBoxButton.OK, MessageBoxImage.Information);
         }
-        catch (Exception ex)
-        {
-            string debugInfo = $"Message: {ex.Message}\n\nInner: {ex.InnerException?.Message}\n\nStack: {ex.StackTrace}";
-            MessageBox.Show(debugInfo, "Debug Info", MessageBoxButton.OK, MessageBoxImage.Error);
-        }
-    }
-}
 
-private void Fermer_Click(object sender, RoutedEventArgs e)
-{
-    Close();
-}
+        private void Fermer_Click(object sender, RoutedEventArgs e)
+        {
+            Close();
+        }
     }
 
     /// <summary>
-    /// Convertisseur pour afficher les noms de catégories
+    /// Convertisseur pour afficher les noms de catÃ©gories d'ingrÃ©dients
     /// </summary>
     public class CategorieIngredientConverter : IValueConverter
     {
@@ -182,10 +169,10 @@ private void Fermer_Click(object sender, RoutedEventArgs e)
             {
                 return categorie switch
                 {
-                    Ingredient.CategorieIngredient.FruitLegume => "Fruits & Légumes",
+                    Ingredient.CategorieIngredient.FruitLegume => "Fruits & LÃ©gumes",
                     Ingredient.CategorieIngredient.ViandePoisson => "Viande & Poisson",
-                    Ingredient.CategorieIngredient.Epicerie => "Épicerie",
-                    Ingredient.CategorieIngredient.Cremerie => "Crémerie",
+                    Ingredient.CategorieIngredient.Epicerie => "Ã‰picerie",
+                    Ingredient.CategorieIngredient.Cremerie => "CrÃ©merie",
                     Ingredient.CategorieIngredient.Boisson => "Boissons",
                     Ingredient.CategorieIngredient.Autre => "Divers",
                     _ => "Autre"
@@ -201,9 +188,14 @@ private void Fermer_Click(object sender, RoutedEventArgs e)
     }
 }
 
-// Extension method pour la répétition de chaînes
+/// <summary>
+/// Extension pour les chaÃ®nes de caractÃ¨res
+/// </summary>
 public static class StringExtensions
 {
+    /// <summary>
+    /// RÃ©pÃ¨te une chaÃ®ne de caractÃ¨res un nombre donnÃ© de fois
+    /// </summary>
     public static string Repeat(this string input, int count)
     {
         return string.Concat(Enumerable.Repeat(input, count));
