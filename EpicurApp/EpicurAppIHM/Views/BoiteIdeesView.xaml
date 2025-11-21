@@ -5,7 +5,34 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              mc:Ignorable="d" 
              d:DesignHeight="600" d:DesignWidth="1000"
-             Background="#FDF6E3">
+             Background="#FDF6E3"
+             FontFamily="/Police/#Playfair Display">
+
+    <UserControl.Resources>
+        <Style x:Key="EpicurAppButtonStyle" TargetType="Button">
+            <Setter Property="Height" Value="45"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" 
+                                CornerRadius="5">
+                            <ContentPresenter HorizontalAlignment="Center" 
+                                              VerticalAlignment="Center"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Opacity" Value="0.85"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+    </UserControl.Resources>
 
     <Grid Margin="20">
         <Grid.RowDefinitions>
@@ -26,12 +53,10 @@
         <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,15">
             <Button x:Name="btnNouvelleIdee" 
                     Content="+ Nouvelle Idée" 
-                    Width="200" Height="45"
-                    Background="#D4AF37" 
+                    Width="200"
+                    Background="#8B1538" 
                     Foreground="White" 
-                    FontWeight="SemiBold"
-                    BorderThickness="0"
-                    Cursor="Hand"
+                    Style="{StaticResource EpicurAppButtonStyle}"
                     Click="NouvelleIdee_Click"/>
         </StackPanel>
 
