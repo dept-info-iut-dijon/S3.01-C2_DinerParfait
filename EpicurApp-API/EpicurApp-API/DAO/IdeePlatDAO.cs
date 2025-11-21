@@ -1,5 +1,6 @@
 using EpicurAPP_Partage.Models;
 using EpicurApp_API.Configuration;
+using EpicurAppLogic.Interfaces;
 using Microsoft.Data.Sqlite;
 
 namespace EpicurApp_API.DAO
@@ -7,13 +8,46 @@ namespace EpicurApp_API.DAO
     /// <summary>
     /// DAO pour la gestion des idées de plats.
     /// </summary>
-    public class IdeePlatDAO
+    public class IdeePlatDAO : IIdeePlatDAO
     {
         private readonly string _connectionString;
 
         public IdeePlatDAO(DatabaseConfiguration databaseConfiguration)
         {
             _connectionString = databaseConfiguration.GetConnectionString();
+        }
+
+        /// <summary>
+        /// Récupère une idée de plat par son identifiant.
+        /// </summary>
+        public IdeePlat? GetById(int id)
+        {
+            using (SqliteConnection connection = new SqliteConnection(_connectionString))
+            {
+                connection.Open();
+                string query = "SELECT Id, Titre, Description, Categorie, Notes, DateCreation FROM IdeesPlats WHERE Id = @Id";
+
+                using (SqliteCommand command = new SqliteCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@Id", id);
+                    using (SqliteDataReader reader = command.ExecuteReader())
+                    {
+                        if (reader.Read())
+                        {
+                            return new IdeePlat
+                            {
+                                Id = reader.GetInt32(0),
+                                Titre = reader.IsDBNull(1) ? "" : reader.GetString(1),
+                                Description = reader.IsDBNull(2) ? "" : reader.GetString(2),
+                                Categorie = reader.IsDBNull(3) ? "" : reader.GetString(3),
+                                Notes = reader.IsDBNull(4) ? "" : reader.GetString(4),
+                                DateCreation = reader.IsDBNull(5) ? "" : reader.GetString(5)
+                            };
+                        }
+                    }
+                }
+            }
+            return null;
         }
 
         /// <summary>

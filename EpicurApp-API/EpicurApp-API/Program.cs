@@ -16,15 +16,14 @@ builder.Services.AddScoped<IAllergeneDAO, AllergeneDAO>();
 builder.Services.AddScoped<IClientDAO, ClientDAO>();
 builder.Services.AddScoped<IMenuDAO, MenuDAO>();
 builder.Services.AddScoped<IRepasDAO, RepasDAO>();
-builder.Services.AddScoped<IdeePlatDAO>();
-
-
+builder.Services.AddScoped<IIdeePlatDAO, IdeePlatDAO>();
 
 // Enregistrement des services
 builder.Services.AddScoped<IPlatService, PlatService>();
 builder.Services.AddScoped<IClientService, ClientService>();
 builder.Services.AddScoped<IMenuService, MenuService>();
 builder.Services.AddScoped<IAllergeneService, AllergeneService>();
+builder.Services.AddScoped<IIdeePlatService, IdeePlatService>();
 
 builder.Services.AddControllers().AddJsonOptions(options =>
 {

@@ -1,6 +1,5 @@
-using System.Runtime.InteropServices;
-using EpicurApp_API.DAO;
 using EpicurAPP_Partage.Models;
+using EpicurAppLogic.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EpicurApp_API.Controllers
@@ -12,11 +11,11 @@ namespace EpicurApp_API.Controllers
     [ApiController]
     public class IdeePlatController : ControllerBase
     {
-        private readonly IdeePlatDAO _ideePlatDAO;
+        private readonly IIdeePlatService _ideePlatService;
 
-        public IdeePlatController(IdeePlatDAO ideePlatDAO)
+        public IdeePlatController(IIdeePlatService ideePlatService)
         {
-            _ideePlatDAO = ideePlatDAO;
+            _ideePlatService = ideePlatService;
         }
 
         /// <summary>
@@ -25,8 +24,15 @@ namespace EpicurApp_API.Controllers
         [HttpGet]
         public IActionResult GetAll()
         {
-            var idees = _ideePlatDAO.GetAll();
-            return Ok(idees);
+            try
+            {
+                var idees = _ideePlatService.ObtenirToutesLesIdees();
+                return Ok(idees);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Erreur lors de la récupération des idées : {ex.Message}");
+            }
         }
 
         /// <summary>
@@ -35,13 +41,19 @@ namespace EpicurApp_API.Controllers
         [HttpPost]
         public IActionResult Ajouter([FromBody] IdeePlat idee)
         {
-            if (string.IsNullOrWhiteSpace(idee.Titre))
+            try
             {
-                return BadRequest("Le titre est obligatoire");
+                _ideePlatService.AjouterIdee(idee);
+                return Ok(idee);
             }
-
-            _ideePlatDAO.Ajouter(idee);
-            return Ok(idee);
+            catch (EpicurAPP_Partage.Exceptions.InvalidFieldException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Erreur lors de l'ajout : {ex.Message}");
+            }
         }
 
         /// <summary>
@@ -50,9 +62,20 @@ namespace EpicurApp_API.Controllers
         [HttpPut("{id}")]
         public IActionResult Modifier(int id, [FromBody] IdeePlat idee)
         {
-            idee.Id = id;
-            _ideePlatDAO.Modifier(idee);
-            return Ok(idee);
+            try
+            {
+                idee.Id = id;
+                _ideePlatService.ModifierIdee(idee);
+                return Ok(idee);
+            }
+            catch (EpicurAPP_Partage.Exceptions.InvalidFieldException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Erreur lors de la modification : {ex.Message}");
+            }
         }
 
         /// <summary>
@@ -61,8 +84,15 @@ namespace EpicurApp_API.Controllers
         [HttpDelete("{id}")]
         public IActionResult Supprimer(int id)
         {
-            _ideePlatDAO.Supprimer(id);
-            return Ok();
+            try
+            {
+                _ideePlatService.SupprimerIdee(id);
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Erreur lors de la suppression : {ex.Message}");
+            }
         }
     }
 }
