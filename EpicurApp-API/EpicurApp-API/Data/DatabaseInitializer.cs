@@ -108,8 +108,8 @@ namespace EpicurApp_API.Data
                         MenuId INTEGER NOT NULL,
                         PlatId INTEGER NOT NULL,
                         PRIMARY KEY (MenuId, PlatId),
-                        FOREIGN KEY (MenuId) REFERENCES Menus(Id),
-                        FOREIGN KEY (PlatId) REFERENCES Plats(Id)
+                        FOREIGN KEY (MenuId) REFERENCES Menus(Id) ON DELETE CASCADE,
+                        FOREIGN KEY (PlatId) REFERENCES Plats(Id) ON DELETE CASCADE
                     );";
 
                 // Table ClientMenu (pour l'historique)
@@ -118,8 +118,8 @@ namespace EpicurApp_API.Data
                         ClientId INTEGER NOT NULL,
                         MenuId INTEGER NOT NULL,
                         PRIMARY KEY (ClientId, MenuId),
-                        FOREIGN KEY (ClientId) REFERENCES Clients(Id),
-                        FOREIGN KEY (MenuId) REFERENCES Menus(Id)
+                        FOREIGN KEY (ClientId) REFERENCES Clients(Id) ON DELETE CASCADE,
+                        FOREIGN KEY (MenuId) REFERENCES Menus(Id) ON DELETE CASCADE
                     );";
 
                 // Table Repas (historique détaillé des repas avec retours)
@@ -132,6 +132,17 @@ namespace EpicurApp_API.Data
                         Retours TEXT,
                         FOREIGN KEY (ClientId) REFERENCES Clients(Id) ON DELETE CASCADE,
                         FOREIGN KEY (MenuId) REFERENCES Menus(Id) ON DELETE CASCADE
+                    );";
+
+                // Table IdeesPlats (boîte à idées pour futurs plats)
+                var createIdeesPlatTable = @"
+                    CREATE TABLE IF NOT EXISTS IdeesPlats (
+                        Id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        Titre TEXT NOT NULL,
+                        Description TEXT,
+                        Categorie TEXT,
+                        Notes TEXT,
+                        DateCreation DATETIME DEFAULT CURRENT_TIMESTAMP
                     );";
 
                 using (var command = connection.CreateCommand())
@@ -165,6 +176,9 @@ namespace EpicurApp_API.Data
 
                     command.CommandText = createRepasTable;
                     command.ExecuteNonQuery();
+
+                    command.CommandText = createIdeesPlatTable;
+                    command.ExecuteNonQuery();
                 }
 
                 SeedAllergenes(connection);
@@ -173,6 +187,7 @@ namespace EpicurApp_API.Data
                 SeedClients(connection);
                 SeedMenus(connection);
                 SeedRepas(connection);
+                SeedIdeesPlats(connection);
             }
         }
 
@@ -518,6 +533,70 @@ namespace EpicurApp_API.Data
                         insertCommand.Parameters["@MenuId"].Value = r.MenuId;
                         insertCommand.Parameters["@Date"].Value = r.Date;
                         insertCommand.Parameters["@Retours"].Value = r.Retours ?? (object)DBNull.Value;
+                        insertCommand.ExecuteNonQuery();
+                    }
+                }
+
+                transaction.Commit();
+            }
+        }
+
+        /// <summary>
+        /// Méthode pour insérer des idées de plats de test dans la table IdeesPlats.
+        /// </summary>
+        /// <param name="connection">connexion a la db</param>
+        private static void SeedIdeesPlats(SqliteConnection connection)
+        {
+            using (var transaction = connection.BeginTransaction())
+            {
+                using (var countCommand = new SqliteCommand("SELECT COUNT(*) FROM IdeesPlats;", connection, transaction))
+                {
+                    long count = (long)(countCommand.ExecuteScalar() ?? 0);
+                    if (count > 0)
+                    {
+                        transaction.Commit();
+                        return;
+                    }
+                }
+
+                var idees = new (string Titre, string Description, string Categorie, string Notes)[]
+                {
+                    ("Soupe glacée à la courgette",
+                     "Une soupe froide rafraîchissante à base de courgettes et menthe fraîche",
+                     "Entree",
+                     "Parfait pour l'été, peut être servi avec des croûtons au parmesan"),
+
+                    ("Tataki de thon mi-cuit",
+                     "Thon rouge saisi rapidement avec une croûte de sésame",
+                     "Entree",
+                     "Servir avec sauce soja-yuzu et gingembre mariné"),
+
+                    ("Poulet rôti au citron confit",
+                     "Poulet mariné aux herbes et citrons confits",
+                     "PlatPrincipal",
+                     "Accompagner de pommes de terre grenailles et légumes de saison"),
+
+                    ("Crème brûlée à la vanille bourbon",
+                     "Dessert classique avec une touche de vanille de Madagascar",
+                     "Dessert",
+                     "Peut être décliné en différentes saveurs : café, lavande, etc.")
+                };
+
+                using (var insertCommand = new SqliteCommand(
+                    "INSERT INTO IdeesPlats (Titre, Description, Categorie, Notes) VALUES (@Titre, @Description, @Categorie, @Notes);",
+                    connection, transaction))
+                {
+                    insertCommand.Parameters.Add(new SqliteParameter("@Titre", SqliteType.Text));
+                    insertCommand.Parameters.Add(new SqliteParameter("@Description", SqliteType.Text));
+                    insertCommand.Parameters.Add(new SqliteParameter("@Categorie", SqliteType.Text));
+                    insertCommand.Parameters.Add(new SqliteParameter("@Notes", SqliteType.Text));
+
+                    foreach (var idee in idees)
+                    {
+                        insertCommand.Parameters["@Titre"].Value = idee.Titre;
+                        insertCommand.Parameters["@Description"].Value = idee.Description;
+                        insertCommand.Parameters["@Categorie"].Value = idee.Categorie;
+                        insertCommand.Parameters["@Notes"].Value = idee.Notes;
                         insertCommand.ExecuteNonQuery();
                     }
                 }
