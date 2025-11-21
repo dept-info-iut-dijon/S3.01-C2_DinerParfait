@@ -4,6 +4,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace EpicurApp_API.Controllers
 {
+    /// <summary>
+    /// Controller pour gérer les allergènes.
+    /// </summary>
     [ApiController]
     [Route("[controller]")]
     public class AllergenesController : ControllerBase
@@ -24,6 +27,7 @@ namespace EpicurApp_API.Controllers
         /// <summary>
         /// Récupère tous les allergènes disponibles.
         /// </summary>
+        /// <exception cref="Exception">En cas d'erreur lors de la récupération</exception>
         /// <returns>Liste des allergènes</returns>
         [HttpGet]
         public IActionResult GetAll()
@@ -47,6 +51,7 @@ namespace EpicurApp_API.Controllers
         /// Ajoute un nouvel allergène.
         /// </summary>
         /// <param name="allergene">Allergène à ajouter</param>
+        /// <exception cref="Exception">Si l'allergène est null</exception>
         /// <returns>Allergène créé</returns>
         [HttpPost]
         public IActionResult AjouterAllergene([FromBody] Allergene allergene)

@@ -9,6 +9,9 @@ namespace EpicurAppLogic.Services
     /// </summary>
     public class AllergeneService : IAllergeneService
     {
+        /// <summary>
+        /// Le dao de l'allergene
+        /// </summary>
         private readonly IAllergeneDAO _allergeneDAO;
 
         /// <summary>

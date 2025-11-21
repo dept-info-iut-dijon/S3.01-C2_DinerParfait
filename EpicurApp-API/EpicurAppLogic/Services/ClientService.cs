@@ -9,7 +9,13 @@ namespace EpicurAppLogic.Services
     /// </summary>
     public class ClientService : IClientService
     {
+        /// <summary>
+        /// Référence au DAO pour les clients
+        /// </summary>
         private IClientDAO _clientRepository;
+        /// <summary>
+        /// Référence au DAO pour les repas
+        /// </summary>
         private IRepasDAO _repasRepository;
 
         /// <summary>

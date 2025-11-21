@@ -11,8 +11,15 @@ namespace EpicurApp_API.Controllers
     [ApiController]
     public class IdeePlatController : ControllerBase
     {
+        /// <summary>
+        /// IService pour gérer les idées de plats.
+        /// </summary>
         private readonly IIdeePlatService _ideePlatService;
 
+        /// <summary>
+        /// Constructeur : injection du service des idées de plats.
+        /// </summary>
+        /// <param name="ideePlatService">idée des plats a servir</param>
         public IdeePlatController(IIdeePlatService ideePlatService)
         {
             _ideePlatService = ideePlatService;
@@ -21,6 +28,7 @@ namespace EpicurApp_API.Controllers
         /// <summary>
         /// Récupère toutes les idées de plats.
         /// </summary>
+        /// <exception cref="Exception">En cas d'erreur lors de la récupération</exception>
         [HttpGet]
         public IActionResult GetAll()
         {
@@ -38,6 +46,7 @@ namespace EpicurApp_API.Controllers
         /// <summary>
         /// Ajoute une nouvelle idée de plat.
         /// </summary>
+        /// <exception cref="Exception">En cas d'erreur lors de l'ajout</exception>
         [HttpPost]
         public IActionResult Ajouter([FromBody] IdeePlat idee)
         {
@@ -59,6 +68,8 @@ namespace EpicurApp_API.Controllers
         /// <summary>
         /// Modifie une idée de plat.
         /// </summary>
+        /// <param name="id">Identifiant de l'idée à modifier</param>
+        /// <exception cref="Exception">En cas d'erreur lors de la modification</exception>
         [HttpPut("{id}")]
         public IActionResult Modifier(int id, [FromBody] IdeePlat idee)
         {
@@ -81,6 +92,8 @@ namespace EpicurApp_API.Controllers
         /// <summary>
         /// Supprime une idée de plat.
         /// </summary>
+        /// <param> name="id">Identifiant de l'idée à supprimer</param>
+        /// <exception cref="Exception">En cas d'erreur lors de la suppression</exception>
         [HttpDelete("{id}")]
         public IActionResult Supprimer(int id)
         {

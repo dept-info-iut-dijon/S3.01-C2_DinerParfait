@@ -11,7 +11,13 @@ namespace EpicurApp_API.DAO
     /// </summary>
     public class MenuDAO : IMenuDAO
     {
+        /// <summary>
+        /// Chaîne de connexion à la base de données.
+        /// </summary>
         private readonly string _connectionString;
+        /// <summary>
+        /// DAO pour accéder aux plats.
+        /// </summary>
         private readonly IPlatDAO _platDAO;
 
         /// <summary>

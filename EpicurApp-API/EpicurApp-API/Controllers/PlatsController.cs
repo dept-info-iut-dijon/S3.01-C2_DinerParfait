@@ -4,6 +4,9 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace EpicurApp_API.Controllers
 {
+    /// <summary>
+    /// Controller pour gérer les plats.
+    /// </summary>
     [ApiController]
     [Route("[controller]")]
     public class PlatsController : Controller
@@ -24,6 +27,8 @@ namespace EpicurApp_API.Controllers
         /// <summary>
         /// Récupère l'ensemble des plats.
         /// </summary>
+        /// <exception cref="Exception">En cas d'erreur lors de la récupération</exception>
+        /// <returns>Liste des plats</returns>
         [HttpGet]
         public ActionResult<IEnumerable<Plat>> GetAllPlats()
         {
@@ -48,6 +53,9 @@ namespace EpicurApp_API.Controllers
 
         /// <summary>
         /// Récupère un plat via son identifiant.
+        /// <param name="id">Identifiant du plat</param>
+        /// <exception cref="Exception">En cas d'erreur lors de la récupération</exception>
+        /// <returns>Le plat correspondant</returns>
         /// </summary>
         [HttpGet("{id}")]
         public ActionResult<Plat> GetPlatById(int id)
@@ -71,6 +79,9 @@ namespace EpicurApp_API.Controllers
 
         /// <summary>
         /// Récupère la liste des plats appartenant à une catégorie donnée.
+        /// <param name="categorie">Catégorie des plats à récupérer</param>
+        /// <exception cref="Exception">En cas d'erreur lors de la récupération</exception>
+        /// <returns>Liste des plats correspondant à la catégorie</returns>
         /// </summary>
         [HttpGet("categorie/{categorie}")]
         public ActionResult<IEnumerable<Plat>> GetPlatsByCategorie(string categorie)
@@ -108,6 +119,9 @@ namespace EpicurApp_API.Controllers
 
         /// <summary>
         /// Crée un nouveau plat.
+        /// <param name="plat">Plat à créer</param>
+        /// <exception cref="Exception">En cas d'erreur lors de la création</exception>
+        /// <returns>Le plat créé</returns>
         /// </summary>
         [HttpPost]
         public ActionResult<Plat> CreatePlat([FromBody] Plat plat)

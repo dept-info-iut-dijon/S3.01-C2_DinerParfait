@@ -2,6 +2,9 @@
 
 namespace EpicurAppLogic.Interfaces
 {
+    /// <summary>
+    /// Interface définissant les méthodes du service de gestion des plats.
+    /// </summary>
     public interface IPlatService
     {
         /// <summary>

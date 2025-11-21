@@ -13,8 +13,15 @@ namespace EpicurApp_API.DAO
     /// </summary>
     public class IngredientDAO : IIngredientDAO
     {
+        /// <summary>
+        /// String de connexion à la base de données.
+        /// </summary>
         private readonly string _connectionString;
 
+        /// <summary>
+        /// Constructeur : injection de la configuration de la base de données.
+        /// </summary>
+        /// <param name="dbConfig">Configuration actuelle de la db</param>
         public IngredientDAO(DatabaseConfiguration dbConfig)
         {
             _connectionString = dbConfig.GetConnectionString();
@@ -46,6 +53,7 @@ namespace EpicurApp_API.DAO
         /// <summary>
         /// Récupère un ingrédient par son identifiant
         /// </summary>
+        /// <param name="id">Identifiant de l'ingrédient</param>
         public Ingredient? GetById(int id)
         {
             const string query = "SELECT Id, Nom, Description, Categorie FROM Ingredients WHERE Id = @Id;";
@@ -71,6 +79,8 @@ namespace EpicurApp_API.DAO
         /// <summary>
         /// Récupère les ingrédients d'un plat
         /// </summary>
+        /// <param name="platId">Identifiant du plat</param>
+        /// <returns>Liste des ingrédients</returns>
         public List<Ingredient> GetIngredientsByPlatId(int platId)
         {
             List<Ingredient> ingredients = new List<Ingredient>();
@@ -103,6 +113,7 @@ namespace EpicurApp_API.DAO
         /// <summary>
         /// Ajoute un nouvel ingrédient
         /// </summary>
+        /// <param name="ingredient">L'ingrédient à ajouter</param>
         public void Add(Ingredient ingredient)
         {
             const string query = "INSERT INTO Ingredients (Nom, Description, Categorie) VALUES (@Nom, @Description, @Categorie);";
@@ -127,6 +138,8 @@ namespace EpicurApp_API.DAO
         /// <summary>
         /// Associe des ingrédients à un plat
         /// </summary>
+        /// <param name="platId">Identifiant du plat</param>
+        /// <param name="ingredientIds">Liste des identifiants des ingrédients à associer</param>
         public void AssocierIngredientsAuPlat(int platId, List<int> ingredientIds)
         {
             using (SqliteConnection connection = new SqliteConnection(_connectionString))

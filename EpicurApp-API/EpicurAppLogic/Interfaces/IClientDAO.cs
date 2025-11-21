@@ -54,6 +54,11 @@ namespace EpicurAppLogic.Interfaces
         /// <param name="clientId">Identifiant du client.</param>
         /// <param name="allergeneIds">Liste des identifiants d'allergènes à associer.</param>
         void AjouterAllergenesAuClient(int clientId, List<int> allergeneIds);
+        /// <summary>
+        /// Recherche un client par son identifiant.
+        /// </summary>
+        /// <param name="id">Identifiant du client.</param> 
+        /// <returns>Le client trouvé ou null si non trouvé.</returns>
         Client? RechercherClientParId(int id);
     }
 }

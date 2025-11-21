@@ -13,7 +13,13 @@ namespace EpicurApp_API.DAO
     /// </summary>
     public class PlatDAO : IPlatDAO
     {
+        /// <summary>
+        /// String de connexion à la base de données.
+        /// </summary>
         private readonly string _connexionString;
+        /// <summary>
+        /// DAO des ingrédients pour la gestion des ingrédients liés aux plats.
+        /// </summary>
         private readonly IIngredientDAO _ingredientDAO;
 
         /// <summary>
