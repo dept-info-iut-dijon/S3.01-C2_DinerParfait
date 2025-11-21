@@ -9,7 +9,7 @@ namespace EpicurAPP_Partage.Models
         /// <summary>
         /// Le client sélectionné.
         /// </summary>
-        public Client Client { get; set; }
+        public Client? Client { get; set; }
 
         /// <summary>
         /// Indique si le client est sélectionné.
@@ -19,11 +19,11 @@ namespace EpicurAPP_Partage.Models
         /// <summary>
         /// Nom du client .
         /// </summary>
-        public string Nom => Client?.Nom;
+        public string? Nom => Client?.Nom;
 
         /// <summary>
         /// Prénom du client.
         /// </summary>
-        public string Prenom => Client?.Prenom;
+        public string? Prenom => Client?.Prenom;
     }
 }
