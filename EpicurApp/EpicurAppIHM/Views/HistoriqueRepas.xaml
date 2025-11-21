@@ -7,7 +7,7 @@
         mc:Ignorable="d"
         Title="Historique des repas" Height="600" Width="900"
         WindowStartupLocation="CenterScreen"
-        Background="#E8DCCA"
+        Background="#FDF6E3"
         FontFamily="./Police/#Playfair Display">
 
     <Border BorderBrush="#8B1538" BorderThickness="3" CornerRadius="10" Margin="15">
@@ -19,45 +19,40 @@
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-            <!-- Titre -->
             <StackPanel Grid.Row="0" HorizontalAlignment="Center">
                 <TextBlock Text="Epicur'app" FontSize="24" FontWeight="Bold"
-                          Foreground="#D4AF37" HorizontalAlignment="Center" Margin="0,5,0,0"/>
-                <TextBlock x:Name="txtTitreClient" Text="Historique des repas" FontSize="14" Foreground="#B8860B"
-                          HorizontalAlignment="Center" FontStyle="Italic" Margin="0,5,0,0"/>
+                           Foreground="#8B1538" HorizontalAlignment="Center" Margin="0,5,0,0"/>
+                <TextBlock x:Name="txtTitreClient" Text="Historique des repas" FontSize="14" Foreground="#D4AF37"
+                           HorizontalAlignment="Center" FontStyle="Italic" Margin="0,5,0,0"/>
             </StackPanel>
 
-            <!-- Ligne de séparation -->
             <Rectangle Grid.Row="1" Height="2" Fill="#8B1538" Margin="0,20,0,20"/>
 
-            <!-- Zone de contenu -->
-            <Border Grid.Row="2" BorderBrush="#D4AF37" BorderThickness="2" CornerRadius="8" Background="#2a2a2a">
+            <Border Grid.Row="2" BorderBrush="#D4AF37" BorderThickness="2" CornerRadius="8" Background="White">
                 <Grid>
-                    <!-- Message "Aucun repas enregistré" -->
                     <TextBlock x:Name="txtAucunRepas"
-                              Text="Aucun repas enregistré"
-                              FontSize="16"
-                              Foreground="#D4AF37"
-                              HorizontalAlignment="Center"
-                              VerticalAlignment="Center"
-                              Visibility="Collapsed"/>
+                               Text="Aucun repas enregistré"
+                               FontSize="16"
+                               Foreground="#D4AF37"
+                               HorizontalAlignment="Center"
+                               VerticalAlignment="Center"
+                               Visibility="Collapsed"/>
 
-                    <!-- DataGrid pour afficher les repas -->
                     <DataGrid x:Name="dgRepas"
-                             AutoGenerateColumns="False"
-                             IsReadOnly="True"
-                             Background="#2a2a2a"
-                             Foreground="White"
-                             BorderThickness="0"
-                             GridLinesVisibility="Horizontal"
-                             HorizontalGridLinesBrush="#3a3a3a"
-                             RowBackground="#2a2a2a"
-                             AlternatingRowBackground="#353535"
-                             HeadersVisibility="Column"
-                             CanUserResizeRows="False"
-                             SelectionMode="Single"
-                             SelectionUnit="FullRow"
-                             Margin="10">
+                              AutoGenerateColumns="False"
+                              IsReadOnly="True"
+                              Background="White"
+                              Foreground="#475569"
+                              BorderThickness="0"
+                              GridLinesVisibility="Horizontal"
+                              HorizontalGridLinesBrush="#F8FAFC"
+                              RowBackground="White"
+                              AlternatingRowBackground="#F8FAFC"
+                              HeadersVisibility="Column"
+                              CanUserResizeRows="False"
+                              SelectionMode="Single"
+                              SelectionUnit="FullRow"
+                              Margin="10">
 
                         <DataGrid.ColumnHeaderStyle>
                             <Style TargetType="DataGridColumnHeader">
@@ -71,7 +66,6 @@
                         </DataGrid.ColumnHeaderStyle>
 
                         <DataGrid.Columns>
-                            <!-- Colonne Date -->
                             <DataGridTextColumn Header="Date" Binding="{Binding Date, StringFormat='{}{0:dd/MM/yyyy HH:mm}'}" Width="150">
                                 <DataGridTextColumn.ElementStyle>
                                     <Style TargetType="TextBlock">
@@ -82,7 +76,6 @@
                                 </DataGridTextColumn.ElementStyle>
                             </DataGridTextColumn>
 
-                            <!-- Colonne Menu -->
                             <DataGridTextColumn Header="Menu" Binding="{Binding Menu.Nom}" Width="*" MinWidth="200">
                                 <DataGridTextColumn.ElementStyle>
                                     <Style TargetType="TextBlock">
@@ -90,12 +83,11 @@
                                         <Setter Property="VerticalAlignment" Value="Center"/>
                                         <Setter Property="FontSize" Value="13"/>
                                         <Setter Property="FontWeight" Value="SemiBold"/>
-                                        <Setter Property="Foreground" Value="#D4AF37"/>
+                                        <Setter Property="Foreground" Value="#8B1538"/>
                                     </Style>
                                 </DataGridTextColumn.ElementStyle>
                             </DataGridTextColumn>
 
-                            <!-- Colonne Retours -->
                             <DataGridTextColumn Header="Retours" Binding="{Binding Retours}" Width="*" MinWidth="250">
                                 <DataGridTextColumn.ElementStyle>
                                     <Style TargetType="TextBlock">
@@ -103,7 +95,7 @@
                                         <Setter Property="VerticalAlignment" Value="Center"/>
                                         <Setter Property="FontSize" Value="12"/>
                                         <Setter Property="TextWrapping" Value="Wrap"/>
-                                        <Setter Property="Foreground" Value="#CCCCCC"/>
+                                        <Setter Property="Foreground" Value="#475569"/>
                                     </Style>
                                 </DataGridTextColumn.ElementStyle>
                             </DataGridTextColumn>
@@ -112,12 +104,11 @@
                 </Grid>
             </Border>
 
-            <!-- Bouton Fermer -->
             <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,20,0,0">
                 <Button x:Name="btnFermer" Content="Fermer" Width="150" Height="45"
-                       Background="Transparent" Foreground="#D4AF37"
-                       BorderBrush="#D4AF37" BorderThickness="2" FontSize="15"
-                       FontWeight="SemiBold" Cursor="Hand" Click="Fermer"/>
+                        Background="Transparent" Foreground="#D4AF37"
+                        BorderBrush="#D4AF37" BorderThickness="2" FontSize="15"
+                        FontWeight="SemiBold" Cursor="Hand" Click="Fermer"/>
             </StackPanel>
         </Grid>
     </Border>

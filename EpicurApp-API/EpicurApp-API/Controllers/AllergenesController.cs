@@ -1,5 +1,5 @@
-﻿using EpicurApp_API.DAO;
-using EpicurAPP_Partage.Models;
+﻿using EpicurAPP_Partage.Models;
+using EpicurAppLogic.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EpicurApp_API.Controllers
@@ -9,16 +9,16 @@ namespace EpicurApp_API.Controllers
     public class AllergenesController : ControllerBase
     {
         /// <summary>
-        /// DAO permettant d'accéder aux données des allergènes.
+        /// Service permettant de gérer les allergènes.
         /// </summary>
-        private readonly AllergeneDAO _allergeneDAO;
+        private readonly IAllergeneService _allergeneService;
 
         /// <summary>
-        /// Constructeur : injection du DAO des allergènes.
+        /// Constructeur : injection du service des allergènes.
         /// </summary>
-        public AllergenesController(AllergeneDAO allergeneDAO)
+        public AllergenesController(IAllergeneService allergeneService)
         {
-            _allergeneDAO = allergeneDAO;
+            _allergeneService = allergeneService;
         }
 
         /// <summary>
@@ -30,15 +30,15 @@ namespace EpicurApp_API.Controllers
         {
             try
             {
-                // Appel au DAO pour récupérer la liste complète
-                List<Allergene> allergenes = _allergeneDAO.GetAll();
+                // Appel au service pour récupérer la liste complète
+                List<Allergene> allergenes = _allergeneService.GetAll();
 
                 // Renvoie un code 200 (OK) avec la liste
                 return Ok(allergenes);
             }
             catch (Exception exception)
             {
-                // En cas d’erreur → code 500
+                // En cas d'erreur → code 500
                 return StatusCode(500, "Erreur lors de la récupération des allergènes : " + exception.Message);
             }
         }
@@ -53,15 +53,15 @@ namespace EpicurApp_API.Controllers
         {
             try
             {
-                // Appel au DAO pour ajouter l’allergène en base
-                _allergeneDAO.AjouterAllergene(allergene);
+                // Appel au service pour ajouter l'allergène en base
+                _allergeneService.AjouterAllergene(allergene);
 
                 // 201 = Created
                 return StatusCode(201, allergene);
             }
             catch (Exception exception)
             {
-                return StatusCode(500, "Erreur lors de l’ajout de l’allergène : " + exception.Message);
+                return StatusCode(500, "Erreur lors de l'ajout de l'allergène : " + exception.Message);
             }
         }
     }

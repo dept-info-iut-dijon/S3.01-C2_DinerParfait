@@ -35,11 +35,11 @@ namespace EpicurAppIHM.Views
         {
             try
             {
-                var menus = await App.ApiClient.HttpClient.GetFromJsonAsync<List<MenuModel>>("Menu/GetAll");
+                List<MenuModel> menus = await App.ApiClient.HttpClient.GetFromJsonAsync<List<MenuModel>>("Menu");
                 if (menus != null)
                 {
                     Menus.Clear();
-                    foreach (var menu in menus)
+                    foreach (MenuModel menu in menus)
                         Menus.Add(menu);
                 }
             }
@@ -57,12 +57,22 @@ namespace EpicurAppIHM.Views
         {
             if (ListBoxMenus.SelectedItem is MenuModel menuSelectionne)
             {
-                // Ouvrir la fenêtre de consultation du menu (lecture seule)
-                var ficheMenu = new ConsultationMenu(menuSelectionne.Id);
-                ficheMenu.ShowDialog();
+                // Si c'est un brouillon, ouvrir en mode édition
+                if (menuSelectionne.Statut == "Brouillon")
+                {
+                    CreationMenu creationMenu = new CreationMenu(menuSelectionne.Id);
+                    creationMenu.Closed += (s, args) => ChargerMenus();
+                    creationMenu.ShowDialog();
+                }
+                else
+                {
+                    // Sinon, ouvrir la fenêtre de consultation du menu (lecture seule)
+                    ConsultationMenu ficheMenu = new ConsultationMenu(menuSelectionne.Id);
+                    ficheMenu.ShowDialog();
 
-                // Recharger la liste après fermeture
-                ChargerMenus();
+                    // Recharger la liste après fermeture
+                    ChargerMenus();
+                }
             }
         }
 
@@ -71,7 +81,7 @@ namespace EpicurAppIHM.Views
         /// </summary>
         private void NouveauMenu_Click(object sender, RoutedEventArgs e)
         {
-            var creationMenu = new CreationMenu();
+            CreationMenu creationMenu = new CreationMenu();
             creationMenu.Closed += (s, args) => ChargerMenus(); // Recharger quand la fenêtre se ferme
             creationMenu.ShowDialog();
         }

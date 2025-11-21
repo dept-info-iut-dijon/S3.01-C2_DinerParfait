@@ -2,11 +2,14 @@ using EpicurApp_API.Configuration;
 using EpicurAPP_Partage.Models;
 using EpicurAppLogic.Interfaces;
 using Microsoft.Data.Sqlite;
+using System;
+using System.Collections.Generic;
+using static EpicurAPP_Partage.Models.Ingredient;
 
 namespace EpicurApp_API.DAO
 {
     /// <summary>
-    /// DAO pour la gestion des ingrédients dans la base de données
+    /// Implementation du DAO pour la gestion des ingrédients.
     /// </summary>
     public class IngredientDAO : IIngredientDAO
     {
@@ -23,29 +26,20 @@ namespace EpicurApp_API.DAO
         public List<Ingredient> GetAll()
         {
             List<Ingredient> ingredients = new List<Ingredient>();
-            const string query = "SELECT Id, Nom, Description FROM Ingredients ORDER BY Nom;";
+            const string query = "SELECT Id, Nom, Description, Categorie FROM Ingredients ORDER BY Nom;";
 
             using (SqliteConnection connection = new SqliteConnection(_connectionString))
             {
                 connection.Open();
-
                 using (SqliteCommand command = new SqliteCommand(query, connection))
                 using (SqliteDataReader reader = command.ExecuteReader())
                 {
                     while (reader.Read())
                     {
-                        Ingredient ingredient = new Ingredient
-                        {
-                            Id = reader.GetInt32(0),
-                            Nom = reader.GetString(1),
-                            Description = reader.IsDBNull(2) ? null : reader.GetString(2)
-                        };
-
-                        ingredients.Add(ingredient);
+                        ingredients.Add(MapperIngredient(reader));
                     }
                 }
             }
-
             return ingredients;
         }
 
@@ -54,33 +48,23 @@ namespace EpicurApp_API.DAO
         /// </summary>
         public Ingredient? GetById(int id)
         {
-            const string query = "SELECT Id, Nom, Description FROM Ingredients WHERE Id = @Id;";
+            const string query = "SELECT Id, Nom, Description, Categorie FROM Ingredients WHERE Id = @Id;";
 
             using (SqliteConnection connection = new SqliteConnection(_connectionString))
             {
                 connection.Open();
-
                 using (SqliteCommand command = new SqliteCommand(query, connection))
                 {
                     command.Parameters.AddWithValue("@Id", id);
-
                     using (SqliteDataReader reader = command.ExecuteReader())
                     {
                         if (reader.Read())
                         {
-                            Ingredient ingredient = new Ingredient
-                            {
-                                Id = reader.GetInt32(0),
-                                Nom = reader.GetString(1),
-                                Description = reader.IsDBNull(2) ? null : reader.GetString(2)
-                            };
-
-                            return ingredient;
+                            return MapperIngredient(reader);
                         }
                     }
                 }
             }
-
             return null;
         }
 
@@ -91,7 +75,8 @@ namespace EpicurApp_API.DAO
         {
             List<Ingredient> ingredients = new List<Ingredient>();
 
-            const string query = @"SELECT i.Id, i.Nom, i.Description
+            // Requête avec jointure pour récupérer les ingrédients liés au plat
+            const string query = @"SELECT i.Id, i.Nom, i.Description, i.Categorie
                                   FROM Ingredients i
                                   INNER JOIN PlatIngredient pi ON i.Id = pi.IngredientId
                                   WHERE pi.PlatId = @PlatId
@@ -100,28 +85,18 @@ namespace EpicurApp_API.DAO
             using (SqliteConnection connection = new SqliteConnection(_connectionString))
             {
                 connection.Open();
-
                 using (SqliteCommand command = new SqliteCommand(query, connection))
                 {
                     command.Parameters.AddWithValue("@PlatId", platId);
-
                     using (SqliteDataReader reader = command.ExecuteReader())
                     {
                         while (reader.Read())
                         {
-                            Ingredient ingredient = new Ingredient
-                            {
-                                Id = reader.GetInt32(0),
-                                Nom = reader.GetString(1),
-                                Description = reader.IsDBNull(2) ? null : reader.GetString(2)
-                            };
-
-                            ingredients.Add(ingredient);
+                            ingredients.Add(MapperIngredient(reader));
                         }
                     }
                 }
             }
-
             return ingredients;
         }
 
@@ -130,16 +105,16 @@ namespace EpicurApp_API.DAO
         /// </summary>
         public void Add(Ingredient ingredient)
         {
-            const string query = "INSERT INTO Ingredients (Nom, Description) VALUES (@Nom, @Description);";
+            const string query = "INSERT INTO Ingredients (Nom, Description, Categorie) VALUES (@Nom, @Description, @Categorie);";
 
             using (SqliteConnection connection = new SqliteConnection(_connectionString))
             {
                 connection.Open();
-
                 using (SqliteCommand command = new SqliteCommand(query, connection))
                 {
                     command.Parameters.AddWithValue("@Nom", ingredient.Nom);
                     command.Parameters.AddWithValue("@Description", ingredient.Description ?? (object)DBNull.Value);
+                    command.Parameters.AddWithValue("@Categorie", ingredient.Categorie.ToString());
 
                     command.ExecuteNonQuery();
 
@@ -168,7 +143,6 @@ namespace EpicurApp_API.DAO
                 foreach (int ingredientId in ingredientIds)
                 {
                     string insertQuery = "INSERT INTO PlatIngredient (PlatId, IngredientId) VALUES (@PlatId, @IngredientId)";
-
                     using (SqliteCommand commandInsert = new SqliteCommand(insertQuery, connection))
                     {
                         commandInsert.Parameters.AddWithValue("@PlatId", platId);
@@ -177,6 +151,29 @@ namespace EpicurApp_API.DAO
                     }
                 }
             }
+        }
+
+
+        /// <summary>
+        /// Permet de mapper un enregistrement de la base de données à un objet Ingredient
+        /// </summary>
+        /// <param name="reader">le reader sql</param>
+        /// <returns>L'ingredient mappe</returns>
+        private Ingredient MapperIngredient(SqliteDataReader reader)
+        {
+            CategorieIngredient categorie = CategorieIngredient.Autre;
+            if (!reader.IsDBNull(3))
+            {
+                Enum.TryParse(reader.GetString(3), out categorie);
+            }
+
+            return new Ingredient
+            {
+                Id = reader.GetInt32(0),
+                Nom = reader.GetString(1),
+                Description = reader.IsDBNull(2) ? null : reader.GetString(2),
+                Categorie = categorie
+            };
         }
     }
 }

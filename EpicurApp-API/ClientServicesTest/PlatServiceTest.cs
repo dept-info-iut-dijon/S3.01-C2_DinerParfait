@@ -37,9 +37,9 @@ public class PlatServiceTests
     {
         int id = 99;
         // DAO renvoei rien
-        _mockPlatDAO.Setup(dao => dao.GetById(id)).Returns((Plat)null);
+        _mockPlatDAO.Setup(dao => dao.GetById(id)).Returns((Plat?)null);
 
-        ApplicationException exceptionVoulue = null;
+        ApplicationException? exceptionVoulue = null;
 
         try
         {
@@ -52,14 +52,14 @@ public class PlatServiceTests
 
         Assert.NotNull(exceptionVoulue);
         Assert.Equal("Erreur lors de la récupération du plat.", exceptionVoulue.Message);
-        Assert.Equal($"Le plat avec l'id {id} n'existe pas.", exceptionVoulue.InnerException.Message);
+        Assert.Equal($"Le plat avec l'id {id} n'existe pas.", exceptionVoulue.InnerException!.Message);
     }
 
     [Fact]
     public void AjouterPlatExeptionNom()
     {
-        Plat platInvalide = new Plat { Nom = null, Categorie = CategoriePlat.Dessert };
-        InvalidFieldException exceptionVoulue = null;
+        Plat platInvalide = new Plat { Nom = null!, Categorie = CategoriePlat.Dessert };
+        InvalidFieldException? exceptionVoulue = null;
 
         try
         {
@@ -82,7 +82,7 @@ public class PlatServiceTests
         mockDAO.Setup(dao => dao.GetById(1)).Throws(new Exception("Erreur db"));
 
         PlatService platService = new PlatService(mockDAO.Object);
-        ApplicationException exceptionVoulue = null;
+        ApplicationException? exceptionVoulue = null;
 
         try { platService.ObtenirPlatParId(1); }
         catch (ApplicationException ex) { exceptionVoulue = ex; }

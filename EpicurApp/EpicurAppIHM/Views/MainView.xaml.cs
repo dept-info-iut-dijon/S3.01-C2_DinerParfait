@@ -49,5 +49,11 @@ namespace EpicurAppIHM.Views
 
             BoiteIdeesViewControl.ChargerIdees();
         }
+
+        private void OuvrirEtiquettes_Click(object sender, RoutedEventArgs e)
+        {
+            EtiquettesView etiquettesView = new EtiquettesView();
+            etiquettesView.Show();
+        }
     }
 }

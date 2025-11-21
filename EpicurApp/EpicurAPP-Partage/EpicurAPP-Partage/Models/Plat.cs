@@ -24,7 +24,7 @@
         /// Liste des ingrédients principaux du plat.
         /// Essentiel pour la gestion des alertes allergènes.
         /// </summary>
-        public List<string> IngredientsPrincipaux { get; set; } = new List<string>();
+        public List<Ingredient> IngredientsPrincipaux { get; set; } = new List<Ingredient>();
 
         /// <summary>
         /// Retourne le nom du plat.

@@ -57,7 +57,7 @@
 
         <!-- Bouton Nouveau Client -->
         <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,15">
-            <Button x:Name="btnNouveauClient" Content="+ Nouveau Client" Width="200" Background="#D4AF37" Foreground="White" Style="{StaticResource EpicurAppButtonStyle}" Click="NouveauClient_Click"/>
+            <Button x:Name="btnNouveauClient" Content="+ Nouveau Client" Width="200" Background="#8B1538" Foreground="White" Style="{StaticResource EpicurAppButtonStyle}" Click="NouveauClient_Click"/>
         </StackPanel>
 
 
@@ -112,8 +112,8 @@
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <ItemsControl ItemsSource="{Binding Allergenes}" 
-                                         VerticalAlignment="Center" 
-                                         Margin="8,0">
+                                          VerticalAlignment="Center" 
+                                          Margin="8,0">
                                 <ItemsControl.ItemsPanel>
                                     <ItemsPanelTemplate>
                                         <WrapPanel/>
@@ -122,13 +122,13 @@
                                 <ItemsControl.ItemTemplate>
                                     <DataTemplate>
                                         <Border Background="#EF4444" 
-                                               CornerRadius="3" 
-                                               Margin="0,2,4,2"
-                                               Padding="6,2">
+                                                CornerRadius="3" 
+                                                Margin="0,2,4,2"
+                                                Padding="6,2">
                                             <TextBlock Text="{Binding Nom}" 
-                                                      FontSize="11" 
-                                                      Foreground="White"
-                                                      FontWeight="SemiBold"/>
+                                                       FontSize="11" 
+                                                       Foreground="White"
+                                                       FontWeight="SemiBold"/>
                                         </Border>
                                     </DataTemplate>
                                 </ItemsControl.ItemTemplate>
@@ -142,12 +142,12 @@
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
                             <TextBlock Text="{Binding Preferences}" 
-                                      TextTrimming="CharacterEllipsis"
-                                      VerticalAlignment="Center"
-                                      Margin="8,0"
-                                      FontSize="12"
-                                      Foreground="#6B7280"
-                                      ToolTip="{Binding Preferences}"/>
+                                       TextTrimming="CharacterEllipsis"
+                                       VerticalAlignment="Center"
+                                       Margin="8,0"
+                                       FontSize="12"
+                                       Foreground="#475569"
+                                       ToolTip="{Binding Preferences}"/>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>

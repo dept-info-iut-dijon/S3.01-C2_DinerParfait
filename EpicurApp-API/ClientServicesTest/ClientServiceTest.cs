@@ -21,8 +21,8 @@ public class ClientServiceTests
     [Fact]
     public void AjouterClientExeptionField()
     {
-        Client clientInvalide = new Client { Nom = null, Prenom = "Marwan" };
-        InvalidFieldException exceptionVoulue = null;
+        Client clientInvalide = new Client { Nom = null!, Prenom = "Marwan" };
+        InvalidFieldException? exceptionVoulue = null;
 
         try
         {
@@ -40,7 +40,7 @@ public class ClientServiceTests
     public void AjouterClientExeptionVide()
     {
         Client clientInvalide = new Client { Nom = "Himeur", Prenom = "   " };
-        InvalidFieldException exceptionVoulue = null;
+        InvalidFieldException? exceptionVoulue = null;
 
         try
         {
@@ -64,7 +64,7 @@ public class ClientServiceTests
         // Le mock leve une exeption
         _mockClientDAO.Setup(dao => dao.AjouterClient(clientValide)).Throws(exceptionDAO);
 
-        ApplicationException exceptionVoulue = null;
+        ApplicationException? exceptionVoulue = null;
 
         try
         {

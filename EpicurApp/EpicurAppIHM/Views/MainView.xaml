@@ -3,7 +3,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:views="clr-namespace:EpicurAppIHM.Views"
              Height="1080" Width="1920"
-             Background="#E8DCCA"
+             Background="#FDF6E3"
              FontFamily="./Police/#Playfair Display">
 
     <Grid>
@@ -12,7 +12,6 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!-- BARRE DE NAVIGATION -->
         <Border Grid.Row="0" Background="#8B1538" BorderThickness="0,0,0,3" BorderBrush="#D4AF37">
             <Grid Height="65" Margin="15,0">
                 <Grid.ColumnDefinitions>
@@ -39,6 +38,14 @@
                             BorderThickness="0" Cursor="Hand"
                             Click="AfficherBoiteIdees"/>
 
+                    <Button x:Name="btnEtiquettes"
+                            Content="Éditer les Étiquettes"
+                            Width="200" Height="50"
+                            Background="#D4AF37" Foreground="White"
+                            FontSize="14" FontWeight="Bold"
+                            Margin="10"
+                            Cursor="Hand"
+                            Click="OuvrirEtiquettes_Click"/>
                 </StackPanel>
 
                 <TextBlock Grid.Column="1" Text="Epicur'app"
@@ -51,7 +58,6 @@
             </Grid>
         </Border>
 
-        <!-- ZONE DE CONTENU -->
         <Grid Grid.Row="1">
             <views:ClientsView x:Name="ClientsViewControl" Visibility="Visible"/>
             <views:MenusView x:Name="MenusViewControl" Visibility="Collapsed"/>

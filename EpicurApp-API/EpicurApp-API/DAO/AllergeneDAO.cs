@@ -1,13 +1,14 @@
 ﻿using EpicurAPP_Partage.Models;
 using Microsoft.Data.Sqlite;
 using EpicurApp_API.Configuration;
+using EpicurAppLogic.Interfaces;
 
 namespace EpicurApp_API.DAO
 {
     /// <summary>
     /// DAO pour la gestion des allergènes.
     /// </summary>
-    public class AllergeneDAO
+    public class AllergeneDAO : IAllergeneDAO
     {
         private readonly string _connectionString;
 

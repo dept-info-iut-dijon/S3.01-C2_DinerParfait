@@ -21,8 +21,6 @@ namespace EpicurApp_API.Controllers
             _platDAO = platDAO;
         }
 
-      
-
         /// <summary>
         /// Récupère l'ensemble des plats.
         /// </summary>
@@ -34,7 +32,7 @@ namespace EpicurApp_API.Controllers
                 // Récupération de tous les plats
                 List<Plat> plats = _platDAO.GetAll();
 
-                // Si aucun plat → renvoyer une liste vide pour éviter null
+                // Si aucun plat on renvoie une liste vide pour éviter null
                 if (plats == null || plats.Count == 0)
                 {
                     return Ok(new List<Plat>());
@@ -48,8 +46,6 @@ namespace EpicurApp_API.Controllers
             }
         }
 
-     
-
         /// <summary>
         /// Récupère un plat via son identifiant.
         /// </summary>
@@ -58,7 +54,7 @@ namespace EpicurApp_API.Controllers
         {
             try
             {
-                Plat plat = _platDAO.GetById(id);
+                Plat? plat = _platDAO.GetById(id);
 
                 if (plat == null)
                 {
@@ -72,8 +68,6 @@ namespace EpicurApp_API.Controllers
                 return StatusCode(500, "Erreur interne du serveur : " + exception.Message);
             }
         }
-
-     
 
         /// <summary>
         /// Récupère la liste des plats appartenant à une catégorie donnée.
@@ -112,8 +106,6 @@ namespace EpicurApp_API.Controllers
             }
         }
 
-    
-
         /// <summary>
         /// Crée un nouveau plat.
         /// </summary>
@@ -131,8 +123,8 @@ namespace EpicurApp_API.Controllers
                 // Ajout en base
                 _platDAO.Add(plat);
 
-                // Retourne le plat créé avec un code 201
-                return CreatedAtAction(nameof(GetPlatById), new { id = plat.Id }, plat);
+                // Retourne le plat créé 
+                return Ok(plat);
             }
             catch (Exception exception)
             {

@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Consultation Menu" Height="650" Width="600"
         WindowStartupLocation="CenterScreen"
-        Background="#E8DCCA"
+        Background="#FDF6E3"
         FontFamily="./Police/#Playfair Display">
 
     <Border BorderBrush="#8B1538" BorderThickness="3" CornerRadius="10" Margin="15">
@@ -17,73 +17,92 @@
 
             <!-- En-tête -->
             <StackPanel Grid.Row="0" HorizontalAlignment="Center">
-                <TextBlock Text="Epicur'app" FontSize="24" FontWeight="Bold" Foreground="#D4AF37" HorizontalAlignment="Center" Margin="0,5,0,0"/>
-                <TextBlock x:Name="txtTitre" Text="Consultation Menu" FontSize="14" Foreground="#B8860B" HorizontalAlignment="Center" FontStyle="Italic" Margin="0,5,0,0"/>
+                <TextBlock Text="Epicur'app" FontSize="24" FontWeight="Bold" Foreground="#8B1538" HorizontalAlignment="Center" Margin="0,5,0,0"/>
+                <TextBlock x:Name="txtTitre" Text="Consultation Menu" FontSize="14" Foreground="#D4AF37" HorizontalAlignment="Center" FontStyle="Italic" Margin="0,5,0,0"/>
             </StackPanel>
 
             <Rectangle Grid.Row="1" Height="2" Fill="#8B1538" Margin="0,20,0,20"/>
 
-            <!-- Contenu -->
             <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto" Padding="5">
                 <StackPanel>
 
-                    <!-- Informations générales -->
                     <TextBlock Text="Informations" FontSize="16" FontWeight="Bold" Foreground="#8B1538" Margin="0,0,0,10"/>
                     <TextBlock Text="Nom du menu :" FontWeight="SemiBold" Foreground="#D4AF37"/>
-                    <TextBlock x:Name="txtNom" FontSize="14" Foreground="#2C3E50" Margin="10,0,0,10"/>
+                    <TextBlock x:Name="txtNom" FontSize="14" Foreground="#475569" Margin="10,0,0,10"/>
 
                     <StackPanel Orientation="Horizontal" Margin="0,0,0,15">
                         <StackPanel Margin="0,0,30,0">
                             <TextBlock Text="Date :" FontWeight="SemiBold" Foreground="#D4AF37"/>
-                            <TextBlock x:Name="txtDate" FontSize="14" Foreground="#2C3E50"/>
+                            <TextBlock x:Name="txtDate" FontSize="14" Foreground="#475569"/>
                         </StackPanel>
                         <StackPanel>
                             <TextBlock Text="Statut :" FontWeight="SemiBold" Foreground="#D4AF37"/>
-                            <TextBlock x:Name="txtStatut" FontSize="14" Foreground="#2C3E50"/>
+                            <TextBlock x:Name="txtStatut" FontSize="14" Foreground="#475569"/>
                         </StackPanel>
                     </StackPanel>
 
-                    <!-- Apéritif -->
                     <TextBlock Text="Apéritif" FontSize="16" FontWeight="Bold" Foreground="#8B1538" Margin="0,15,0,10"/>
                     <TextBlock Text="Amuse Bouche :" FontWeight="SemiBold" Foreground="#D4AF37"/>
-                    <TextBlock x:Name="txtAmuseBouche" FontSize="14" Foreground="#2C3E50" Margin="10,0,0,5"/>
+                    <TextBlock x:Name="txtAmuseBouche" FontSize="14" Foreground="#475569" Margin="10,0,0,5"/>
                     <TextBlock Text="Boisson Apéritif :" FontWeight="SemiBold" Foreground="#D4AF37"/>
-                    <TextBlock x:Name="txtBoissonAperitif" FontSize="14" Foreground="#2C3E50" Margin="10,0,0,15"/>
+                    <TextBlock x:Name="txtBoissonAperitif" FontSize="14" Foreground="#475569" Margin="10,0,0,15"/>
 
-                    <!-- Repas -->
                     <TextBlock Text="Repas" FontSize="16" FontWeight="Bold" Foreground="#8B1538" Margin="0,15,0,10"/>
                     <TextBlock Text="Entrée :" FontWeight="SemiBold" Foreground="#D4AF37"/>
-                    <TextBlock x:Name="txtEntree" FontSize="14" Foreground="#2C3E50" Margin="10,0,0,5"/>
+                    <TextBlock x:Name="txtEntree" FontSize="14" Foreground="#475569" Margin="10,0,0,5"/>
                     <TextBlock Text="Plat Principal :" FontWeight="SemiBold" Foreground="#D4AF37"/>
-                    <TextBlock x:Name="txtPlatPrincipal" FontSize="14" Foreground="#2C3E50" Margin="10,0,0,5"/>
+                    <TextBlock x:Name="txtPlatPrincipal" FontSize="14" Foreground="#475569" Margin="10,0,0,5"/>
                     <TextBlock Text="Vin :" FontWeight="SemiBold" Foreground="#D4AF37"/>
-                    <TextBlock x:Name="txtVin" FontSize="14" Foreground="#2C3E50" Margin="10,0,0,15"/>
+                    <TextBlock x:Name="txtVin" FontSize="14" Foreground="#475569" Margin="10,0,0,15"/>
 
-                    <!-- Fin du repas -->
                     <TextBlock Text="Fin du Repas" FontSize="16" FontWeight="Bold" Foreground="#8B1538" Margin="0,15,0,10"/>
                     <TextBlock Text="Fromage :" FontWeight="SemiBold" Foreground="#D4AF37"/>
-                    <TextBlock x:Name="txtFromage" FontSize="14" Foreground="#2C3E50" Margin="10,0,0,5"/>
+                    <TextBlock x:Name="txtFromage" FontSize="14" Foreground="#475569" Margin="10,0,0,5"/>
                     <TextBlock Text="Dessert :" FontWeight="SemiBold" Foreground="#D4AF37"/>
-                    <TextBlock x:Name="txtDessert" FontSize="14" Foreground="#2C3E50" Margin="10,0,0,5"/>
+                    <TextBlock x:Name="txtDessert" FontSize="14" Foreground="#475569" Margin="10,0,0,5"/>
 
                 </StackPanel>
             </ScrollViewer>
 
-            <!-- Bouton Fermer -->
-            <Button Grid.Row="3"
-                    x:Name="btnFermer"
-                    Content="Fermer"
-                    Width="150"
-                    Height="45"
-                    HorizontalAlignment="Center"
-                    Margin="0,20,0,0"
-                    Background="#D4AF37"
-                    Foreground="#1a1a1a"
-                    BorderThickness="0"
-                    FontSize="15"
-                    FontWeight="Bold"
-                    Cursor="Hand"
-                    Click="Fermer_Click"/>
+            <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,20,0,0">
+                <Button x:Name="btnGenererListeCourses"
+                        Content="Liste de courses"
+                        Width="150"
+                        Height="45"
+                        Margin="0,0,10,0"
+                        Background="#2E8B57"
+                        Foreground="White"
+                        BorderThickness="0"
+                        FontSize="13"
+                        FontWeight="Bold"
+                        Cursor="Hand"
+                        Click="GenererListeCourses_Click"/>
+
+                <Button x:Name="btnSupprimer"
+                        Content="Supprimer"
+                        Width="120"
+                        Height="45"
+                        Margin="0,0,10,0"
+                        Background="#EF4444"
+                        Foreground="White"
+                        BorderThickness="0"
+                        FontSize="14"
+                        FontWeight="Bold"
+                        Cursor="Hand"
+                        Click="Supprimer_Click"/>
+
+                <Button x:Name="btnFermer"
+                        Content="Fermer"
+                        Width="120"
+                        Height="45"
+                        Background="#D4AF37"
+                        Foreground="#1a1a1a"
+                        BorderThickness="0"
+                        FontSize="14"
+                        FontWeight="Bold"
+                        Cursor="Hand"
+                        Click="Fermer_Click"/>
+            </StackPanel>
         </Grid>
     </Border>
 </Window>

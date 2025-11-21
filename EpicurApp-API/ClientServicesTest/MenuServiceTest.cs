@@ -7,19 +7,21 @@ using EpicurAppLogic.Services;
 public class MenuServiceTests
 {
     private readonly Mock<IMenuDAO> _mockMenuDAO;
+    private readonly Mock<IPlatDAO> _mockPlatDAO;
     private readonly MenuService _menuService;
 
     public MenuServiceTests()
     {
         _mockMenuDAO = new Mock<IMenuDAO>();
-        _menuService = new MenuService(_mockMenuDAO.Object);
+        _mockPlatDAO = new Mock<IPlatDAO>();
+        _menuService = new MenuService(_mockMenuDAO.Object, _mockPlatDAO.Object);
     }
 
     [Fact]
     public void AjouterMenuExeptionNom()
     {
         Menu menuInvalide = new Menu { Nom = "   " };
-        InvalidFieldException exceptionVoulue = null;
+        InvalidFieldException? exceptionVoulue = null;
 
         try
         {
@@ -38,7 +40,7 @@ public class MenuServiceTests
     public void AjouterMenu_StatutInvalide_DoitLeverException()
     {
         Menu menuInvalide = new Menu { Nom = "Menu test", Statut = "En cours" };
-        InvalidFieldException exceptionVoulue = null;
+        InvalidFieldException? exceptionVoulue = null;
 
         try
         {
@@ -56,8 +58,8 @@ public class MenuServiceTests
     [Fact]
     public void GetById_APIDAONull()
     {
-        _mockMenuDAO.Setup(dao => dao.GetById(99)).Returns((Menu)null);
-        Menu resultat = _menuService.GetById(99);
+        _mockMenuDAO.Setup(dao => dao.GetById(99)).Returns((Menu?)null);
+        Menu? resultat = _menuService.GetById(99);
         Assert.Null(resultat);
     }
 
@@ -65,12 +67,12 @@ public class MenuServiceTests
     public void AjouterPlatsAuMenuExeptionPlatNull()
     {
         int menuId = 1;
-        List<int> platIds = null;
-        InvalidFieldException exceptionVoulue = null;
+        List<int>? platIds = null;
+        InvalidFieldException? exceptionVoulue = null;
 
         try
         {
-            _menuService.AjouterPlatsAuMenu(menuId, platIds);
+            _menuService.AjouterPlatsAuMenu(menuId, platIds!);
         }
         catch (InvalidFieldException ex)
         {
@@ -86,7 +88,7 @@ public class MenuServiceTests
     {
         int menuId = 1;
         List<int> platIdsVides = new List<int>();
-        InvalidFieldException exceptionVoulue = null;
+        InvalidFieldException? exceptionVoulue = null;
 
         try
         {
@@ -105,10 +107,11 @@ public class MenuServiceTests
     public void GetAll_ShouldReturnListOfMenus_WhenDAOReturnsData()
     {
         Mock<IMenuDAO> mockDAO = new Mock<IMenuDAO>();
+        Mock<IPlatDAO> mockPlatDAO = new Mock<IPlatDAO>();
         List<Menu> listeAttendue = new List<Menu> { new Menu { Id = 1, Nom = "Test" } };
         mockDAO.Setup(dao => dao.GetAll()).Returns(listeAttendue);
 
-        MenuService menuService = new MenuService(mockDAO.Object);
+        MenuService menuService = new MenuService(mockDAO.Object, mockPlatDAO.Object);
         List<Menu> resultat = menuService.GetAll();
         Assert.Equal(listeAttendue, resultat);
     }
@@ -117,10 +120,11 @@ public class MenuServiceTests
     public void GetAllErreurDAO()
     {
         Mock<IMenuDAO> mockDAO = new Mock<IMenuDAO>();
+        Mock<IPlatDAO> mockPlatDAO = new Mock<IPlatDAO>();
         mockDAO.Setup(dao => dao.GetAll()).Throws(new Exception("Erreur db"));
 
-        MenuService menuService = new MenuService(mockDAO.Object);
-        ApplicationException exceptionVoulue = null;
+        MenuService menuService = new MenuService(mockDAO.Object, mockPlatDAO.Object);
+        ApplicationException? exceptionVoulue = null;
 
         try
         {
@@ -141,7 +145,7 @@ public class MenuServiceTests
         Menu brouillon = new Menu { Id = 2, Nom = "Brouillon" };
         _mockMenuDAO.Setup(dao => dao.GetDernierBrouillon()).Returns(brouillon);
 
-        Menu resultat = _menuService.GetDernierBrouillon();
+        Menu? resultat = _menuService.GetDernierBrouillon();
 
         Assert.Equal(brouillon, resultat);
     }
@@ -150,7 +154,7 @@ public class MenuServiceTests
     public void MettreAJourMenu_SansId_DoitLeverException()
     {
         Menu menu = new Menu { Nom = "Menu test", Statut = "Brouillon" };
-        InvalidFieldException exceptionVoulue = null;
+        InvalidFieldException? exceptionVoulue = null;
 
         try
         {
@@ -169,7 +173,7 @@ public class MenuServiceTests
     public void MettreAJourMenu_StatutInvalide_DoitLeverException()
     {
         Menu menu = new Menu { Id = 3, Nom = "Menu test", Statut = "EnAttente" };
-        InvalidFieldException exceptionVoulue = null;
+        InvalidFieldException? exceptionVoulue = null;
 
         try
         {

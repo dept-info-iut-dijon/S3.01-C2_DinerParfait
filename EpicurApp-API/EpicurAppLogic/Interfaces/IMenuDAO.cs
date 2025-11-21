@@ -45,6 +45,12 @@ namespace EpicurAppLogic.Interfaces
         /// <param name="menuId">Id du menu.</param>
         /// <param name="platsIds">Ids des plats à ajouter.</param>
         void AjouterPlatsAuMenu(int menuId, List<int> platIds);
+
+        /// <summary>
+        /// Supprime un menu par son Id.
+        /// </summary>
+        /// <param name="id">Id du menu à supprimer.</param>
+        void SupprimerMenu(int id);
     }
 }
 

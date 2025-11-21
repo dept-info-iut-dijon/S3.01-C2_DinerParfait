@@ -169,15 +169,17 @@ namespace EpicurApp_API.Controllers
             try
             {
                 // Récupération de l'historique des repas via le service
-                var repas = _clientService.ObtenirHistoriqueRepas(id);
+                List<Repas> repas = _clientService.ObtenirHistoriqueRepas(id);
 
                 // Si la liste est vide, on renvoie un message approprié
                 if (repas == null || repas.Count == 0)
                 {
+                    List<object> listeVide = new List<object>();
+
                     return Ok(new
                     {
                         message = "Aucun repas enregistré",
-                        repas = new List<object>()
+                        repas = listeVide
                     });
                 }
 
