@@ -7,7 +7,7 @@
         mc:Ignorable="d"
         Title="Fiche Client" Height="700" Width="650"
         WindowStartupLocation="CenterScreen"
-        Background="#E8DCCA"
+        Background="#FDF6E3"
         FontFamily="./Police/#Playfair Display">
 
     <Border BorderBrush="#8B1538" BorderThickness="3" CornerRadius="10" Margin="15">
@@ -19,83 +19,54 @@
                 <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
 
-            <!-- Titre -->
             <StackPanel Grid.Row="0" HorizontalAlignment="Center">
-                <TextBlock Text="Epicur'app" FontSize="24" FontWeight="Bold" 
-                          Foreground="#D4AF37" HorizontalAlignment="Center" Margin="0,5,0,0"/>
-                <TextBlock Text="Nouvelle Fiche Client" FontSize="14" Foreground="#B8860B" 
-                          HorizontalAlignment="Center" FontStyle="Italic" Margin="0,5,0,0"/>
+                <TextBlock Text="Epicur'app" FontSize="24" FontWeight="Bold" Foreground="#8B1538" HorizontalAlignment="Center" Margin="0,5,0,0"/>
+                <TextBlock Text="Nouvelle Fiche Client" FontSize="14" Foreground="#D4AF37" HorizontalAlignment="Center" FontStyle="Italic" Margin="0,5,0,0"/>
             </StackPanel>
 
-            <!-- Ligne de séparation -->
             <Rectangle Grid.Row="1" Height="2" Fill="#8B1538" Margin="0,20,0,20"/>
 
-            <!-- Formulaire -->
             <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">
                 <StackPanel>
-
-                    <!-- Prénom -->
-                    <Label Content="Prénom *" Foreground="#D4AF37" FontWeight="SemiBold" FontSize="13"/>
-                    <Border x:Name="borderPrenom" BorderBrush="#D4AF37" BorderThickness="2" 
-                           CornerRadius="8" Background="#2a2a2a">
-                        <TextBox x:Name="txtPrenom" Height="40" Padding="10" FontSize="14" 
-                                Background="Transparent" Foreground="White" BorderThickness="0" 
-                                LostFocus="ValiderPrenom"/>
+                    <Label Content="Prénom *" Foreground="#475569" FontWeight="SemiBold" FontSize="13"/>
+                    <Border x:Name="borderPrenom" BorderBrush="#D4AF37" BorderThickness="2" CornerRadius="8" Background="White">
+                        <TextBox x:Name="txtPrenom" Height="40" Padding="10" FontSize="14" Background="Transparent" Foreground="#475569" BorderThickness="0" LostFocus="ValiderPrenom"/>
                     </Border>
-                    <TextBlock x:Name="erreurPrenom" Text="Le prénom ne doit contenir que des lettres" 
-                              Foreground="#ff6b6b" FontSize="11" Visibility="Collapsed" Margin="5,2,0,0"/>
+                    <TextBlock x:Name="erreurPrenom" Text="Erreur" Foreground="#EF4444" FontSize="11" Visibility="Collapsed" Margin="5,2,0,0"/>
 
-                    <!-- Nom -->
-                    <Label Content="Nom *" Foreground="#D4AF37" FontWeight="SemiBold" 
-                          FontSize="13" Margin="0,10,0,0"/>
-                    <Border x:Name="borderNom" BorderBrush="#D4AF37" BorderThickness="2" 
-                           CornerRadius="8" Background="#2a2a2a">
-                        <TextBox x:Name="txtNom" Height="40" Padding="10" FontSize="14" 
-                                Background="Transparent" Foreground="White" BorderThickness="0" 
-                                LostFocus="ValiderNom"/>
+                    <Label Content="Nom *" Foreground="#475569" FontWeight="SemiBold" FontSize="13" Margin="0,10,0,0"/>
+                    <Border x:Name="borderNom" BorderBrush="#D4AF37" BorderThickness="2" CornerRadius="8" Background="White">
+                        <TextBox x:Name="txtNom" Height="40" Padding="10" FontSize="14" Background="Transparent" Foreground="#475569" BorderThickness="0" LostFocus="ValiderNom"/>
                     </Border>
-                    <TextBlock x:Name="erreurNom" Text="Le nom ne doit contenir que des lettres" 
-                              Foreground="#ff6b6b" FontSize="11" Visibility="Collapsed" Margin="5,2,0,0"/>
+                    <TextBlock x:Name="erreurNom" Text="Erreur" Foreground="#EF4444" FontSize="11" Visibility="Collapsed" Margin="5,2,0,0"/>
 
-                    <!-- Email -->
-                    <Label Content="Email *" Foreground="#D4AF37" FontWeight="SemiBold" 
-                          FontSize="13" Margin="0,10,0,0"/>
-                    <Border x:Name="borderEmail" BorderBrush="#D4AF37" BorderThickness="2" 
-                           CornerRadius="8" Background="#2a2a2a">
-                        <TextBox x:Name="txtEmail" Height="40" Padding="10" FontSize="14" 
-                                Background="Transparent" Foreground="White" BorderThickness="0" 
-                                LostFocus="ValiderEmail"/>
+                    <Label Content="Email *" Foreground="#475569" FontWeight="SemiBold" FontSize="13" Margin="0,10,0,0"/>
+                    <Border x:Name="borderEmail" BorderBrush="#D4AF37" BorderThickness="2" CornerRadius="8" Background="White">
+                        <TextBox x:Name="txtEmail" Height="40" Padding="10" FontSize="14" Background="Transparent" Foreground="#475569" BorderThickness="0" LostFocus="ValiderEmail"/>
                     </Border>
-                    <TextBlock x:Name="erreurEmail" 
-                              Text="Format d'email invalide (exemple: nom@domaine.com)" 
-                              Foreground="#ff6b6b" FontSize="11" Visibility="Collapsed" Margin="5,2,0,0"/>
+                    <TextBlock x:Name="erreurEmail" Text="Erreur" Foreground="#EF4444" FontSize="11" Visibility="Collapsed" Margin="5,2,0,0"/>
 
-                    <!-- Téléphone -->
-                    <Label Content="Téléphone * (10 chiffres)" Foreground="#D4AF37" 
-                          FontWeight="SemiBold" FontSize="13" Margin="0,10,0,0"/>
-                    <Border x:Name="borderTelephone" BorderBrush="#D4AF37" BorderThickness="2" 
-                           CornerRadius="8" Background="#2a2a2a">
-                        <TextBox x:Name="txtTelephone" Height="40" Padding="10" FontSize="14" 
-                                Background="Transparent" Foreground="White" BorderThickness="0" 
-                                MaxLength="14" LostFocus="ValiderTelephone"/>
+                    <Label Content="Téléphone *" Foreground="#475569" FontWeight="SemiBold" FontSize="13" Margin="0,10,0,0"/>
+                    <Border x:Name="borderTelephone" BorderBrush="#D4AF37" BorderThickness="2" CornerRadius="8" Background="White">
+                        <TextBox x:Name="txtTelephone" Height="40" Padding="10" FontSize="14" Background="Transparent" Foreground="#475569" BorderThickness="0" MaxLength="14" LostFocus="ValiderTelephone"/>
                     </Border>
-                    <TextBlock x:Name="erreurTelephone" 
-                              Text="Le téléphone doit contenir 10 chiffres (ex: 0612345678)" 
-                              Foreground="#ff6b6b" FontSize="11" Visibility="Collapsed" Margin="5,2,0,0"/>
+                    <TextBlock x:Name="erreurTelephone" Text="Erreur" Foreground="#EF4444" FontSize="11" Visibility="Collapsed" Margin="5,2,0,0"/>
 
-                    <!-- Ligne de séparation -->
                     <Rectangle Height="1" Fill="#8B1538" Margin="0,20,0,15"/>
 
-                    <!-- Allergènes avec cases à cocher -->
-
-                    <Label Content="Allergènes" Foreground="#D4AF37" FontWeight="SemiBold" FontSize="13"/>
+                    <Label Content="Allergènes" Foreground="#EF4444" FontWeight="SemiBold" FontSize="13"/>
                     <Border BorderBrush="#D4AF37" BorderThickness="2" CornerRadius="8" Background="White" Padding="5">
-                        <Expander x:Name="expanderAllergenes" Header="Sélectionner les allergènes" Background="White" Foreground="Black" Expanded="ExpanderAllergenes_Expanded">
-                            <ScrollViewer MaxHeight="150" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+                        <Expander x:Name="expanderAllergenes" Header="Sélectionner les allergènes" 
+                                  Background="White" Foreground="#475569" 
+                                  Expanded="ExpanderAllergenes_Expanded">
+                            <ScrollViewer MaxHeight="150" VerticalScrollBarVisibility="Auto">
                                 <ItemsControl x:Name="lstAllergenes" Background="White">
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate>
-                                            <CheckBox Content="{Binding Nom}" Tag="{Binding Id}" Foreground="Black" Margin="5,3"/>
+                                            <CheckBox Content="{Binding Nom}" 
+                                                      Tag="{Binding Id}" 
+                                                      Foreground="#475569" 
+                                                      Margin="5,3"/>
                                         </DataTemplate>
                                     </ItemsControl.ItemTemplate>
                                 </ItemsControl>
@@ -103,59 +74,24 @@
                         </Expander>
                     </Border>
 
-
-
-                    <!-- Plats non appréciés -->
-                    <Label Content="Plats non appréciés" Foreground="#D4AF37" 
-                          FontWeight="SemiBold" FontSize="13" Margin="0,10,0,0"/>
-                    <Border BorderBrush="#D4AF37" BorderThickness="2" CornerRadius="8" 
-                           Background="#2a2a2a">
-                        <TextBox x:Name="txtPlatsNonApprecies" Height="60" Padding="10" FontSize="14"
-                                Background="Transparent" Foreground="White" BorderThickness="0"
-                                TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Auto"/>
+                    <Label Content="Plats non appréciés" Foreground="#475569" FontWeight="SemiBold" FontSize="13" Margin="0,10,0,0"/>
+                    <Border BorderBrush="#D4AF37" BorderThickness="2" CornerRadius="8" Background="White">
+                        <TextBox x:Name="txtPlatsNonApprecies" Height="60" Padding="10" FontSize="14" Background="Transparent" Foreground="#475569" BorderThickness="0" TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Auto"/>
                     </Border>
 
-                    <!-- Préférences alimentaires -->
-                    <Label Content="Préférences alimentaires" Foreground="#D4AF37" 
-                          FontWeight="SemiBold" FontSize="13" Margin="0,10,0,0"/>
-                    <Border BorderBrush="#D4AF37" BorderThickness="2" CornerRadius="8" 
-                           Background="#2a2a2a">
-                        <TextBox x:Name="txtPreferences" Height="60" Padding="10" FontSize="14"
-                                Background="Transparent" Foreground="White" BorderThickness="0"
-                                TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Auto"/>
+                    <Label Content="Préférences alimentaires" Foreground="#475569" FontWeight="SemiBold" FontSize="13" Margin="0,10,0,0"/>
+                    <Border BorderBrush="#D4AF37" BorderThickness="2" CornerRadius="8" Background="White">
+                        <TextBox x:Name="txtPreferences" Height="60" Padding="10" FontSize="14" Background="Transparent" Foreground="#475569" BorderThickness="0" TextWrapping="Wrap" AcceptsReturn="True" VerticalScrollBarVisibility="Auto"/>
                     </Border>
                 </StackPanel>
             </ScrollViewer>
 
-            <!-- Boutons -->
             <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,20,0,0">
-                <!-- Bouton Annuler/Fermer -->
-                <Button x:Name="btnAnnuler" Content="Fermer" Width="110" Height="40" 
-                       Margin="0,0,10,0" Background="Transparent" Foreground="#D4AF37" 
-                       BorderBrush="#D4AF37" BorderThickness="2" FontSize="14" 
-                       FontWeight="SemiBold" Cursor="Hand" Click="Annuler"/>
-
-                <!-- Bouton Modifier -->
-                <Button x:Name="btnModifier" Content="Modifier" Width="110" Height="40"
-                       Margin="0,0,10,0" Background="#D4AF37" Foreground="#1a1a1a" BorderThickness="0"
-                       FontSize="14" FontWeight="Bold" Cursor="Hand" Click="ModifierClient" Visibility="Collapsed"/>
-
-                <!-- Bouton Créer/Enregistrer -->
-                <Button x:Name="btnCreer" Content="Créer le client" Width="140" Height="40"
-                       Margin="0,0,10,0" Background="#D4AF37" Foreground="#1a1a1a" BorderThickness="0"
-                       FontSize="14" FontWeight="Bold" Cursor="Hand" Click="CreerClient"/>
-
-                <!-- Bouton Supprimer -->
-                <Button x:Name="btnSupprimer" Content="Supprimer" Width="110" Height="40" 
-                       Margin="0,0,10,0" Background="#EF4444" Foreground="White" BorderThickness="0" 
-                       FontSize="14" FontWeight="Bold" Cursor="Hand" Visibility="Collapsed" Click="SupprimerClient"/>
-
-                <!-- Bouton Historique -->
-                <Button x:Name="btnHistorique" Content="Historique" Width="110" Height="40"
-                       Background="#8B1538" Foreground="White"
-                       BorderBrush="#8B1538" BorderThickness="2" FontSize="14"
-                       FontWeight="SemiBold" Cursor="Hand" Click="VoirHistorique"
-                       Visibility="Collapsed"/>
+                <Button x:Name="btnAnnuler" Content="Fermer" Width="110" Height="40" Margin="0,0,10,0" Background="Transparent" Foreground="#D4AF37" BorderBrush="#D4AF37" BorderThickness="2" FontSize="14" FontWeight="SemiBold" Cursor="Hand" Click="Annuler"/>
+                <Button x:Name="btnModifier" Content="Modifier" Width="110" Height="40" Margin="0,0,10,0" Background="#D4AF37" Foreground="#1a1a1a" BorderThickness="0" FontSize="14" FontWeight="Bold" Cursor="Hand" Click="ModifierClient" Visibility="Collapsed"/>
+                <Button x:Name="btnCreer" Content="Créer le client" Width="140" Height="40" Margin="0,0,10,0" Background="#8B1538" Foreground="White" BorderThickness="0" FontSize="14" FontWeight="Bold" Cursor="Hand" Click="CreerClient"/>
+                <Button x:Name="btnSupprimer" Content="Supprimer" Width="110" Height="40" Margin="0,0,10,0" Background="#EF4444" Foreground="White" BorderThickness="0" FontSize="14" FontWeight="Bold" Cursor="Hand" Visibility="Collapsed" Click="SupprimerClient"/>
+                <Button x:Name="btnHistorique" Content="Historique" Width="110" Height="40" Background="#8B1538" Foreground="White" BorderBrush="#8B1538" BorderThickness="2" FontSize="14" FontWeight="SemiBold" Cursor="Hand" Click="VoirHistorique" Visibility="Collapsed"/>
             </StackPanel>
         </Grid>
     </Border>

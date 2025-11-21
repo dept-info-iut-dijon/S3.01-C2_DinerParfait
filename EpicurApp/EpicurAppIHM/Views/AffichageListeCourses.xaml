@@ -3,7 +3,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         Title="Liste de Courses" Height="600" Width="500"
         WindowStartupLocation="CenterScreen"
-        Background="#E8DCCA"
+        Background="#FDF6E3"
         FontFamily="./Police/#Playfair Display">
 
     <Border BorderBrush="#8B1538" BorderThickness="3" CornerRadius="10" Margin="15">
@@ -17,13 +17,13 @@
             </Grid.RowDefinitions>
 
             <StackPanel Grid.Row="0" HorizontalAlignment="Center">
-                <TextBlock Text="Liste de Courses" FontSize="24" FontWeight="Bold" Foreground="#D4AF37" HorizontalAlignment="Center" Margin="0,5,0,0"/>
-                <TextBlock x:Name="txtMenuNom" FontSize="14" Foreground="#B8860B" HorizontalAlignment="Center" FontStyle="Italic" Margin="0,5,0,0"/>
+                <TextBlock Text="Liste de Courses" FontSize="24" FontWeight="Bold" Foreground="#8B1538" HorizontalAlignment="Center" Margin="0,5,0,0"/>
+                <TextBlock x:Name="txtMenuNom" FontSize="14" Foreground="#D4AF37" HorizontalAlignment="Center" FontStyle="Italic" Margin="0,5,0,0"/>
             </StackPanel>
 
             <Rectangle Grid.Row="1" Height="2" Fill="#8B1538" Margin="0,20,0,20"/>
 
-            <Border Grid.Row="2" Background="#F5F5DC" CornerRadius="5" Padding="10" Margin="0,0,0,15">
+            <Border Grid.Row="2" Background="#F8FAFC" CornerRadius="5" Padding="10" Margin="0,0,0,15">
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                     <TextBlock x:Name="txtNombreIngredients" FontWeight="Bold" Foreground="#8B1538"/>
                     <TextBlock x:Name="txtNombreCategories" Margin="20,0,0,0" FontWeight="Bold" Foreground="#8B1538"/>
@@ -36,7 +36,7 @@
                     <GroupStyle>
                         <GroupStyle.HeaderTemplate>
                             <DataTemplate>
-                                <Border Background="#2E8B57" CornerRadius="3" Padding="8,4" Margin="0,10,0,5">
+                                <Border Background="#9CAF88" CornerRadius="3" Padding="8,4" Margin="0,10,0,5">
                                     <TextBlock Text="{Binding Name}" Foreground="White" FontWeight="Bold" FontSize="14"/>
                                 </Border>
                             </DataTemplate>
@@ -54,12 +54,12 @@
                             <StackPanel Grid.Column="0" Orientation="Horizontal">
                                 <Ellipse Width="8" Height="8" Fill="#D4AF37"
                                          VerticalAlignment="Center" Margin="0,0,10,0"/>
-                                <TextBlock Text="{Binding Ingredient.Nom}" VerticalAlignment="Center" FontSize="13" Foreground="#2C3E50"/>
+                                <TextBlock Text="{Binding Ingredient.Nom}" VerticalAlignment="Center" FontSize="13" Foreground="#475569"/>
                             </StackPanel>
 
-                            <Border Grid.Column="1" Background="#FFE4B5" CornerRadius="8" Padding="5,2">
+                            <Border Grid.Column="1" Background="#FFF9E6" CornerRadius="8" Padding="5,2">
                                 <TextBlock Text="{Binding Quantite, StringFormat='x{0}'}"
-                                           FontSize="11" FontWeight="Bold" Foreground="#8B4513"/>
+                                           FontSize="11" FontWeight="Bold" Foreground="#8B1538"/>
                             </Border>
                         </Grid>
                     </DataTemplate>
@@ -80,7 +80,7 @@
                         FontWeight="Bold"
                         Cursor="Hand"
                         Click="Exporter_Click"/>
-                
+
                 <Button x:Name="btnFermer"
                         Content="Fermer"
                         Width="120"

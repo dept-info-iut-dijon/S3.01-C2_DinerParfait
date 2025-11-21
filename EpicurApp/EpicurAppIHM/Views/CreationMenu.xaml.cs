@@ -403,6 +403,7 @@ namespace EpicurAppIHM.Views
                 btnAnnuler.IsEnabled = true;
                 btnEnregistrerBrouillon.IsEnabled = true;
                 btnValider.IsEnabled = true;
+                this.Close();
             }
         }
 
