@@ -10,8 +10,15 @@ namespace EpicurApp_API.DAO
     /// </summary>
     public class IdeePlatDAO : IIdeePlatDAO
     {
+        /// <summary>
+        /// String de connexion à la base de données.
+        /// </summary>
         private readonly string _connectionString;
 
+        /// <summary>
+        /// Constructeur : injection de la configuration de la base de données.
+        /// </summary>
+        /// <param name="databaseConfiguration">la configuration actuelle de la db</param>
         public IdeePlatDAO(DatabaseConfiguration databaseConfiguration)
         {
             _connectionString = databaseConfiguration.GetConnectionString();
@@ -20,6 +27,7 @@ namespace EpicurApp_API.DAO
         /// <summary>
         /// Récupère une idée de plat par son identifiant.
         /// </summary>
+        /// <returns>Idée de plat ou null si non trouvée.</returns>
         public IdeePlat? GetById(int id)
         {
             using (SqliteConnection connection = new SqliteConnection(_connectionString))
@@ -53,6 +61,7 @@ namespace EpicurApp_API.DAO
         /// <summary>
         /// Récupère toutes les idées de plats.
         /// </summary>
+        /// <returns>Liste des idées de plats.</returns>
         public List<IdeePlat> GetAll()
         {
             List<IdeePlat> idees = new List<IdeePlat>();
@@ -87,6 +96,7 @@ namespace EpicurApp_API.DAO
         /// <summary>
         /// Ajoute une nouvelle idée de plat.
         /// </summary>
+        /// <param name="idee">L'idée de plat à ajouter.</param>
         public void Ajouter(IdeePlat idee)
         {
             using (SqliteConnection connection = new SqliteConnection(_connectionString))
@@ -108,6 +118,7 @@ namespace EpicurApp_API.DAO
         /// <summary>
         /// Modifie une idée de plat.
         /// </summary>
+        /// <param name="idee">L'idée de plat à modifier.</param>
         public void Modifier(IdeePlat idee)
         {
             using (SqliteConnection connection = new SqliteConnection(_connectionString))
@@ -130,6 +141,7 @@ namespace EpicurApp_API.DAO
         /// <summary>
         /// Supprime une idée de plat.
         /// </summary>
+        /// <param name="id">L'identifiant de l'idée de plat à supprimer.</param>
         public void Supprimer(int id)
         {
             using (SqliteConnection connection = new SqliteConnection(_connectionString))

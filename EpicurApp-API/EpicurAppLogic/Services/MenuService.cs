@@ -9,7 +9,13 @@ namespace EpicurAppLogic.Services
     /// </summary>
     public class MenuService : IMenuService
     {
+        /// <summary>
+        /// référence au DAO du menu
+        /// </summary>
         private readonly IMenuDAO _menuDAO;
+        /// <summary>
+        /// reférence au DAO des plats
+        /// </summary>
         private readonly IPlatDAO _platDAO;
 
         /// <summary>

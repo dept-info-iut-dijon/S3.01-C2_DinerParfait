@@ -5,18 +5,31 @@ using EpicurAppLogic.Interfaces;
 
 namespace EpicurApp_API.Controllers
 {
+    /// <summary>
+    /// Controller pour gérer les menus.
+    /// </summary>
     [ApiController]
     [Route("[controller]")]
     public class MenuController : ControllerBase
     {
+        /// <summary>
+        /// Service permettant de gérer les opérations sur les menus.
+        /// </summary>
         private readonly IMenuService _menuService;
-
+        /// <summary>
+        /// Constructeur : injection du service menu.
+        /// </summary>
+        /// <param name="menuService">service du menu</param>
         public MenuController(IMenuService menuService)
         {
             _menuService = menuService;
         }
 
-        // GET: api/Menu
+        /// <summary>
+        /// Méthode GET pour récupérer tous les menus.
+        /// </summary>
+        /// <exception cref="Exception">Lance une exception en cas d'erreur lors de la récupération des menus.</exception>
+        /// <returns>Promesse d'une liste de menu</returns>
         [HttpGet]
         public ActionResult<List<Menu>> GetAll()
         {
@@ -31,7 +44,11 @@ namespace EpicurApp_API.Controllers
             }
         }
 
-        // GET: api/Menu/5
+        /// <summary>
+        /// Méthode GET pour récupérer un menu par son ID.
+        /// </summary>
+        /// <param name="id">ID de la personne cible</param>
+        /// <returns>La personne avec l'ID correspondant</returns>
         [HttpGet("{id}")]
         public ActionResult<Menu> GetById(int id)
         {
@@ -40,7 +57,13 @@ namespace EpicurApp_API.Controllers
             return Ok(menu);
         }
 
-        // GET: api/Menu/5/courses
+        /// <summary>
+        /// Méthode GET pour générer la liste de courses d'un menu.
+        /// </summary>
+        /// <param name="id">ID du menu</param>
+        /// <exception cref="EntityNotFoundException">Lance une exception si le menu n'est pas trouvé.</exception>
+        /// <exception cref="Exception">Lance une exception en cas d'erreur lors de la génération de la liste de courses.</exception>
+        /// <returns>Promesse d'une liste d'elements pour la liste de course</returns>
         [HttpGet("{id}/courses")]
         public ActionResult<List<ElementListeCourse>> GetListeCourses(int id)
         {
@@ -59,8 +82,13 @@ namespace EpicurApp_API.Controllers
             }
         }
 
-        // POST: api/Menu
-        [HttpPost]
+        /// <summary>
+        /// Méthode POST pour ajouter un nouveau menu.
+        /// </summary>
+        /// <param name="menu">Menu a ajouter</param>
+        /// <exception cref="ValidationException">Lance une exception en cas de validation échouée.</exception>
+        /// <returns>Code201 sinon une exeption</returns>
+        [HttpPost] 
         public ActionResult Add([FromBody] Menu menu)
         {
             try
@@ -74,7 +102,13 @@ namespace EpicurApp_API.Controllers
             }
         }
 
-        // PUT: api/Menu/5
+        /// <summary>
+        /// Méthode PUT pour mettre à jour un menu existant.
+        /// </summary>
+        /// <param name="id">ID du menu</param>
+        /// <param name="menu">nm du menu</param>
+        /// <exception cref="ValidationException">Lance une exception en cas de validation échouée.</exception>
+        /// <returns>code 201 sinon exeption</returns>
         [HttpPut("{id}")]
         public ActionResult Update(int id, [FromBody] Menu menu)
         {
@@ -91,7 +125,13 @@ namespace EpicurApp_API.Controllers
             }
         }
 
-        // DELETE: api/Menu/5
+        /// <summary>
+        /// Méthode DELETE pour supprimer un menu par son ID.
+        /// </summary>
+        /// <param name="id">id du menu a supprimer</param>
+        /// <exception cref="InvalidFieldException">Lance une exception en cas de champ invalide.</exception>
+        /// <exception cref="Exception">Lance une exception en cas d'erreur lors de la suppression du menu.</exception>
+        /// <returns>code 201 sinon exeption</returns>
         [HttpDelete("{id}")]
         public ActionResult Delete(int id)
         {

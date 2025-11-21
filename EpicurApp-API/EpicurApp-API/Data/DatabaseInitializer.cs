@@ -318,6 +318,10 @@ namespace EpicurApp_API.Data
             }
         }
 
+        /// <summary>
+        /// Méthode pour insérer des plats prédéfinis dans la table Plats.
+        /// </summary>
+        /// <param name="connection">connexion a la db</param>
         private static void SeedPlats(SqliteConnection connection)
         {
             using (var transaction = connection.BeginTransaction())

@@ -23,7 +23,10 @@ namespace EpicurAppLogic.Interfaces
         /// <param name="plat">Plat à ajouter</param>
         void Add(Plat plat);
 
-    
+        /// <summary>
+        /// Met à jour un plat existant dans la base.
+        /// </summary>
+        /// <param name="plat">Plat a mettre a jour</param>
         void Update(Plat plat);
 
         /// <summary>

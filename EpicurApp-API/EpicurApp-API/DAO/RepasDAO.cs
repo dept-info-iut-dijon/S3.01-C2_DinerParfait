@@ -10,7 +10,13 @@ namespace EpicurApp_API.DAO
     /// </summary>
     public class RepasDAO : IRepasDAO
     {
+        /// <summary>
+        /// Connection string vers la base de données.
+        /// </summary>
         private readonly string _connectionString;
+        /// <summary>
+        /// DAO pour accéder aux menus.
+        /// </summary>
         private readonly IMenuDAO _menuDAO;
 
         /// <summary>
