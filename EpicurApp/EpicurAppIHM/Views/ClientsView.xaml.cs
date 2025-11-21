@@ -13,6 +13,9 @@ namespace EpicurAppIHM.Views
     /// </summary>
     public partial class ClientsView : UserControl
     {
+        /// <summary>
+        /// Collection des clients
+        /// </summary>
         public ObservableCollection<Client> Clients { get; set; } = new ObservableCollection<Client>();
 
         //Client HTTP local
@@ -21,7 +24,6 @@ namespace EpicurAppIHM.Views
         /// <summary>
         /// Intancie la page d'affichage client
         /// </summary>
-
         public ClientsView()
         {
             InitializeComponent();
@@ -93,6 +95,7 @@ namespace EpicurAppIHM.Views
         /// Gère la suppression du client sélectionné.
         /// (Appelée par le bouton "Supprimer le client sélectionné")
         /// </summary>
+        /// <exception cref="Exception">Erreur lors de la suppression du client</exception>
         private async void SupprimerClient_Click(object sender, RoutedEventArgs e)
         {
             //Vérifier si un client est sélectionné

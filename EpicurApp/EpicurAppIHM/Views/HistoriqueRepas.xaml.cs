@@ -41,6 +41,8 @@ namespace EpicurAppIHM.Views
         /// <summary>
         /// Charge l'historique des repas depuis l'API
         /// </summary>
+        /// <exception cref="Exception">Lancée en cas d'erreur lors de l'appel API</exception>
+        /// <exception cref="HttpRequestException">Lancée en cas de problème de connexion à l'API</exception>
         private async void ChargerHistoriqueRepas()
         {
             try

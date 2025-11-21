@@ -15,13 +15,23 @@ using Path = System.IO.Path;
 
 namespace EpicurAppIHM.Views
 {
+    /// <summary>
+    /// Classe pour représenter un invité avec une sélection
+    /// </summary>
     public partial class EtiquettesView : Window
     {
+        /// <summary>
+        /// L'instance HttpClient pour les appels API
+        /// </summary>
         private readonly HttpClient _httpClient;
 
-        // Liste utilisée pour l'affichage (contient le client + la case à cocher)
+        /// <summary>
+        /// Liste utilisée pour l'affichage (contient le client + la case à cocher)
+        /// </summary>
         public List<InviteSelection> Invites { get; set; } = new List<InviteSelection>();
-
+        /// <summary>
+        /// Classe pour représenter un invité avec une sélection
+        /// </summary>
         public EtiquettesView()
         {
             InitializeComponent();
@@ -37,6 +47,10 @@ namespace EpicurAppIHM.Views
             ChargerClients();
         }
 
+        /// <summary>
+        /// Charge les clients depuis l'API et les lie à la grille
+        /// </summary>
+        /// <exception cref="Exception">Lance une exception si le chargement échoue</exception>
         private async void ChargerClients()
         {
             try
@@ -58,7 +72,9 @@ namespace EpicurAppIHM.Views
                 MessageBox.Show($"Erreur lors du chargement : {ex.Message}", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
-
+        /// <summary>
+        /// Génère le fichier PDF avec les étiquettes pour les invités sélectionnés
+        /// </summary>
         private void GenererPDF_Click(object sender, RoutedEventArgs e)
         {
             // Récupérer les invités cochés
@@ -83,6 +99,12 @@ namespace EpicurAppIHM.Views
             }
         }
 
+        /// <summary>
+        /// Génère le fichier PDF avec les étiquettes pour les invités sélectionnés
+        /// </summary>
+        /// <param name="cheminFichier">Chemin du fichier a savegarder</param>
+        /// <param name="selection">Invités sélectionnés</param>
+        /// <exception cref="FileNotFoundException">Fiier introuvable</exception>
         private void GenererLeFichierPDF(string cheminFichier, List<InviteSelection> selection)
         {
             try

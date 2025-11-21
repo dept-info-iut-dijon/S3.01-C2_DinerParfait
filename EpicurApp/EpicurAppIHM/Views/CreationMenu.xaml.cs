@@ -199,6 +199,7 @@ namespace EpicurAppIHM.Views
         /// Charge un menu spécifique par son ID
         /// </summary>
         /// <param name="menuId">ID du menu à charger</param>
+        /// <exception cref="Exception">Erreur lors de l'appel API</exception>
         private void ChargerMenu(int menuId)
         {
             try
@@ -249,6 +250,7 @@ namespace EpicurAppIHM.Views
         /// <summary>
         /// Charge le brouillon du menu
         /// </summary>
+        /// <exception cref="Exception">Erreur lors de l'appel API</exception>
         private void ChargerBrouillon()
         {
             try
@@ -411,7 +413,7 @@ namespace EpicurAppIHM.Views
         /// Construit un menu à partir des sélections de l'utilisateur
         /// </summary>
         /// <param name="statut">si le menu est validé ou brouillon</param>
-        /// <returns></returns>
+        /// <returns>Le menu qui a été construit</returns>
         private MenuModel ConstruireMenu(string statut)
         {
             MenuModel menu = new MenuModel();
@@ -435,36 +437,13 @@ namespace EpicurAppIHM.Views
         /// Obtient le plat sélectionné dans une ComboBox
         /// </summary>
         /// <param name="comboBox">Combobox cible</param>
-        /// <returns></returns>
+        /// <returns>Le plat séléctionné</returns>
         private static Plat? ObtenirPlatSelectionne(ComboBox comboBox)
         {
             return comboBox.SelectedItem as Plat;
         }
 
-        /// <summary>
-        /// Obtient la valeur sélectionnée dans une ComboBox
-        /// </summary>
-        /// <param name="comboBox">combobox cible</param>
-        /// <returns></returns>
-        private static int? ObtenirValeurSelectionnee(ComboBox comboBox)
-        {
-            if (comboBox.SelectedValue == null)
-            {
-                return null;
-            }
-
-            if (comboBox.SelectedValue is int valeur)
-            {
-                return valeur;
-            }
-
-            if (int.TryParse(comboBox.SelectedValue.ToString(), out int resultat))
-            {
-                return resultat;
-            }
-
-            return null;
-        }
+        
 
         /// <summary>
         /// Reinitialise la sélection des plats
@@ -484,6 +463,7 @@ namespace EpicurAppIHM.Views
         /// <summary>
         /// Supprime le menu/brouillon actuel
         /// </summary>
+        /// <exception cref="Exception">Erreur lors de la suppression</exception>
         private async void SupprimerMenu(object sender, RoutedEventArgs e)
         {
             if (!_menuBrouillonId.HasValue)

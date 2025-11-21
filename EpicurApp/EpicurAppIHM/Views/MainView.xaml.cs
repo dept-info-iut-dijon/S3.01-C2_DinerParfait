@@ -50,6 +50,9 @@ namespace EpicurAppIHM.Views
             BoiteIdeesViewControl.ChargerIdees();
         }
 
+        /// <summary>
+        /// Ouvre la fenêtre des étiquettes
+        /// </summary>
         private void OuvrirEtiquettes_Click(object sender, RoutedEventArgs e)
         {
             EtiquettesView etiquettesView = new EtiquettesView();

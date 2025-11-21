@@ -13,10 +13,18 @@ namespace EpicurAppIHM.Views
     /// </summary>
     public partial class BoiteIdeesView : UserControl
     {
+        /// <summary>
+        /// Initialise la liste des idées de plats
+        /// </summary>
         public ObservableCollection<IdeePlat> Idees { get; set; } = new ObservableCollection<IdeePlat>();
-
+        /// <summary>
+        /// L'instance HttpClient pour les appels API
+        /// </summary>
         private readonly HttpClient _httpClient;
 
+        /// <summary>
+        /// BoiteIdeesView Constructor
+        /// </summary>
         public BoiteIdeesView()
         {
             InitializeComponent();
@@ -28,6 +36,7 @@ namespace EpicurAppIHM.Views
         /// <summary>
         /// Charge les idées de plats depuis l'API
         /// </summary>
+        /// <exception cref="Exception">Lancée en cas d'erreur lors de l'appel API</exception>
         public async void ChargerIdees()
         {
             try

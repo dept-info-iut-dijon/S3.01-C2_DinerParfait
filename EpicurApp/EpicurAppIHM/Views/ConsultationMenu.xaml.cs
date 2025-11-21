@@ -80,6 +80,7 @@ namespace EpicurAppIHM.Views
         /// <summary>
         /// Génère et affiche la liste de courses pour le menu actuel
         /// </summary>
+        /// <exception cref="Exception">Erreur de génération de la liste de courses</exception>
         private async void GenererListeCourses_Click(object sender, RoutedEventArgs e)
         {
             try
@@ -128,6 +129,7 @@ namespace EpicurAppIHM.Views
         /// <summary>
         /// Supprime le menu actuel
         /// </summary>
+        /// <exception cref="Exception">Erreur de suppression du menu</exception>
         private async void Supprimer_Click(object sender, RoutedEventArgs e)
         {
             MessageBoxResult confirmation = MessageBox.Show(
@@ -173,8 +175,6 @@ namespace EpicurAppIHM.Views
         /// <summary>
         /// Ferme la fenetre
         /// </summary>
-        /// <param name="sender">Envoie</param>
-        /// <param name="e">Argument</param>
         private void Fermer_Click(object sender, RoutedEventArgs e)
         {
             this.Close();

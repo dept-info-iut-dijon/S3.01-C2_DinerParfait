@@ -19,8 +19,16 @@ namespace EpicurAppIHM.Views
     /// </summary>
     public partial class AffichageListeCourses : Window
     {
+        /// <summary>
+        /// Liste des éléments de la liste de courses
+        /// </summary>
         private List<ElementListeCourse> _listeCourses;
 
+        /// <summary>
+        /// AffichageListeCourses Constructor
+        /// </summary>
+        /// <param name="listeCourses">Liste des courses sélectionné</param>
+        /// <param name="nomMenu">Nom du menu sélectionné</param>
         public AffichageListeCourses(List<ElementListeCourse> listeCourses, string nomMenu)
         {
             InitializeComponent();
@@ -186,18 +194,19 @@ namespace EpicurAppIHM.Views
             throw new NotImplementedException();
         }
     }
-}
 
-/// <summary>
-/// Extension pour les chaînes de caractères
-/// </summary>
-public static class StringExtensions
-{
+
     /// <summary>
-    /// Répète une chaîne de caractères un nombre donné de fois
+    /// Extension pour les chaînes de caractères
     /// </summary>
-    public static string Repeat(this string input, int count)
+    public static class StringExtensions
     {
-        return string.Concat(Enumerable.Repeat(input, count));
+        /// <summary>
+        /// Répète une chaîne de caractères un nombre donné de fois
+        /// </summary>
+        public static string Repeat(this string input, int count)
+        {
+            return string.Concat(Enumerable.Repeat(input, count));
+        }
     }
 }

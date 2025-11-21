@@ -6,7 +6,9 @@ using System.Threading.Tasks;
 
 namespace EpicurAPP_Partage.Exceptions
 {
-    //Exception levée en cas d'erreur de validation
+    /// <summary>
+    /// Exception levée en cas d'erreur de validation
+    /// </summary>
     public class InvalidFieldException : Exception
     {
         public InvalidFieldException(string message) : base(message)

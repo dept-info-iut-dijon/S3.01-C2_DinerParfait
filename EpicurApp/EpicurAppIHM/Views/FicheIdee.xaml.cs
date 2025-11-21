@@ -11,7 +11,13 @@ namespace EpicurAppIHM.Views
     /// </summary>
     public partial class FicheIdee : Window
     {
+        /// <summary>
+        /// L'instance HttpClient pour les appels API
+        /// </summary>
         private readonly HttpClient _httpClient;
+        /// <summary>
+        /// ID de l'idée en cours de modification (null si création)
+        /// </summary>
         private int? _ideeId;
 
         /// <summary>
@@ -41,6 +47,7 @@ namespace EpicurAppIHM.Views
         /// <summary>
         /// Charge les données de l'idée depuis l'API
         /// </summary>
+        /// <exception cref="Exception">Erreur de chargement de l'idée</exception>
         private async void ChargerIdee()
         {
             if (!_ideeId.HasValue) return;
@@ -82,6 +89,7 @@ namespace EpicurAppIHM.Views
         /// <summary>
         /// Enregistre l'idée (création ou modification)
         /// </summary>
+        /// <exception cref="Exception">Erreur lors de l'enregistrement</exception>
         private async void Enregistrer_Click(object sender, RoutedEventArgs e)
         {
             // Validation
@@ -138,6 +146,7 @@ namespace EpicurAppIHM.Views
         /// <summary>
         /// Supprime l'idée
         /// </summary>
+        /// <exception cref="Exception">Erreur lors de la suppression</exception>
         private async void Supprimer_Click(object sender, RoutedEventArgs e)
         {
             if (!_ideeId.HasValue) return;

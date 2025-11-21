@@ -5,7 +5,13 @@
     /// </summary>
     public class ClientAllergene
     {
+        /// <summary>
+        /// Identifiant du client
+        /// </summary>
         public int ClientId { get; set; }
+        /// <summary>
+        /// Identifiant de l'allergene
+        /// </summary>
         public int AllergeneId { get; set; }
     }
 }

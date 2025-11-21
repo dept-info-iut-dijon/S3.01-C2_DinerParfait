@@ -5,6 +5,9 @@ namespace EpicurAPP_Partage.Models
     /// </summary>
     public class Ingredient
     {
+        /// <summary>
+        /// Catégroie de l'ingredient
+        /// </summary>
         public enum CategorieIngredient
         {
             FruitLegume,
@@ -29,10 +32,18 @@ namespace EpicurAPP_Partage.Models
         /// </summary>
         public string? Description { get; set; }
 
+        /// <summary>
+        /// Affichage de l'ingredient 
+        /// </summary>
+        /// <returns>Représentation de l'ingredient </returns>
         public override string ToString()
         {
             return Nom;
         }
+
+        /// <summary>
+        /// Catégorie de l'ingredient
+        /// </summary>
         public CategorieIngredient Categorie { get; set; } = CategorieIngredient.Autre;
     }
 }

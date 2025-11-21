@@ -33,8 +33,7 @@ namespace EpicurAPP_Partage.Exceptions
         /// <param name="entityName">Nom de l'entité non trouvée.</param>
         /// <param name="id">Identifiant recherché.</param>
         /// <param name="message">Message d'erreur personnalisé.</param>
-        public EntityNotFoundException(string entityName, int id, string message)
-            : base(message)
+        public EntityNotFoundException(string entityName, int id, string message) : base(message)
         {
             EntityName = entityName;
             EntityId = id;

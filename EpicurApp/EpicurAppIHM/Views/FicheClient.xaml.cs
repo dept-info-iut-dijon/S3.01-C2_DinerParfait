@@ -31,6 +31,9 @@ namespace EpicurAppIHM.Views
         /// </summary>
         private List<int> _allergenesClient = new List<int>();
 
+        /// <summary>
+        /// FicheClient Constructor pour création
+        /// </summary>
         public FicheClient()
         {
             InitializeComponent();
@@ -39,6 +42,11 @@ namespace EpicurAppIHM.Views
             ChargerAllergenes();
         }
 
+        /// <summary>
+        /// FicheClient Constructor pour consultation/modification
+        /// </summary>
+        /// <param name="clientId">id du client a modifier/consulter</param>
+        /// <param name="modeConsultation">mod de co,sultation de la fiche</param>
         public FicheClient(int clientId, bool modeConsultation = true)
         {
             InitializeComponent();
@@ -67,6 +75,7 @@ namespace EpicurAppIHM.Views
         /// <summary>
         /// Charge la liste des allergènes depuis l'API
         /// </summary>
+        /// <exception cref="Exception">Erreur de chargement des allergènes</exception>
         private async void ChargerAllergenes()
         {
             try
@@ -85,6 +94,7 @@ namespace EpicurAppIHM.Views
         /// <summary>
         /// Charge les données du client
         /// </summary>
+        /// <exception cref="Exception">Erreur de chargement du client</exception>
         private async void ChargerClient()
         {
             if (!_clientId.HasValue) return;
@@ -149,6 +159,7 @@ namespace EpicurAppIHM.Views
         /// <summary>
         /// Trouve la CheckBox dans un élément de liste
         /// </summary>
+        /// <returns>CheckBox trouvée ou null</returns>
         private CheckBox TrouverCheckBox(DependencyObject parent)
         {
             for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
@@ -191,6 +202,7 @@ namespace EpicurAppIHM.Views
         /// <summary>
         /// Récupère les IDs des allergènes cochés
         /// </summary>
+        /// <returns>Liste des IDs cochés</returns>
         private List<int> GetAllergenesCoches()
         {
             List<int> ids = new List<int>();
@@ -211,6 +223,9 @@ namespace EpicurAppIHM.Views
             return ids;
         }
 
+        /// <summary>
+        /// Configure la fenêtre en mode consultation
+        /// </summary>
         private void ConfigurerModeConsultation()
         {
             this.Title = "Consultation Client";
@@ -315,6 +330,9 @@ namespace EpicurAppIHM.Views
             expanderAllergenes.Header = "Sélectionner les allergènes";
         }
 
+        /// <summary>
+        /// Validation du prénom
+        /// </summary>
         private void ValiderPrenom(object sender, RoutedEventArgs e)
         {
             string prenom = txtPrenom.Text.Trim();
@@ -423,6 +441,8 @@ namespace EpicurAppIHM.Views
         /// <summary>
         /// Crée ou modifie un client via l'API
         /// </summary>
+        /// <exception cref="Exception">Erreur lors de la création/modification du client</exception>
+        /// <exception cref="HttpRequestException">Erreur de connexion à l'API</exception>
         private async void CreerClient(object sender, RoutedEventArgs e)
         {
             if (!ToutEstValide())
@@ -549,6 +569,7 @@ namespace EpicurAppIHM.Views
         /// <summary>
         /// Supprime le client actuel 
         /// </summary>
+        /// <exception cref="Exception">Erreur lors de la suppression du client</exception>
         private async void SupprimerClient(object sender, RoutedEventArgs e)
         {
             if (!_clientId.HasValue) return;
@@ -592,9 +613,5 @@ namespace EpicurAppIHM.Views
             fenetreHistorique.ShowDialog();
         }
 
-        private void txtPrenom_TextChanged(object sender, TextChangedEventArgs e)
-        {
-
-        }
     }
 }
