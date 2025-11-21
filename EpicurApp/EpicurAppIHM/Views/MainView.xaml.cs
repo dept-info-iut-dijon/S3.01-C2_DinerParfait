@@ -23,6 +23,7 @@ namespace EpicurAppIHM.Views
         {
             ClientsViewControl.Visibility = Visibility.Visible;
             MenusViewControl.Visibility = Visibility.Collapsed;
+            BoiteIdeesViewControl.Visibility = Visibility.Collapsed;
         }
 
         /// <summary>
@@ -32,20 +33,27 @@ namespace EpicurAppIHM.Views
         {
             ClientsViewControl.Visibility = Visibility.Collapsed;
             MenusViewControl.Visibility = Visibility.Visible;
-       
+            BoiteIdeesViewControl.Visibility = Visibility.Collapsed;
+
             MenusViewControl.ChargerMenus();
         }
 
         /// <summary>
-        /// Affiche la vue des étiquettes
+        /// Affiche la vue  boite a idees
         /// </summary>
+        private void AfficherBoiteIdees(object sender, RoutedEventArgs e)
+        {
+            ClientsViewControl.Visibility = Visibility.Collapsed;
+            MenusViewControl.Visibility = Visibility.Collapsed;
+            BoiteIdeesViewControl.Visibility = Visibility.Visible;
+
+            BoiteIdeesViewControl.ChargerIdees();
+        }
+
         private void OuvrirEtiquettes_Click(object sender, RoutedEventArgs e)
         {
-            // Créer une nouvelle instance de la fenêtre
-            EtiquettesView fenetreEtiquettes = new EtiquettesView();
-
-            //L'afficher
-            fenetreEtiquettes.ShowDialog();
+            EtiquettesView etiquettesView = new EtiquettesView();
+            etiquettesView.Show();
         }
     }
 }

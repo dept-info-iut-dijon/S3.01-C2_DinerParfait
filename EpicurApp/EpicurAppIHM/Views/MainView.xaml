@@ -31,6 +31,13 @@
                             FontSize="16" FontWeight="SemiBold"
                             BorderThickness="0" Cursor="Hand"
                             Click="AfficherMenus"/>
+
+                    <Button Content="Boîte à idées" Width="150" Height="45" Margin="5"
+                            Background="#D4AF37" Foreground="White"
+                            FontSize="16" FontWeight="SemiBold"
+                            BorderThickness="0" Cursor="Hand"
+                            Click="AfficherBoiteIdees"/>
+
                     <Button x:Name="btnEtiquettes"
                             Content="Éditer les Étiquettes"
                             Width="200" Height="50"
@@ -54,6 +61,7 @@
         <Grid Grid.Row="1">
             <views:ClientsView x:Name="ClientsViewControl" Visibility="Visible"/>
             <views:MenusView x:Name="MenusViewControl" Visibility="Collapsed"/>
+            <views:BoiteIdeesView x:Name="BoiteIdeesViewControl" Visibility="Collapsed"/>
         </Grid>
     </Grid>
 </UserControl>
