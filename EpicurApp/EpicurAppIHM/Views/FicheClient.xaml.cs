@@ -292,9 +292,9 @@ namespace EpicurAppIHM.Views
             txtPreferences.IsReadOnly = false;
             lstAllergenes.IsEnabled = true;
 
-            // Restaurer l'apparence normale des champs
-            SolidColorBrush normalBackground = new SolidColorBrush(Colors.White);
-            SolidColorBrush normalForeground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#475569"));
+            // Garder le même style qu'en consultation
+            SolidColorBrush normalBackground = new SolidColorBrush((Color)ColorConverter.ConvertFromString("#2a2a2a"));
+            SolidColorBrush normalForeground = new SolidColorBrush(Colors.White);
 
             // Restaurer le background des Border
             borderPrenom.Background = normalBackground;

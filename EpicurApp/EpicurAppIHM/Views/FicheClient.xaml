@@ -29,8 +29,8 @@
             <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Auto">
                 <StackPanel>
                     <Label Content="Prénom *" Foreground="#475569" FontWeight="SemiBold" FontSize="13"/>
-                    <Border x:Name="borderPrenom" BorderBrush="#D4AF37" BorderThickness="2" CornerRadius="8" Background="White">
-                        <TextBox x:Name="txtPrenom" Height="40" Padding="10" FontSize="14" Background="#2a2a2a" Foreground="White" BorderThickness="0" LostFocus="ValiderPrenom" TextChanged="txtPrenom_TextChanged"/>
+                    <Border x:Name="borderPrenom" BorderBrush="#D4AF37" BorderThickness="2" CornerRadius="8" Background="#2a2a2a">
+                        <TextBox x:Name="txtPrenom" Height="40" Padding="10" FontSize="14" Background="Transparent" Foreground="White" BorderThickness="0" LostFocus="ValiderPrenom" />
                     </Border>
                     <TextBlock x:Name="erreurPrenom" Text="Erreur" Foreground="#EF4444" FontSize="11" Visibility="Collapsed" Margin="5,2,0,0"/>
 
@@ -48,24 +48,24 @@
 
                     <Label Content="Téléphone *" Foreground="#475569" FontWeight="SemiBold" FontSize="13" Margin="0,10,0,0"/>
                     <Border x:Name="borderTelephone" BorderBrush="#D4AF37" BorderThickness="2" CornerRadius="8" Background="#2a2a2a">
-                        <TextBox x:Name="txtTelephone" Height="40" Padding="10" FontSize="14" Background="Transparent" Foreground="#475569" BorderThickness="0" MaxLength="14" LostFocus="ValiderTelephone"/>
+                        <TextBox x:Name="txtTelephone" Height="40" Padding="10" FontSize="14" Background="Transparent" Foreground="White" BorderThickness="0" MaxLength="14" LostFocus="ValiderTelephone"/>
                     </Border>
                     <TextBlock x:Name="erreurTelephone" Text="Erreur" Foreground="#EF4444" FontSize="11" Visibility="Collapsed" Margin="5,2,0,0"/>
 
                     <Rectangle Height="1" Fill="#8B1538" Margin="0,20,0,15"/>
 
                     <Label Content="Allergènes" Foreground="#EF4444" FontWeight="SemiBold" FontSize="13"/>
-                    <Border x:Name="borderAllergenes" BorderBrush="#D4AF37" BorderThickness="2" CornerRadius="8" Background="White" Padding="5">
+                    <Border x:Name="borderAllergenes" BorderBrush="#D4AF37" BorderThickness="2" CornerRadius="8" Background="#2a2a2a" Padding="5">
                         <Expander x:Name="expanderAllergenes" Header="Sélectionner les allergènes"
-                                  Background="White" Foreground="White"
+                                  Background="Transparent" Foreground="White"
                                   Expanded="ExpanderAllergenes_Expanded">
                             <ScrollViewer MaxHeight="150" VerticalScrollBarVisibility="Auto">
-                                <ItemsControl x:Name="lstAllergenes" Background="White">
+                                <ItemsControl x:Name="lstAllergenes" Background="#2a2a2a">
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate>
-                                            <CheckBox Content="{Binding Nom}" 
-                                                      Tag="{Binding Id}" 
-                                                      Foreground="White" 
+                                            <CheckBox Content="{Binding Nom}"
+                                                      Tag="{Binding Id}"
+                                                      Foreground="White"
                                                       Margin="5,3"/>
                                         </DataTemplate>
                                     </ItemsControl.ItemTemplate>
