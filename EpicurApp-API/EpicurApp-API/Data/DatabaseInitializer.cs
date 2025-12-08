@@ -117,6 +117,8 @@ namespace EpicurApp_API.Data
                     CREATE TABLE IF NOT EXISTS ClientMenu (
                         ClientId INTEGER NOT NULL,
                         MenuId INTEGER NOT NULL,
+                         Note INTEGER CHECk (Note<=5 AND Note>=0),   
+                        Avis TEXT, 
                         PRIMARY KEY (ClientId, MenuId),
                         FOREIGN KEY (ClientId) REFERENCES Clients(Id) ON DELETE CASCADE,
                         FOREIGN KEY (MenuId) REFERENCES Menus(Id) ON DELETE CASCADE
