@@ -18,15 +18,14 @@
 	</ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\EpicurApp\EpicurAPP-Partage\EpicurAPP-Partage\EpicurAPP-Partage.csproj" />
+	<ProjectReference Include="..\..\EpicurApp\EpicurAPP-Partage\EpicurAPP-Partage\EpicurAPP-Partage.csproj" />
     <ProjectReference Include="..\EpicurAppLogic\EpicurAppLogic.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="epicurapp.db">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-      <CopyToPublishDirectory>Always</CopyToPublishDirectory>
-    </Content>
+	<None Update="epicurapp.db">
+	  <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+	</None>
   </ItemGroup>
 
 </Project>

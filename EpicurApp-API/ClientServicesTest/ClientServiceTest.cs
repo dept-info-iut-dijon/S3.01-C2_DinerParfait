@@ -1,5 +1,5 @@
 using Moq;
-using EpicurAPP_Partage.Interfaces;
+using EpicurAppLogic.Interfaces;
 using EpicurAPP_Partage.Exceptions;
 using EpicurAPP_Partage.Models;
 using EpicurAppLogic.Services;
@@ -7,20 +7,22 @@ using EpicurAppLogic.Services;
 public class ClientServiceTests
 {
     private readonly Mock<IClientDAO> _mockClientDAO;
+    private readonly Mock<IRepasDAO> _mockRepasDAO;
     private readonly ClientService _clientService;
 
     public ClientServiceTests()
     {
         _mockClientDAO = new Mock<IClientDAO>();
-        _clientService = new ClientService(_mockClientDAO.Object);
+        _mockRepasDAO = new Mock<IRepasDAO>();
+        _clientService = new ClientService(_mockClientDAO.Object, _mockRepasDAO.Object);
     }
 
 
     [Fact]
     public void AjouterClientExeptionField()
     {
-        Client clientInvalide = new Client { Nom = null, Prenom = "Marwan" };
-        InvalidFieldException exceptionVoulue = null;
+        Client clientInvalide = new Client { Nom = null!, Prenom = "Marwan" };
+        InvalidFieldException? exceptionVoulue = null;
 
         try
         {
@@ -31,14 +33,14 @@ public class ClientServiceTests
             exceptionVoulue = ex;
         }
         Assert.NotNull(exceptionVoulue);
-        Assert.Equal("Le nom et le prénom sont obligatoires.", exceptionVoulue.Message);
+        Assert.Equal("Le nom et le prenom sont obligatoires.", exceptionVoulue.Message);
     }
 
     [Fact]
     public void AjouterClientExeptionVide()
     {
         Client clientInvalide = new Client { Nom = "Himeur", Prenom = "   " };
-        InvalidFieldException exceptionVoulue = null;
+        InvalidFieldException? exceptionVoulue = null;
 
         try
         {
@@ -50,7 +52,7 @@ public class ClientServiceTests
         }
 
         Assert.NotNull(exceptionVoulue);
-        Assert.Equal("Le nom et le prénom sont obligatoires.", exceptionVoulue.Message);
+        Assert.Equal("Le nom et le prenom sont obligatoires.", exceptionVoulue.Message);
     }
 
     [Fact]
@@ -62,7 +64,7 @@ public class ClientServiceTests
         // Le mock leve une exeption
         _mockClientDAO.Setup(dao => dao.AjouterClient(clientValide)).Throws(exceptionDAO);
 
-        ApplicationException exceptionVoulue = null;
+        ApplicationException? exceptionVoulue = null;
 
         try
         {
@@ -75,6 +77,6 @@ public class ClientServiceTests
 
         Assert.NotNull(exceptionVoulue);
         Assert.Equal("Erreur lors de l'enregistrement du client.", exceptionVoulue.Message);
-        Assert.Equal(exceptionDAO, exceptionVoulue.InnerException); // On vérifie qu'on a gardé l'exception de base
+        Assert.Equal(exceptionDAO, exceptionVoulue.InnerException); // On vï¿½rifie qu'on a gardï¿½ l'exception de base
     }
 }

@@ -1,52 +1,44 @@
-﻿using EpicurAPP_Partage.Exceptions;
-using EpicurAPP_Partage.Interfaces;
-using EpicurApp_API.Models;
+﻿using EpicurAppLogic.Interfaces;
+using EpicurAPP_Partage.Models;
+using EpicurAPP_Partage.Exceptions;
 
-namespace EpicurApp.Logic.Services
+namespace EpicurAppLogic.Services
 {
+    /// <summary>
+    /// Service des menus
+    /// </summary>
     public class MenuService : IMenuService
     {
-        private IMenuDAO _menuRepository;
+        /// <summary>
+        /// référence au DAO du menu
+        /// </summary>
+        private readonly IMenuDAO _menuDAO;
+        /// <summary>
+        /// reférence au DAO des plats
+        /// </summary>
+        private readonly IPlatDAO _platDAO;
 
-        public MenuService(IMenuDAO menuRepository)
+        /// <summary>
+        /// Constructeur de la classe MenuService
+        /// </summary>
+        /// <param name="menuDAO">Le DAO pour interagir avec le menu</param>
+        /// <param name="platDAO">Le DAO pour interagir avec les plats</param>
+        public MenuService(IMenuDAO menuDAO, IPlatDAO platDAO)
         {
-            _menuRepository = menuRepository;
+            _menuDAO = menuDAO;
+            _platDAO = platDAO;
         }
 
-        public void AjouterMenu(Menu menu)
-        {
-            if (string.IsNullOrWhiteSpace(menu.Nom))
-            {
-                throw new InvalidFieldException("Le nom du menu est obligatoire.");
-            }
-
-            try
-            {
-                _menuRepository.AjouterMenu(menu);
-            }
-            catch (Exception ex)
-            {
-                throw new ApplicationException("Erreur lors de l'enregistrement du menu.", ex);
-            }
-        }
-
-        public Menu? GetById(int id)
-        {
-            try
-            {
-                return _menuRepository.GetById(id);
-            }
-            catch (Exception ex)
-            {
-                throw new ApplicationException("Erreur lors de la récupération du menu.", ex);
-            }
-        }
-
+        /// <summary>
+        /// Liste tous les menus
+        /// </summary>
+        /// <returns>Une liste de tous les menus</returns>
+        /// <exception cref="ApplicationException">Impossible de récupérer les menus</exception>
         public List<Menu> GetAll()
         {
             try
             {
-                return _menuRepository.GetAll();
+                return _menuDAO.GetAll();
             }
             catch (Exception ex)
             {
@@ -54,28 +46,34 @@ namespace EpicurApp.Logic.Services
             }
         }
 
-        public void AjouterPlatsAuMenu(int menuId, List<int> platIds)
+        /// <summary>
+        /// Donne un menu par son id
+        /// </summary>
+        /// <param name="id">id du menu cherché</param>
+        /// <returns>le menu avec l'id correspondant</returns>
+        /// <exception cref="ApplicationException">Impossible de trouver le menu</exception>
+        public Menu? GetById(int id)
         {
-            if (platIds == null || platIds.Count == 0)
-            {
-                throw new InvalidFieldException("Au moins un plat doit être sélectionné pour ajouter au menu.");
-            }
-
             try
             {
-                _menuRepository.AjouterPlatsAuMenu(menuId, platIds);
+                return _menuDAO.GetById(id);
             }
             catch (Exception ex)
             {
-                throw new ApplicationException("Erreur lors de l'ajout des plats au menu.", ex);
+                throw new ApplicationException("Erreur lors de la récupération du menu.", ex);
             }
         }
 
-            public Menu? GetDernierBrouillon()
+        /// <summary>
+        /// Donne le dernier menu brouillon
+        /// </summary>
+        /// <returns>Le dernier menu en statut brouillon</returns>
+        /// <exception cref="ApplicationException">Impossible de récupérer le brouillon</exception>
+        public Menu? GetDernierBrouillon()
         {
             try
             {
-                return _menuRepository.GetDernierBrouillon();
+                return _menuDAO.GetDernierBrouillon();
             }
             catch (Exception ex)
             {
@@ -83,28 +81,48 @@ namespace EpicurApp.Logic.Services
             }
         }
 
-        public void MettreAJourMenu(Menu menu)
+        /// <summary>
+        /// Ajoute un nouveau menu
+        /// </summary>
+        /// <param name="menu">menu a ajouter</param>
+        /// <exception cref="InvalidFieldException">nom de menu obligatoire</exception>
+        /// <exception cref="ApplicationException">Impossible d'ajouter le menu</exception>
+        public void AjouterMenu(Menu menu)
         {
-            if (menu == null)
-            {
-                throw new InvalidFieldException("Les informations du menu sont obligatoires.");
-            }
-
-            if (menu.Id <= 0)
-            {
-                throw new InvalidFieldException("L'identifiant du menu est obligatoire pour la mise à jour.");
-            }
-
             if (string.IsNullOrWhiteSpace(menu.Nom))
-            {
                 throw new InvalidFieldException("Le nom du menu est obligatoire.");
-            }
 
             ValiderStatut(menu.Statut);
 
             try
             {
-                _menuRepository.MettreAJourMenu(menu);
+                _menuDAO.AjouterMenu(menu);
+            }
+            catch (Exception ex)
+            {
+                throw new ApplicationException("Erreur lors de l'enregistrement du menu.", ex);
+            }
+        }
+
+        /// <summary>
+        /// Met à jour un menu
+        /// </summary>
+        /// <param name="menu">Menu a mettre à jour</param>
+        /// <exception cref="InvalidFieldException">Informations du menu insuffisantes id,nom</exception>
+        /// <exception cref="ApplicationException">Impossible de mettre à jour le menu</exception>
+        public void MettreAJourMenu(Menu menu)
+        {
+            if (menu.Id <= 0)
+                throw new InvalidFieldException("L'identifiant du menu est obligatoire pour la mise à jour.");
+
+            if (string.IsNullOrWhiteSpace(menu.Nom))
+                throw new InvalidFieldException("Le nom du menu est obligatoire.");
+
+            ValiderStatut(menu.Statut);
+
+            try
+            {
+                _menuDAO.MettreAJourMenu(menu);
             }
             catch (Exception ex)
             {
@@ -112,20 +130,111 @@ namespace EpicurApp.Logic.Services
             }
         }
 
-        private static void ValiderStatut(string statut)
+        /// <summary>
+        /// Ajoute des plats à un menu existant.
+        /// </summary>
+        /// <param name="menuId">menu à modifier</param>
+        /// <param name="platIds">id des plats à ajouter</param>
+        /// <exception cref="InvalidFieldException">Minimum un plat par menu</exception>
+        /// <exception cref="ApplicationException">Impossible d'ajouter les plats au menu</exception>
+        public void AjouterPlatsAuMenu(int menuId, List<int> platIds)
+        {
+            if (platIds == null || !platIds.Any())
+                throw new InvalidFieldException("Au moins un plat doit être sélectionné pour ajouter au menu.");
+
+            try
+            {
+                _menuDAO.AjouterPlatsAuMenu(menuId, platIds);
+            }
+            catch (Exception ex)
+            {
+                throw new ApplicationException("Erreur lors de l'ajout des plats au menu.", ex);
+            }
+        }
+
+        /// <summary>
+        /// Génère la liste de courses pour un menu donné.
+        /// </summary>
+        /// <param name="menuId">Menu dont on veut la liste de course</param>
+        /// <returns>La liste de course du menu</returns>
+        /// <exception cref="InvalidFieldException">Menu non valide</exception>
+        public List<ElementListeCourse> GenererListeCourses(int menuId)
+        {
+            Menu? menu = _menuDAO.GetById(menuId);
+            if (menu == null)
+                throw new InvalidFieldException($"Menu {menuId} introuvable.");
+
+            List<int> idsPlats = new List<int?>
+            {
+                menu.AmuseBouche?.Id,
+                menu.BoissonAperitif?.Id,
+                menu.Entree?.Id,
+                menu.PlatPrincipal?.Id,
+                menu.Vin?.Id,
+                menu.Fromage?.Id,
+                menu.Dessert?.Id
+            }.Where(id => id.HasValue).Select(id => id!.Value).ToList();
+
+            List<Ingredient> tousLesIngredients = new List<Ingredient>();
+
+            foreach (int platId in idsPlats)
+            {
+                Plat? plat = _platDAO.GetById(platId);
+                if (plat?.IngredientsPrincipaux != null)
+                {
+                    tousLesIngredients.AddRange(plat.IngredientsPrincipaux);
+                }
+            }
+
+            return tousLesIngredients
+                .GroupBy(ing => ing.Id)
+                .Select(g => new ElementListeCourse 
+                {
+                    Ingredient = g.First(),
+                    Quantite = g.Count()
+                })
+                .OrderBy(e => e.Ingredient.Categorie)
+                .ThenBy(e => e.Ingredient.Nom)
+                .ToList();
+        }
+
+        /// <summary>
+        /// Valide le statut du menu.
+        /// </summary>
+        /// <param name="statut">statut du menu</param>
+        /// <exception cref="InvalidFieldException">Statut du menu incorrect</exception>
+        private void ValiderStatut(string statut)
         {
             if (string.IsNullOrWhiteSpace(statut))
             {
                 throw new InvalidFieldException("Le statut du menu est obligatoire.");
             }
 
-            if (!string.Equals(statut, "Brouillon") &&
-                !string.Equals(statut, "Validé"))
+            if (statut != "Brouillon" && statut != "Validé")
             {
                 throw new InvalidFieldException("Le statut du menu doit être 'Brouillon' ou 'Validé'.");
             }
         }
-    }
-    
-}
 
+        /// <summary>
+        /// Supprime un menu par son Id.
+        /// </summary>
+        /// <param name="id">Id du menu à supprimer</param>
+        /// <exception cref="InvalidFieldException">Id invalide</exception>
+        /// <exception cref="ApplicationException">Impossible de supprimer le menu</exception>
+        public void SupprimerMenu(int id)
+        {
+            if (id <= 0)
+                throw new InvalidFieldException("L'identifiant du menu est invalide.");
+
+            try
+            {
+                _menuDAO.SupprimerMenu(id);
+            }
+            catch (Exception ex)
+            {
+                throw new ApplicationException("Erreur lors de la suppression du menu.", ex);
+            }
+        }
+    }
+}

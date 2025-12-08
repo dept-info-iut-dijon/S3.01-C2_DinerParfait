@@ -1,23 +1,33 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using EpicurAPP_Partage.Exceptions;
-using EpicurAPP_Partage.Interfaces;
+﻿using EpicurAPP_Partage.Exceptions;
+using EpicurAppLogic.Interfaces;
 using EpicurAPP_Partage.Models;
 
 namespace EpicurAppLogic.Services
 {
+    /// <summary>
+    /// implementation des services allergene 
+    /// </summary>
     public class AllergeneService : IAllergeneService
     {
+        /// <summary>
+        /// Le dao de l'allergene
+        /// </summary>
         private readonly IAllergeneDAO _allergeneDAO;
 
+        /// <summary>
+        /// Constructeur de la classe AllergeneService
+        /// </summary>
+        /// <param name="allergeneDAO">Le dao de l'allergene</param>
         public AllergeneService(IAllergeneDAO allergeneDAO)
         {
             _allergeneDAO = allergeneDAO;
         }
 
+        /// <summary>
+        /// Méthode pour récupérer tous les allergènes
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="ApplicationException">Recupération impossible de l'allergene</exception>
         public List<Allergene> GetAll()
         {
             try
@@ -30,6 +40,12 @@ namespace EpicurAppLogic.Services
             }
         }
 
+        /// <summary>
+        /// Méthode pour récupérer les allergènes d'un client
+        /// </summary>
+        /// <param name="clientId">id du client</param>
+        /// <returns>La liste d'allergies du client</returns>
+        /// <exception cref="ApplicationException">Recupération impossible des allergies du client</exception>
         public List<Allergene> GetAllergenesByClient(int clientId)
         {
             try
@@ -42,6 +58,12 @@ namespace EpicurAppLogic.Services
             }
         }
 
+        /// <summary>
+        /// Méthode pour ajouter des allergènes à un client
+        /// </summary>
+        /// <param name="clientId">id du client</param>
+        /// <param name="allergeneIds">id des allergene du client</param>
+        /// <exception cref="ApplicationException">Ajout impossible des allergenes</exception>
         public void AjouterAllergenesAuClient(int clientId, List<int> allergeneIds)
         {
             if (allergeneIds == null || allergeneIds.Count == 0)
@@ -59,6 +81,12 @@ namespace EpicurAppLogic.Services
             }
         }
 
+        /// <summary>
+        /// Ajoute un nouvel allergène
+        /// </summary>
+        /// <param name="allergene">allegene a ajouter</param>
+        /// <exception cref="InvalidFieldException">Le nom de l'allergene ne peut etre vide</exception>
+        /// <exception cref="ApplicationException">Impossible d'ajouter l'allergene </exception>
         public void AjouterAllergene(Allergene allergene)
         {
             if (string.IsNullOrWhiteSpace(allergene.Nom))

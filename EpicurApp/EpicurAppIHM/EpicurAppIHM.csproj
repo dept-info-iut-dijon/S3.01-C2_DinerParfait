@@ -9,17 +9,25 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Police\arial.ttf" />
     <None Remove="Police\PlayfairDisplay-Bold.ttf" />
     <None Remove="Police\PlayfairDisplay-Italic.ttf" />
     <None Remove="Police\PlayfairDisplay-Regular.ttf" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\EpicurAPP-Partage\EpicurAPP-Partage\EpicurAPP-Partage.csproj" />
+	<ProjectReference Include="..\EpicurAPP-Partage\EpicurAPP-Partage\EpicurAPP-Partage.csproj" />
+	<PackageReference Include="itext" Version="9.4.0" />
+	<PackageReference Include="itext.bouncy-castle-adapter" Version="9.4.0" />
+	<PackageReference Include="itext7" Version="9.4.0" />
 	<PackageReference Include="System.Net.Http.Json" Version="9.0.10" />
+	<PackageReference Include="System.Text.Encoding.CodePages" Version="10.0.0" />
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="Police\arial.ttf">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
     <Resource Include="Police\PlayfairDisplay-Bold.ttf" />
     <Resource Include="Police\PlayfairDisplay-Italic.ttf" />
     <Resource Include="Police\PlayfairDisplay-Regular.ttf" />

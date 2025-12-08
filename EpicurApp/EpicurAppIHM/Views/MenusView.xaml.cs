@@ -1,18 +1,25 @@
-﻿using EpicurApp_API.Models;
-using EpicurAppIHM.Services;
-using System;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.Net.Http.Json;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using MenuModel = EpicurAPP_Partage.Models.Menu;
 
 namespace EpicurAppIHM.Views
 {
+    /// <summary>
+    /// Page d'affichage des menus
+    /// </summary>
     public partial class MenusView : UserControl
     {
-        public ObservableCollection<EpicurApp_API.Models.Menu> Menus { get; set; } = new ObservableCollection<EpicurApp_API.Models.Menu>();
+        /// <summary>
+        ///  Collection des menus
+        /// </summary>
+        public ObservableCollection<MenuModel> Menus { get; set; } = new ObservableCollection<MenuModel>();
 
+        /// <summary>
+        /// Intancie la page d'affichage des menus
+        /// </summary>
         public MenusView()
         {
             InitializeComponent();
@@ -20,15 +27,19 @@ namespace EpicurAppIHM.Views
             ChargerMenus();
         }
 
+        /// <summary>
+        /// Charge les menus
+        /// </summary>
+        /// <exception cref="Exception">Erreur du chargement des menus</exception>
         public async void ChargerMenus()
         {
             try
             {
-                var menus = await ApiClient.Instance.GetFromJsonAsync<List<EpicurApp_API.Models.Menu>>("Menu/GetAll");
+                List<MenuModel> menus = await App.ApiClient.HttpClient.GetFromJsonAsync<List<MenuModel>>("Menu");
                 if (menus != null)
                 {
                     Menus.Clear();
-                    foreach (var menu in menus)
+                    foreach (MenuModel menu in menus)
                         Menus.Add(menu);
                 }
             }
@@ -39,22 +50,38 @@ namespace EpicurAppIHM.Views
             }
         }
 
+        /// <summary>
+        /// Consulte le menu sélectionné en double-cliquant dessus
+        /// </summary>
         private void ListBoxMenus_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
-            if (ListBoxMenus.SelectedItem is EpicurApp_API.Models.Menu menuSelectionne)
+            if (ListBoxMenus.SelectedItem is MenuModel menuSelectionne)
             {
-                // Ouvrir la fenêtre de consultation du menu (lecture seule)
-                var ficheMenu = new ConsultationMenu(menuSelectionne.Id);
-                ficheMenu.ShowDialog();
+                // Si c'est un brouillon, ouvrir en mode édition
+                if (menuSelectionne.Statut == "Brouillon")
+                {
+                    CreationMenu creationMenu = new CreationMenu(menuSelectionne.Id);
+                    creationMenu.Closed += (s, args) => ChargerMenus();
+                    creationMenu.ShowDialog();
+                }
+                else
+                {
+                    // Sinon, ouvrir la fenêtre de consultation du menu (lecture seule)
+                    ConsultationMenu ficheMenu = new ConsultationMenu(menuSelectionne.Id);
+                    ficheMenu.ShowDialog();
 
-                // Recharger la liste après fermeture
-                ChargerMenus();
+                    // Recharger la liste après fermeture
+                    ChargerMenus();
+                }
             }
         }
 
+        /// <summary>
+        /// Ouvre la fenêtre de création d'un nouveau menu
+        /// </summary>
         private void NouveauMenu_Click(object sender, RoutedEventArgs e)
         {
-            var creationMenu = new CreationMenu();
+            CreationMenu creationMenu = new CreationMenu();
             creationMenu.Closed += (s, args) => ChargerMenus(); // Recharger quand la fenêtre se ferme
             creationMenu.ShowDialog();
         }
