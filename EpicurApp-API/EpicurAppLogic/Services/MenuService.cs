@@ -164,16 +164,11 @@ namespace EpicurAppLogic.Services
             if (menu == null)
                 throw new InvalidFieldException($"Menu {menuId} introuvable.");
 
-            List<int> idsPlats = new List<int?>
-            {
-                menu.AmuseBouche?.Id,
-                menu.BoissonAperitif?.Id,
-                menu.Entree?.Id,
-                menu.PlatPrincipal?.Id,
-                menu.Vin?.Id,
-                menu.Fromage?.Id,
-                menu.Dessert?.Id
-            }.Where(id => id.HasValue).Select(id => id!.Value).ToList();
+            // Récupérer tous les IDs de plats depuis les éléments du menu
+            List<int> idsPlats = menu.Elements
+                .Select(e => e.PlatId)
+                .Distinct()
+                .ToList();
 
             List<Ingredient> tousLesIngredients = new List<Ingredient>();
 
@@ -188,7 +183,7 @@ namespace EpicurAppLogic.Services
 
             return tousLesIngredients
                 .GroupBy(ing => ing.Id)
-                .Select(g => new ElementListeCourse 
+                .Select(g => new ElementListeCourse
                 {
                     Ingredient = g.First(),
                     Quantite = g.Count()
