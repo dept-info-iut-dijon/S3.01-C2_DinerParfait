@@ -21,6 +21,7 @@ namespace EpicurAppIHM.Views
         /// </summary>
         private void AfficherClients(object sender, RoutedEventArgs e)
         {
+            DashboardViewControl.Visibility = Visibility.Collapsed;
             ClientsViewControl.Visibility = Visibility.Visible;
             MenusViewControl.Visibility = Visibility.Collapsed;
             BoiteIdeesViewControl.Visibility = Visibility.Collapsed;
@@ -31,6 +32,7 @@ namespace EpicurAppIHM.Views
         /// </summary>
         private void AfficherMenus(object sender, RoutedEventArgs e)
         {
+            DashboardViewControl.Visibility = Visibility.Collapsed;
             ClientsViewControl.Visibility = Visibility.Collapsed;
             MenusViewControl.Visibility = Visibility.Visible;
             BoiteIdeesViewControl.Visibility = Visibility.Collapsed;
@@ -43,11 +45,24 @@ namespace EpicurAppIHM.Views
         /// </summary>
         private void AfficherBoiteIdees(object sender, RoutedEventArgs e)
         {
+            DashboardViewControl.Visibility = Visibility.Collapsed;
             ClientsViewControl.Visibility = Visibility.Collapsed;
             MenusViewControl.Visibility = Visibility.Collapsed;
             BoiteIdeesViewControl.Visibility = Visibility.Visible;
 
             BoiteIdeesViewControl.ChargerIdees();
+        }
+
+    
+        /// <summary>
+        /// Affiche le Dashboard page d'accueil
+        /// </summary>
+        public void AfficherDashboard()
+        {
+            DashboardViewControl.Visibility = Visibility.Visible;
+            ClientsViewControl.Visibility = Visibility.Collapsed;
+            MenusViewControl.Visibility = Visibility.Collapsed;
+            BoiteIdeesViewControl.Visibility = Visibility.Collapsed;
         }
 
         /// <summary>

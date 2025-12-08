@@ -5,6 +5,8 @@ using System.Net.Http.Json;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media;
 
 namespace EpicurAppIHM.Views
 {
@@ -137,5 +139,23 @@ namespace EpicurAppIHM.Views
                 MessageBox.Show($"Erreur : {ex.Message}", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
+        /// <summary>
+        /// Retour à la page d'accueil (Dashboard)
+        /// </summary>
+        private void RetourAccueil_Click(object sender, RoutedEventArgs e)
+        {
+            // Trouver le MainView parent
+            DependencyObject parent = VisualTreeHelper.GetParent(this);
+            while (parent != null && !(parent is MainView))
+            {
+                parent = VisualTreeHelper.GetParent(parent);
+            }
+
+            if (parent is MainView mainView)
+            {
+                mainView.AfficherDashboard();
+            }
+        }
     }
+
 }

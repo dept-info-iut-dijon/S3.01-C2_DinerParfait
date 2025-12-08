@@ -41,13 +41,28 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!-- Titre -->
-        <TextBlock Grid.Row="0" 
-                   Text="Boîte à Idées" 
-                   FontSize="28" 
-                   FontWeight="Bold" 
-                   Foreground="#8B1538" 
-                   Margin="0,0,0,20"/>
+        <!-- En-tête avec titre et bouton accueil -->
+        <Grid Grid.Row="0" Margin="0,0,0,20">
+            <TextBlock Text="Boîte à Idées" 
+               FontSize="28" 
+               FontWeight="Bold" 
+               Foreground="#8B1538" 
+               HorizontalAlignment="Left"
+               VerticalAlignment="Center"/>
+
+            <Button Content="Accueil" 
+            HorizontalAlignment="Left" 
+            VerticalAlignment="Center"
+            Width="140"
+            Height="40"
+            Background="#D4AF37"
+            Foreground="White"
+            FontSize="14"
+            FontWeight="SemiBold"
+            BorderThickness="0"
+            Cursor="Hand"
+            Click="RetourAccueil_Click" Margin="667,0,0,0"/>
+        </Grid>
 
         <!-- Boutons -->
         <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,15">

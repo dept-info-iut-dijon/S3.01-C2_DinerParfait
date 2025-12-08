@@ -58,13 +58,28 @@
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
+        <!-- En-tête avec titre et bouton accueil -->
+        <Grid Grid.Row="0" Margin="0,0,0,20">
+            <TextBlock Text="Gestion des Menus" 
+               FontSize="28" 
+               FontWeight="Bold" 
+               Foreground="#8B1538" 
+               HorizontalAlignment="Left"
+               VerticalAlignment="Center"/>
 
-        <TextBlock Grid.Row="0" 
-                   Text="Gestion des Menus" 
-                   FontSize="28" 
-                   FontWeight="Bold" 
-                   Foreground="#8B1538" 
-                   Margin="0,0,0,20"/>
+            <Button Content="Accueil" 
+            HorizontalAlignment="Center" 
+            VerticalAlignment="Center"
+            Width="140"
+            Height="40"
+            Background="#D4AF37"
+            Foreground="White"
+            FontSize="14"
+            FontWeight="SemiBold"
+            BorderThickness="0"
+            Cursor="Hand"
+            Click="RetourAccueil_Click"/>
+        </Grid>
 
         <Button Grid.Row="1"
                 x:Name="btnNouveauMenu"
