@@ -1,7 +1,5 @@
 ﻿using EpicurAPP_Partage.Models;
 using System.Collections.ObjectModel;
-using System.Net.Http;
-using System.Net.Http.Json;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -17,10 +15,6 @@ namespace EpicurAppIHM.Views
         /// Initialise la liste des idées de plats
         /// </summary>
         public ObservableCollection<IdeePlat> Idees { get; set; } = new ObservableCollection<IdeePlat>();
-        /// <summary>
-        /// L'instance HttpClient pour les appels API
-        /// </summary>
-        private readonly HttpClient _httpClient;
 
         /// <summary>
         /// BoiteIdeesView Constructor
@@ -28,7 +22,6 @@ namespace EpicurAppIHM.Views
         public BoiteIdeesView()
         {
             InitializeComponent();
-            _httpClient = App.ApiClient.HttpClient;
             DataGridIdees.ItemsSource = Idees;
             ChargerIdees();
         }
@@ -41,7 +34,7 @@ namespace EpicurAppIHM.Views
         {
             try
             {
-                List<IdeePlat> idees = await _httpClient.GetFromJsonAsync<List<IdeePlat>>("IdeePlat");
+                List<IdeePlat> idees = await App.IdeePlatRepository.GetAllAsync();
                 if (idees != null)
                 {
                     Idees.Clear();

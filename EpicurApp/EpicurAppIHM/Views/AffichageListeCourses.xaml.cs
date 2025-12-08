@@ -7,10 +7,8 @@ using System.Windows.Data;
 using iText.Kernel.Pdf;
 using iText.Layout;
 using iText.Layout.Element;
-using iText.Layout.Properties;
 using iText.Kernel.Font;
 using System.Text;
-using iText.IO.Font;
 
 namespace EpicurAppIHM.Views
 {
@@ -105,11 +103,11 @@ namespace EpicurAppIHM.Views
 
                     document.Add(new Paragraph("\n"));
 
-                    IOrderedEnumerable<IGrouping<Ingredient.CategorieIngredient, ElementListeCourse>> parCategorie = _listeCourses.GroupBy(e => e.Ingredient.Categorie)
+                    IOrderedEnumerable<IGrouping<CategorieIngredient, ElementListeCourse>> parCategorie = _listeCourses.GroupBy(e => e.Ingredient.Categorie)
                                            .OrderBy(g => g.Key);
 
                     CategorieIngredientConverter convertisseur = new CategorieIngredientConverter();
-                    foreach (IGrouping<Ingredient.CategorieIngredient, ElementListeCourse> groupe in parCategorie)
+                    foreach (IGrouping<CategorieIngredient, ElementListeCourse> groupe in parCategorie)
                     {
                         string nomCategorie = (string)convertisseur.Convert(groupe.Key, null, null, null);
                         Paragraph titreCategorie = new Paragraph(nomCategorie)
@@ -173,16 +171,16 @@ namespace EpicurAppIHM.Views
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value is Ingredient.CategorieIngredient categorie)
+            if (value is CategorieIngredient categorie)
             {
                 return categorie switch
                 {
-                    Ingredient.CategorieIngredient.FruitLegume => "Fruits & Légumes",
-                    Ingredient.CategorieIngredient.ViandePoisson => "Viande & Poisson",
-                    Ingredient.CategorieIngredient.Epicerie => "Épicerie",
-                    Ingredient.CategorieIngredient.Cremerie => "Crémerie",
-                    Ingredient.CategorieIngredient.Boisson => "Boissons",
-                    Ingredient.CategorieIngredient.Autre => "Divers",
+                    CategorieIngredient.FruitLegume => "Fruits & Légumes",
+                    CategorieIngredient.ViandePoisson => "Viande & Poisson",
+                    CategorieIngredient.Epicerie => "Épicerie",
+                    CategorieIngredient.Cremerie => "Crémerie",
+                    CategorieIngredient.Boisson => "Boissons",
+                    CategorieIngredient.Autre => "Divers",
                     _ => "Autre"
                 };
             }

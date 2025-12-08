@@ -4,7 +4,7 @@ using System.Net.Http;
 namespace EpicurAppIHM.Services
 {
     /// <summary>
-    /// Client HTTP simple pour communiquer avec l'API EpicurApp.
+    /// Client HTTP pour communiquer avec l'API.
     /// </summary>
     public class ApiClient
     {
@@ -21,7 +21,7 @@ namespace EpicurAppIHM.Services
                 {
                     // Détermination de l'URL de base
                     string baseUrl = Environment.GetEnvironmentVariable("EPICURAPP_API_BASEURL")
-                        ?? "https://localhost:7068/";
+                        ?? "https://localhost:8081/";
 
                     // Configuration du handler pour accepter tous les certificats SSL
                     HttpClientHandler handler = new HttpClientHandler
