@@ -17,6 +17,8 @@ builder.Services.AddScoped<IClientDAO, ClientDAO>();
 builder.Services.AddScoped<IMenuDAO, MenuDAO>();
 builder.Services.AddScoped<IRepasDAO, RepasDAO>();
 builder.Services.AddScoped<IIdeePlatDAO, IdeePlatDAO>();
+builder.Services.AddScoped<ServiceDAO>();
+builder.Services.AddScoped<ReservationDAO>();
 
 // Enregistrement des services
 builder.Services.AddScoped<IPlatService, PlatService>();
