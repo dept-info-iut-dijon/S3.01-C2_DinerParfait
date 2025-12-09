@@ -24,8 +24,19 @@
                    Margin="0,0,0,8"
                    Grid.Row="0"/>
 
-        <!-- 3 cartes statistiques - LARGEUR LIMITÉE -->
+        <!-- 3 cartes statistiques -->
         <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Left" Margin="0,0,0,8" Height="75">
+            <!-- Filtre par période -->
+            <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,0,8">
+                <TextBlock Text="Période :" VerticalAlignment="Center" Margin="0,0,10,0" FontSize="12" Foreground="#8B1538"/>
+                <ComboBox x:Name="CbFiltrePeriode" Width="140" Height="28" SelectionChanged="FiltrePeriode_Changed">
+                    <ComboBoxItem Content="Tout" IsSelected="True"/>
+                    <ComboBoxItem Content="Ce mois-ci"/>
+                    <ComboBoxItem Content="Cette année"/>
+                    <ComboBoxItem Content="Derniers 30 jours"/>
+                    <ComboBoxItem Content="Derniers 90 jours"/>
+                </ComboBox>
+            </StackPanel>
             <!-- Carte 1 -->
             <Border Background="White" CornerRadius="5" Padding="10" Width="220"
             BorderBrush="#D4AF37" BorderThickness="2" Margin="0,0,8,0">
@@ -54,7 +65,7 @@
             </Border>
         </StackPanel>
 
-        <!-- Graphique et Liste côte à côte - LARGEURS AUGMENTÉES -->
+        <!-- Graphique et Liste côte à côte -->
         <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Left" Height="320">
 
             <!-- Graphique -->
@@ -87,13 +98,16 @@
                         <ItemsControl x:Name="ListeClientsInactifs">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
-                                    <Border Background="#FFF8F3E3" Padding="6" Margin="0,0,0,5" CornerRadius="4">
+                                    <Border Background="#FFE4E1" Padding="8" Margin="0,0,0,5" CornerRadius="4">
                                         <StackPanel>
-                                            <TextBlock FontSize="11" FontWeight="SemiBold" Foreground="#8B1538" TextWrapping="Wrap">
-                                                <Run Text="{Binding Prenom}"/>
-                                                <Run Text="{Binding Nom}"/>
-                                            </TextBlock>
-                                            <TextBlock Text="{Binding Email}" FontSize="9" Foreground="#666" Margin="0,2,0,0" TextWrapping="Wrap"/>
+                                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                                <Ellipse Width="12" Height="12" Fill="#FFD700" Margin="0,0,8,0"/>
+                                                <TextBlock FontSize="11" FontWeight="SemiBold" Foreground="#8B1538" TextWrapping="Wrap" VerticalAlignment="Center">
+                            <Run Text="{Binding Prenom}"/>
+                            <Run Text="{Binding Nom}"/>
+                                                </TextBlock>
+                                            </StackPanel>
+                                            <TextBlock Text="{Binding InfoVisites}" FontSize="9" Foreground="#666" Margin="20,2,0,0"/>
                                         </StackPanel>
                                     </Border>
                                 </DataTemplate>

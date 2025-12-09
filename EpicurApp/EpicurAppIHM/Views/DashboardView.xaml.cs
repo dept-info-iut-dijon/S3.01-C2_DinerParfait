@@ -3,15 +3,27 @@ using LiveCharts;
 using LiveCharts.Wpf;
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Media;
 
+
+
 namespace EpicurAppIHM.Views
 {
+
+    /// <summary>
+    /// Classe simple pour afficher un client avec ses stats
+    /// </summary>
+    public class ClientAvecStats
+    {
+        public string Prenom { get; set; }
+        public string Nom { get; set; }
+        public string Email { get; set; }
+        public string InfoVisites { get; set; }
+    }
     /// <summary>
     /// Page d'accueil avec tableau de bord et statistiques
     /// </summary>
@@ -20,11 +32,10 @@ namespace EpicurAppIHM.Views
         // Client HTTP pour appeler l'API
         private readonly HttpClient _httpClient;
 
-        // Liste de tous les clients
-        private List<Client> clients;
-
-        // Variable pour savoir quel graphique on affiche
-        //private bool afficherTopClients = true;
+        // Listes de clients
+        private List<Client> tousLesClients;
+        private List<Client> clientsReguliers;
+        private List<Client> clientsInactifs;
 
         /// <summary>
         /// Constructeur - initialise la page
@@ -33,9 +44,20 @@ namespace EpicurAppIHM.Views
         {
             InitializeComponent();
             _httpClient = App.ApiClient.HttpClient;
-            clients = new List<Client>();
+            tousLesClients = new List<Client>();
+            clientsReguliers = new List<Client>();
+            clientsInactifs = new List<Client>();
 
             // Charger les données au démarrage
+            ChargerDonnees();
+            
+        }
+
+        /// <summary>
+        /// Rafraîchit les données quand la page devient visible
+        /// </summary>
+        public void Rafraichir()
+        {
             ChargerDonnees();
         }
 
@@ -47,12 +69,16 @@ namespace EpicurAppIHM.Views
             try
             {
                 // Récupérer tous les clients
-                clients = await _httpClient.GetFromJsonAsync<List<Client>>("Client");
+                tousLesClients = await _httpClient.GetFromJsonAsync<List<Client>>("Client");
+                if (tousLesClients == null) tousLesClients = new List<Client>();
 
-                if (clients == null)
-                {
-                    clients = new List<Client>();
-                }
+                // Récupérer les clients réguliers (3+ visites)
+                clientsReguliers = await _httpClient.GetFromJsonAsync<List<Client>>("Client/Reguliers");
+                if (clientsReguliers == null) clientsReguliers = new List<Client>();
+
+                // Récupérer les clients inactifs (60+ jours sans visite)
+                clientsInactifs = await _httpClient.GetFromJsonAsync<List<Client>>("Client/Inactifs");
+                if (clientsInactifs == null) clientsInactifs = new List<Client>();
 
                 // Afficher les statistiques
                 AfficherStatistiques();
@@ -62,6 +88,7 @@ namespace EpicurAppIHM.Views
 
                 // Afficher la liste des clients inactifs
                 AfficherClientsInactifs();
+
             }
             catch (Exception ex)
             {
@@ -76,77 +103,13 @@ namespace EpicurAppIHM.Views
         private async void AfficherStatistiques()
         {
             // Carte 1 : Total de clients
-            TxtTotalClients.Text = clients.Count.ToString();
+            TxtTotalClients.Text = tousLesClients.Count.ToString();
 
-            // Carte 2 et 3 : on doit compter les repas
+            // Carte 2 : Réservations du mois (on doit encore compter)
             int repasDuMois = 0;
-            int clientsInactifs = 0;
-            DateTime dateUnAnAvant = DateTime.Now.AddYears(-1);
             DateTime debutMois = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
 
-            // Pour chaque client, récupérer ses repas
-            foreach (Client client in clients)
-            {
-                try
-                {
-                    List<Repas> repasClient = await _httpClient.GetFromJsonAsync<List<Repas>>($"Client/{client.Id}/repas");
-
-                    if (repasClient == null || repasClient.Count == 0)
-                    {
-                        // Pas de repas = client inactif
-                        clientsInactifs++;
-                    }
-                    else
-                    {
-                        // Compter les repas du mois
-                        foreach (Repas repas in repasClient)
-                        {
-                            if (repas.Date >= debutMois)
-                            {
-                                repasDuMois++;
-                            }
-                        }
-
-                        // Vérifier si le client est inactif (dernier repas > 1 an)
-                        Repas dernierRepas = repasClient[0];
-                        foreach (Repas repas in repasClient)
-                        {
-                            if (repas.Date > dernierRepas.Date)
-                            {
-                                dernierRepas = repas;
-                            }
-                        }
-
-                        if (dernierRepas.Date < dateUnAnAvant)
-                        {
-                            clientsInactifs++;
-                        }
-                    }
-                }
-                catch
-                {
-                    // Si erreur, on considère le client comme inactif
-                    clientsInactifs++;
-                }
-            }
-
-            TxtReservationsMois.Text = repasDuMois.ToString();
-            TxtClientsInactifs.Text = clientsInactifs.ToString();
-        }
-
-        /// <summary>
-        /// Affiche le graphique des 10 meilleurs clients
-        /// </summary>
-        private async void AfficherGraphiqueTopClients()
-        {
-            // Liste pour stocker le nombre de repas par client
-            List<string> nomsClients = new List<string>();
-            List<int> nombreRepas = new List<int>();
-
-            DateTime dateDebutAnnee = DateTime.Now.AddYears(-1);
-
-            // Pour chaque client, compter ses repas sur l'année
-            foreach (Client client in clients)
+            foreach (Client client in tousLesClients)
             {
                 try
                 {
@@ -154,13 +117,88 @@ namespace EpicurAppIHM.Views
 
                     if (repasClient != null)
                     {
-                        // Compter les repas de l'année
-                        int compteur = 0;
                         foreach (Repas repas in repasClient)
                         {
-                            if (repas.Date >= dateDebutAnnee)
+                            if (repas.Date >= debutMois)
                             {
-                                compteur++;
+                                repasDuMois++;
+                            }
+                        }
+                    }
+                }
+                catch
+                {
+                    // Si erreur, on passe au suivant
+                }
+            }
+
+            TxtReservationsMois.Text = repasDuMois.ToString();
+
+            // Carte 3 : Clients inactifs (utilise le nouvel endpoint !)
+            TxtClientsInactifs.Text = clientsInactifs.Count.ToString();
+        }
+
+        /// <summary>
+        /// Affiche le graphique des 10 meilleurs clients (par nombre de visites)
+        /// </summary>
+        private async void AfficherGraphiqueTopClients()
+        {
+            List<string> nomsClients = new List<string>();
+            List<int> nombreRepas = new List<int>();
+
+            // Déterminer la date de début selon le filtre
+            DateTime? dateDebut = null;
+
+            if (CbFiltrePeriode != null && CbFiltrePeriode.SelectedItem != null)
+            {
+                ComboBoxItem itemSelectionne = (ComboBoxItem)CbFiltrePeriode.SelectedItem;
+                string filtre = itemSelectionne.Content.ToString();
+
+                if (filtre == "Ce mois-ci")
+                {
+                    dateDebut = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
+                }
+                else if (filtre == "Cette année")
+                {
+                    dateDebut = new DateTime(DateTime.Now.Year, 1, 1);
+                }
+                else if (filtre == "Derniers 30 jours")
+                {
+                    dateDebut = DateTime.Now.AddDays(-30);
+                }
+                else if (filtre == "Derniers 90 jours")
+                {
+                    dateDebut = DateTime.Now.AddDays(-90);
+                }
+                // Si "Tout", dateDebut reste null = pas de filtre
+            }
+
+            // Utiliser TOUS les clients
+            foreach (Client client in tousLesClients)
+            {
+                try
+                {
+                    List<Repas> repasClient = await _httpClient.GetFromJsonAsync<List<Repas>>($"Client/{client.Id}/repas");
+
+                    if (repasClient != null && repasClient.Count > 0)
+                    {
+                        // Compter les repas selon le filtre
+                        int compteur = 0;
+
+                        if (dateDebut == null)
+                        {
+                            // Pas de filtre = tous les repas
+                            compteur = repasClient.Count;
+                        }
+                        else
+                        {
+                            // Filtrer par date
+                            foreach (Repas repas in repasClient)
+                            {
+                                if (repas.Date >= dateDebut)
+                                {
+                                    compteur++;
+                                }
                             }
                         }
 
@@ -184,12 +222,10 @@ namespace EpicurAppIHM.Views
                 {
                     if (nombreRepas[j] < nombreRepas[j + 1])
                     {
-                        // Échanger les nombres
                         int tempNombre = nombreRepas[j];
                         nombreRepas[j] = nombreRepas[j + 1];
                         nombreRepas[j + 1] = tempNombre;
 
-                        // Échanger les noms
                         string tempNom = nomsClients[j];
                         nomsClients[j] = nomsClients[j + 1];
                         nomsClients[j + 1] = tempNom;
@@ -212,88 +248,86 @@ namespace EpicurAppIHM.Views
             }
 
             SeriesCollection series = new SeriesCollection
-            {
-                new ColumnSeries
-                {
-                    Title = "Réservations",
-                    Values = valeurs,
-                    Fill = new SolidColorBrush(Color.FromRgb(139, 21, 56)),
-                    DataLabels = true
-                }
-            };
+    {
+        new ColumnSeries
+        {
+            Title = "Réservations",
+            Values = valeurs,
+            Fill = new SolidColorBrush(Color.FromRgb(139, 21, 56)),
+            DataLabels = true,
+            LabelPoint = point => point.Y.ToString("0")
+        }
+    };
 
             ChartPrincipal.Series = series;
             ChartPrincipal.AxisX[0].Labels = nomsClients.ToArray();
         }
 
         /// <summary>
-        /// Affiche le graphique des 10 plats les plus servis
+        /// Affiche la liste des clients inactifs (utilise le nouvel endpoint !)
         /// </summary>
         /// <summary>
-        /// Affiche le graphique des 10 plats les plus servis
-        /// </summary>
-        
-        /// <summary>
-        /// Méthode pour compter un plat dans le dictionnaire
-        /// </summary>
-        private void CompterPlat(Plat plat, Dictionary<int, int> compteur, Dictionary<int, string> noms)
-        {
-            if (compteur.ContainsKey(plat.Id))
-            {
-                compteur[plat.Id]++;
-            }
-            else
-            {
-                compteur[plat.Id] = 1;
-                noms[plat.Id] = plat.Nom;
-            }
-        }
-
-        /// <summary>
-        /// Affiche la liste des clients inactifs en bas
+        /// Affiche la liste des clients inactifs avec leurs stats
         /// </summary>
         private async void AfficherClientsInactifs()
         {
-            List<Client> clientsInactifs = new List<Client>();
-            DateTime dateUnAnAvant = DateTime.Now.AddYears(-1);
+            List<ClientAvecStats> listeAffichage = new List<ClientAvecStats>();
 
-            foreach (Client client in clients)
+            foreach (Client client in clientsInactifs)
             {
+                int nbVisites = 0;
+                string derniereVisite = "Jamais";
+
                 try
                 {
                     List<Repas> repasClient = await _httpClient.GetFromJsonAsync<List<Repas>>($"Client/{client.Id}/repas");
 
-                    if (repasClient == null || repasClient.Count == 0)
+                    if (repasClient != null && repasClient.Count > 0)
                     {
-                        clientsInactifs.Add(client);
-                    }
-                    else
-                    {
-                        // Trouver le dernier repas
-                        Repas dernierRepas = repasClient[0];
+                        nbVisites = repasClient.Count;
+
+                        // Trouver la dernière visite
+                        DateTime derniere = repasClient[0].Date;
                         foreach (Repas repas in repasClient)
                         {
-                            if (repas.Date > dernierRepas.Date)
+                            if (repas.Date > derniere)
                             {
-                                dernierRepas = repas;
+                                derniere = repas.Date;
                             }
                         }
-
-                        if (dernierRepas.Date < dateUnAnAvant)
-                        {
-                            clientsInactifs.Add(client);
-                        }
+                        derniereVisite = derniere.ToString("dd/MM/yyyy");
                     }
                 }
                 catch
                 {
-                    clientsInactifs.Add(client);
+                    // Si erreur, on garde les valeurs par défaut
                 }
+
+                ClientAvecStats clientStats = new ClientAvecStats
+                {
+                    Prenom = client.Prenom,
+                    Nom = client.Nom,
+                    Email = client.Email,
+                    InfoVisites = nbVisites + " visite(s) - Dernière : " + derniereVisite
+                };
+
+                listeAffichage.Add(clientStats);
             }
 
-            ListeClientsInactifs.ItemsSource = clientsInactifs;
+            ListeClientsInactifs.ItemsSource = listeAffichage;
         }
 
-        
+        /// <summary>
+        /// Événement quand on change le filtre de période
+        /// </summary>
+        private void FiltrePeriode_Changed(object sender, SelectionChangedEventArgs e)
+        {
+            // Ne rien faire si pas encore initialisé
+            if (CbFiltrePeriode.SelectedItem == null) return;
+            if (tousLesClients == null) return;
+
+            // Recharger le graphique avec le nouveau filtre
+            AfficherGraphiqueTopClients();
+        }
     }
 }

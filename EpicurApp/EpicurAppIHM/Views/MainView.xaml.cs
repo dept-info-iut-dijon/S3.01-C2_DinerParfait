@@ -63,6 +63,8 @@ namespace EpicurAppIHM.Views
             ClientsViewControl.Visibility = Visibility.Collapsed;
             MenusViewControl.Visibility = Visibility.Collapsed;
             BoiteIdeesViewControl.Visibility = Visibility.Collapsed;
+
+            DashboardViewControl.Rafraichir();
         }
 
         /// <summary>
