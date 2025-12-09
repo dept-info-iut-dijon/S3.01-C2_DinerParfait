@@ -2,6 +2,7 @@
 using EpicurAPP_Partage.Exceptions;
 using Microsoft.AspNetCore.Mvc;
 using EpicurAppLogic.Interfaces;
+using System.Diagnostics;
 
 namespace EpicurApp_API.Controllers
 {
@@ -167,6 +168,48 @@ namespace EpicurApp_API.Controllers
             catch (Exception ex)
             {
                 return StatusCode(500, $"Erreur lors de la suppression du menu: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Ajoute une note à un menu.
+        /// </summary>
+        /// <param name="menuId">Id du menu.</param>
+        /// <param name="note">Note à ajouter.</param>
+        /// <returns>Réponse HTTP.</returns>
+        [HttpPost("{menuId}/AddNote")]
+        public IActionResult AjouterNoteAuMenu(int menuId, [FromBody] int note)
+        {
+            try
+            {
+                _menuService.AjouterNoteAuMenu(menuId, note);
+                return Ok("Note ajoutée au menu avec succès.");
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex.ToString());
+                return StatusCode(StatusCodes.Status500InternalServerError, "Erreur lors de l'ajout de la note au menu.");
+            }
+        }
+
+        /// <summary>       
+        /// Met à jour une note d'un menu.
+        /// </summary>
+        /// <param name="menuId">Id du menu.</param>
+        /// <param name="note">Note à mettre à jour.</param>
+        /// <returns>Réponse HTTP.</returns>
+        [HttpPut("{menuId}/AddNote")]
+        public IActionResult MettreAJourNoteDuMenu(int menuId, [FromBody] int note)
+        {
+            try
+            {
+                _menuService.MettreAJourNoteDuMenu(menuId, note);
+                return Ok("Note mise à jour avec succès.");
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex.ToString());
+                return StatusCode(StatusCodes.Status500InternalServerError, "Erreur lors de la mise à jour de la note du menu.");
             }
         }
     }

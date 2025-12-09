@@ -43,6 +43,17 @@
         /// Liste des éléments (plats) du menu.
         /// Permet d'avoir plusieurs plats de la même catégorie.
         /// </summary>
+        
         public List<ElementMenu> Elements { get; set; } = new List<ElementMenu>();
+
+        /// <summary>
+        /// Note sur 5 du menu.
+        /// </summary>
+        public int? Note { get; set; }
+
+        /// <summary>
+        /// Retours clients sur le menu
+        /// </summary>
+        public string? Retours { get; set; }
     }
 }

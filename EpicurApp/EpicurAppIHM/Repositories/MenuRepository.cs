@@ -63,5 +63,11 @@ namespace EpicurAppIHM.Repositories
         {
             return await _httpClient.GetFromJsonAsync<Menu>($"{BaseEndpoint}/brouillon");
         }
+
+        public async Task<bool> AddNoteAsync(int menuId, int note)
+        {
+            HttpResponseMessage response = await _httpClient.PostAsJsonAsync($"{BaseEndpoint}/{menuId}/AddNote", note);
+            return response.IsSuccessStatusCode;
+        }
     }
 }

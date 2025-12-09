@@ -79,13 +79,15 @@ namespace EpicurApp_API.Data
                         FOREIGN KEY (IngredientId) REFERENCES Ingredients(Id) ON DELETE CASCADE
                     );";
 
-                // Table Menus (simplifié - sans colonnes de plats fixes)
+                // Table Menus
                 string createMenusTable = @"
                     CREATE TABLE IF NOT EXISTS Menus (
                         Id INTEGER PRIMARY KEY AUTOINCREMENT,
                         Nom TEXT NOT NULL,
                         Date DATETIME NOT NULL,
-                        Statut TEXT NOT NULL
+                        Statut TEXT NOT NULL,
+                        Note INTEGER CHECK (Note IS NULL OR (Note >= 0 AND Note <= 5)),
+                        Retours TEXT
                     );";
 
                 // Table ElementMenus (nouvelle structure extensible)
@@ -115,6 +117,8 @@ namespace EpicurApp_API.Data
                     CREATE TABLE IF NOT EXISTS ClientMenu (
                         ClientId INTEGER NOT NULL,
                         MenuId INTEGER NOT NULL,
+                        Note INTEGER CHECk (Note<=5 AND Note>=0),   
+                        Avis TEXT, 
                         PRIMARY KEY (ClientId, MenuId),
                         FOREIGN KEY (ClientId) REFERENCES Clients(Id) ON DELETE CASCADE,
                         FOREIGN KEY (MenuId) REFERENCES Menus(Id) ON DELETE CASCADE
@@ -481,24 +485,28 @@ namespace EpicurApp_API.Data
                 // Insertion des menus
                 var menus = new[]
                 {
-                    ("Menu Découverte", "2024-11-15", "Validé"),
-                    ("Menu Végétarien", "2024-11-16", "Validé"),
-                    ("Menu du Jour", "2024-11-18", "Validé"),
+                    ("Menu Découverte", "2024-11-15", "Validé", 5, "Parfait, je reviendrai !"),
+                    ("Menu Végétarien", "2024-11-16", "Validé", 4, "Très bon mais l'entrée manquais un peu de sel"),
+                    ("Menu du Jour", "2024-11-18", "Validé", (int?)null, (string)null),
                 };
 
                 using (var insertMenuCommand = new SqliteCommand(
-                    "INSERT INTO Menus (Nom, Date, Statut) VALUES (@Nom, @Date, @Statut);",
+                    "INSERT INTO Menus (Nom, Date, Statut, Note, Retours) VALUES (@Nom, @Date, @Statut, @Note, @Retours);",
                     connection, transaction))
                 {
                     insertMenuCommand.Parameters.Add(new SqliteParameter("@Nom", SqliteType.Text));
                     insertMenuCommand.Parameters.Add(new SqliteParameter("@Date", SqliteType.Text));
                     insertMenuCommand.Parameters.Add(new SqliteParameter("@Statut", SqliteType.Text));
+                    insertMenuCommand.Parameters.Add(new SqliteParameter("@Note", SqliteType.Integer));
+                    insertMenuCommand.Parameters.Add(new SqliteParameter("@Retours", SqliteType.Text));
 
                     foreach (var menu in menus)
                     {
                         insertMenuCommand.Parameters["@Nom"].Value = menu.Item1;
                         insertMenuCommand.Parameters["@Date"].Value = menu.Item2;
                         insertMenuCommand.Parameters["@Statut"].Value = menu.Item3;
+                        insertMenuCommand.Parameters["@Note"].Value = menu.Item4.HasValue ? (object)menu.Item4.Value : DBNull.Value;
+                        insertMenuCommand.Parameters["@Retours"].Value = menu.Item5 ?? (object)DBNull.Value;
                         insertMenuCommand.ExecuteNonQuery();
                     }
                 }
