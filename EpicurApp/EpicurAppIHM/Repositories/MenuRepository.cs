@@ -50,7 +50,7 @@ namespace EpicurAppIHM.Repositories
 
         public async Task<List<ElementListeCourse>> GetListeCoursesAsync(int menuId)
         {
-            List<ElementListeCourse>? list = await _httpClient.GetFromJsonAsync<List<ElementListeCourse>>($"{BaseEndpoint}/{menuId}/listecourses");
+            List<ElementListeCourse>? list = await _httpClient.GetFromJsonAsync<List<ElementListeCourse>>($"{BaseEndpoint}/{menuId}/courses");
             return list ?? new List<ElementListeCourse>();
         }
 
@@ -61,7 +61,9 @@ namespace EpicurAppIHM.Repositories
 
         public async Task<Menu?> GetBrouillonAsync()
         {
-            return await _httpClient.GetFromJsonAsync<Menu>($"{BaseEndpoint}/brouillon");
+            // Récupérer tous les menus et trouver le brouillon (statut != "Validé")
+            List<Menu> menus = await GetAllAsync();
+            return menus.Find(m => m.Statut != "Validé");
         }
 
         public async Task<bool> AddNoteAsync(int menuId, int note)

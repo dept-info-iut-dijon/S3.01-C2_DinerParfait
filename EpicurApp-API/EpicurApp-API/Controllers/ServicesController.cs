@@ -5,7 +5,7 @@ using EpicurApp_API.DAO;
 namespace EpicurApp_API.Controllers
 {
     /// <summary>
-    /// Controller pour gérer les services et les réservations.
+    /// Controller pour gï¿½rer les services et les rï¿½servations.
     /// </summary>
     [ApiController]
     [Route("[controller]")]
@@ -18,7 +18,7 @@ namespace EpicurApp_API.Controllers
         /// Constructeur : injection des DAO.
         /// </summary>
         /// <param name="serviceDAO">DAO pour les services.</param>
-        /// <param name="reservationDAO">DAO pour les réservations.</param>
+        /// <param name="reservationDAO">DAO pour les rï¿½servations.</param>
         public ServicesController(ServiceDAO serviceDAO, ReservationDAO reservationDAO)
         {
             _serviceDAO = serviceDAO;
@@ -26,52 +26,82 @@ namespace EpicurApp_API.Controllers
         }
 
         /// <summary>
-        /// Récupère tous les services futurs.
+        /// Rï¿½cupï¿½re l'ID du restaurant depuis le header X-Restaurant-Id.
         /// </summary>
-        /// <returns>Liste des services futurs.</returns>
+        /// <returns>L'ID du restaurant ou null si non trouvï¿½.</returns>
+        private int? GetRestaurantIdFromHeader()
+        {
+            if (Request.Headers.TryGetValue("X-Restaurant-Id", out var restaurantIdValue))
+            {
+                if (int.TryParse(restaurantIdValue, out int restaurantId))
+                {
+                    return restaurantId;
+                }
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Rï¿½cupï¿½re tous les services futurs du restaurant.
+        /// </summary>
+        /// <returns>Liste des services futurs du restaurant.</returns>
         [HttpGet]
         public IActionResult GetAllServices()
         {
             try
             {
-                List<Service> services = _serviceDAO.GetAllServices();
+                int? restaurantId = GetRestaurantIdFromHeader();
+
+                if (!restaurantId.HasValue)
+                {
+                    return BadRequest("Header X-Restaurant-Id requis.");
+                }
+
+                List<Service> services = _serviceDAO.GetAllServices(restaurantId.Value);
                 return Ok(services);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Erreur lors de la récupération des services: {ex.Message}");
+                return StatusCode(500, $"Erreur lors de la rï¿½cupï¿½ration des services: {ex.Message}");
             }
         }
 
         /// <summary>
-        /// Récupère les services pour une date donnée.
+        /// Rï¿½cupï¿½re les services pour une date donnï¿½e et le restaurant.
         /// </summary>
         /// <param name="date">Date au format yyyy-MM-dd.</param>
-        /// <returns>Liste des services pour cette date.</returns>
+        /// <returns>Liste des services pour cette date et ce restaurant.</returns>
         [HttpGet("ByDate/{date}")]
         public IActionResult GetServicesParDate(string date)
         {
             try
             {
+                int? restaurantId = GetRestaurantIdFromHeader();
+
+                if (!restaurantId.HasValue)
+                {
+                    return BadRequest("Header X-Restaurant-Id requis.");
+                }
+
                 if (!DateTime.TryParse(date, out DateTime parsedDate))
                 {
                     return BadRequest("Format de date invalide. Utilisez yyyy-MM-dd.");
                 }
 
-                List<Service> services = _serviceDAO.GetServicesParDate(parsedDate);
+                List<Service> services = _serviceDAO.GetServicesParDate(parsedDate, restaurantId.Value);
                 return Ok(services);
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Erreur lors de la récupération des services: {ex.Message}");
+                return StatusCode(500, $"Erreur lors de la rï¿½cupï¿½ration des services: {ex.Message}");
             }
         }
 
         /// <summary>
         /// Ajoute un nouveau service.
         /// </summary>
-        /// <param name="service">Le service à ajouter.</param>
-        /// <returns>Le service créé avec son ID.</returns>
+        /// <param name="service">Le service ï¿½ ajouter.</param>
+        /// <returns>Le service crï¿½ï¿½ avec son ID.</returns>
         [HttpPost]
         public IActionResult AjouterService([FromBody] Service service)
         {
@@ -79,7 +109,7 @@ namespace EpicurApp_API.Controllers
             {
                 if (service == null)
                 {
-                    return BadRequest("Le service ne peut pas être null.");
+                    return BadRequest("Le service ne peut pas ï¿½tre null.");
                 }
 
                 _serviceDAO.AjouterService(service);
@@ -92,10 +122,10 @@ namespace EpicurApp_API.Controllers
         }
 
         /// <summary>
-        /// Ajoute une nouvelle réservation.
+        /// Ajoute une nouvelle rï¿½servation.
         /// </summary>
-        /// <param name="reservation">La réservation à ajouter.</param>
-        /// <returns>La réservation créée avec son ID.</returns>
+        /// <param name="reservation">La rï¿½servation ï¿½ ajouter.</param>
+        /// <returns>La rï¿½servation crï¿½ï¿½e avec son ID.</returns>
         [HttpPost("Reservation")]
         public IActionResult AjouterReservation([FromBody] Reservation reservation)
         {
@@ -103,7 +133,7 @@ namespace EpicurApp_API.Controllers
             {
                 if (reservation == null)
                 {
-                    return BadRequest("La réservation ne peut pas être null.");
+                    return BadRequest("La rï¿½servation ne peut pas ï¿½tre null.");
                 }
 
                 _reservationDAO.AjouterReservation(reservation);
@@ -111,15 +141,15 @@ namespace EpicurApp_API.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Erreur lors de l'ajout de la réservation: {ex.Message}");
+                return StatusCode(500, $"Erreur lors de l'ajout de la rï¿½servation: {ex.Message}");
             }
         }
 
         /// <summary>
-        /// Récupère toutes les réservations pour un service donné.
+        /// Rï¿½cupï¿½re toutes les rï¿½servations pour un service donnï¿½.
         /// </summary>
         /// <param name="serviceId">Identifiant du service.</param>
-        /// <returns>Liste des réservations avec nom et prénom des clients.</returns>
+        /// <returns>Liste des rï¿½servations avec nom et prï¿½nom des clients.</returns>
         [HttpGet("{serviceId}/Reservations")]
         public IActionResult GetReservationsParService(int serviceId)
         {
@@ -130,7 +160,7 @@ namespace EpicurApp_API.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Erreur lors de la récupération des réservations: {ex.Message}");
+                return StatusCode(500, $"Erreur lors de la rï¿½cupï¿½ration des rï¿½servations: {ex.Message}");
             }
         }
     }

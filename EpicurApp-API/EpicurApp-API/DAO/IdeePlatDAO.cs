@@ -33,7 +33,7 @@ namespace EpicurApp_API.DAO
             using (SqliteConnection connection = new SqliteConnection(_connectionString))
             {
                 connection.Open();
-                string query = "SELECT Id, Titre, Description, Categorie, Notes, DateCreation FROM IdeesPlats WHERE Id = @Id";
+                string query = "SELECT Id, Titre, Description, Categorie, Notes, DateCreation, RestaurantId FROM IdeesPlats WHERE Id = @Id";
 
                 using (SqliteCommand command = new SqliteCommand(query, connection))
                 {
@@ -49,7 +49,8 @@ namespace EpicurApp_API.DAO
                                 Description = reader.IsDBNull(2) ? "" : reader.GetString(2),
                                 Categorie = reader.IsDBNull(3) ? "" : reader.GetString(3),
                                 Notes = reader.IsDBNull(4) ? "" : reader.GetString(4),
-                                DateCreation = reader.IsDBNull(5) ? "" : reader.GetString(5)
+                                DateCreation = reader.IsDBNull(5) ? "" : reader.GetString(5),
+                                RestaurantId = reader.GetInt32(6)
                             };
                         }
                     }
@@ -69,7 +70,7 @@ namespace EpicurApp_API.DAO
             using (SqliteConnection connection = new SqliteConnection(_connectionString))
             {
                 connection.Open();
-                string query = "SELECT Id, Titre, Description, Categorie, Notes, DateCreation FROM IdeesPlats";
+                string query = "SELECT Id, Titre, Description, Categorie, Notes, DateCreation, RestaurantId FROM IdeesPlats";
 
                 using (SqliteCommand command = new SqliteCommand(query, connection))
                 using (SqliteDataReader reader = command.ExecuteReader())
@@ -83,9 +84,51 @@ namespace EpicurApp_API.DAO
                             Description = reader.IsDBNull(2) ? "" : reader.GetString(2),
                             Categorie = reader.IsDBNull(3) ? "" : reader.GetString(3),
                             Notes = reader.IsDBNull(4) ? "" : reader.GetString(4),
-                            DateCreation = reader.IsDBNull(5) ? "" : reader.GetString(5)
+                            DateCreation = reader.IsDBNull(5) ? "" : reader.GetString(5),
+                            RestaurantId = reader.GetInt32(6)
                         };
                         idees.Add(idee);
+                    }
+                }
+            }
+
+            return idees;
+        }
+
+        /// <summary>
+        /// Récupère toutes les idées de plats d'un restaurant spécifique.
+        /// </summary>
+        /// <param name="restaurantId">Identifiant du restaurant.</param>
+        /// <returns>Liste des idées de plats du restaurant.</returns>
+        public List<IdeePlat> GetAllByRestaurantId(int restaurantId)
+        {
+            List<IdeePlat> idees = new List<IdeePlat>();
+
+            using (SqliteConnection connection = new SqliteConnection(_connectionString))
+            {
+                connection.Open();
+                string query = "SELECT Id, Titre, Description, Categorie, Notes, DateCreation, RestaurantId FROM IdeesPlats WHERE RestaurantId = @RestaurantId";
+
+                using (SqliteCommand command = new SqliteCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@RestaurantId", restaurantId);
+
+                    using (SqliteDataReader reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            IdeePlat idee = new IdeePlat
+                            {
+                                Id = reader.GetInt32(0),
+                                Titre = reader.IsDBNull(1) ? "" : reader.GetString(1),
+                                Description = reader.IsDBNull(2) ? "" : reader.GetString(2),
+                                Categorie = reader.IsDBNull(3) ? "" : reader.GetString(3),
+                                Notes = reader.IsDBNull(4) ? "" : reader.GetString(4),
+                                DateCreation = reader.IsDBNull(5) ? "" : reader.GetString(5),
+                                RestaurantId = reader.GetInt32(6)
+                            };
+                            idees.Add(idee);
+                        }
                     }
                 }
             }
@@ -102,7 +145,7 @@ namespace EpicurApp_API.DAO
             using (SqliteConnection connection = new SqliteConnection(_connectionString))
             {
                 connection.Open();
-                string query = "INSERT INTO IdeesPlats (Titre, Description, Categorie, Notes) VALUES (@Titre, @Description, @Categorie, @Notes)";
+                string query = "INSERT INTO IdeesPlats (Titre, Description, Categorie, Notes, RestaurantId) VALUES (@Titre, @Description, @Categorie, @Notes, @RestaurantId)";
 
                 using (SqliteCommand command = new SqliteCommand(query, connection))
                 {
@@ -110,6 +153,7 @@ namespace EpicurApp_API.DAO
                     command.Parameters.AddWithValue("@Description", idee.Description ?? "");
                     command.Parameters.AddWithValue("@Categorie", idee.Categorie ?? "");
                     command.Parameters.AddWithValue("@Notes", idee.Notes ?? "");
+                    command.Parameters.AddWithValue("@RestaurantId", idee.RestaurantId);
                     command.ExecuteNonQuery();
                 }
             }

@@ -1,5 +1,3 @@
-using Microsoft.Extensions.Configuration;
-
 namespace EpicurApp_API.Configuration
 {
     /// <summary>

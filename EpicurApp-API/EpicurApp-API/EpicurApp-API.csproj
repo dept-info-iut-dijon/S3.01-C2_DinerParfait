@@ -8,6 +8,8 @@
     <UserSecretsId>118ae72e-fe0a-46a1-90c1-8b9edbb12293</UserSecretsId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
 	  <DockerfileContext>..\..</DockerfileContext>
+    <EnableDefaultContentItems>false</EnableDefaultContentItems>
+    <GenerateStaticWebAssetsManifest>false</GenerateStaticWebAssetsManifest>
   </PropertyGroup>
 
 	<ItemGroup>

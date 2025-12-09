@@ -2,7 +2,6 @@
 {
     /// <summary>
     /// Représente un menu composé de plusieurs plats.
-    /// Modèle extensible permettant plusieurs plats par catégorie.
     /// </summary>
     public class Menu
     {
@@ -10,6 +9,11 @@
         /// Identifiant unique du menu.
         /// </summary>
         public int Id { get; set; }
+
+        /// <summary>
+        /// Identifiant du restaurant auquel appartient ce menu
+        /// </summary>
+        public int RestaurantId { get; set; }
 
         /// <summary>
         /// Nom du menu.

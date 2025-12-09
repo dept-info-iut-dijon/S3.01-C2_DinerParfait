@@ -44,8 +44,8 @@ namespace EpicurApp_API.DAO
                 connection.Open();
 
                 string query = @"
-                    SELECT 
-                        r.Id, r.ClientId, r.MenuId, r.Date, r.Retours,
+                    SELECT
+                        r.Id, r.ClientId, r.MenuId, r.Date, r.Retours, r.RestaurantId,
                         m.Id AS Menu_Id, m.Nom AS Menu_Nom, m.Note AS Menu_Note
                     FROM Repas r
                     JOIN Menus m ON r.MenuId = m.Id
@@ -64,7 +64,6 @@ namespace EpicurApp_API.DAO
                             {
                                 Id = reader.GetInt32(reader.GetOrdinal("Menu_Id")),
                                 Nom = reader.GetString(reader.GetOrdinal("Menu_Nom")),
-
                                 Note = reader.IsDBNull(reader.GetOrdinal("Menu_Note"))
                                        ? null
                                        : reader.GetInt32(reader.GetOrdinal("Menu_Note"))
@@ -72,17 +71,16 @@ namespace EpicurApp_API.DAO
 
                             var nouveauRepas = new Repas
                             {
-                                Id = reader.GetInt32(reader.GetOrdinal("Id")),
-                                ClientId = reader.GetInt32(reader.GetOrdinal("ClientId")),
-                                MenuId = reader.GetInt32(reader.GetOrdinal("MenuId")),
-                                Date = reader.GetDateTime(reader.GetOrdinal("Date")),
-                                Retours = reader.IsDBNull(reader.GetOrdinal("Retours"))
-                                          ? null
-                                          : reader.GetString(reader.GetOrdinal("Retours")),
-                                Menu = menu 
+                                Id = reader.GetInt32(0),
+                                ClientId = reader.GetInt32(1),
+                                MenuId = reader.GetInt32(2),
+                                Date = DateTime.Parse(reader.GetString(3)),
+                                Retours = reader.IsDBNull(4) ? null : reader.GetString(4),
+                                RestaurantId = reader.GetInt32(5),
+                                Menu = menu,
+                                Note = menu.Note
                             };
 
-                            nouveauRepas.Note = menu.Note;
                             repas.Add(nouveauRepas);
                         }
                     }
@@ -103,8 +101,8 @@ namespace EpicurApp_API.DAO
                 connection.Open();
 
                 string query = @"
-                    INSERT INTO Repas (ClientId, MenuId, Date, Retours)
-                    VALUES (@ClientId, @MenuId, @Date, @Retours);
+                    INSERT INTO Repas (ClientId, MenuId, Date, Retours, RestaurantId)
+                    VALUES (@ClientId, @MenuId, @Date, @Retours, @RestaurantId);
                     SELECT last_insert_rowid();";
 
                 using (var command = new SqliteCommand(query, connection))
@@ -113,6 +111,7 @@ namespace EpicurApp_API.DAO
                     command.Parameters.AddWithValue("@MenuId", repas.MenuId);
                     command.Parameters.AddWithValue("@Date", repas.Date.ToString("yyyy-MM-dd HH:mm:ss"));
                     command.Parameters.AddWithValue("@Retours", repas.Retours ?? (object)DBNull.Value);
+                    command.Parameters.AddWithValue("@RestaurantId", repas.RestaurantId);
 
                     var result = command.ExecuteScalar();
                     if (result != null)

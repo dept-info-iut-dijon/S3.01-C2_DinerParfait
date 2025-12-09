@@ -38,5 +38,29 @@ namespace EpicurAppIHM.Services
                 return _httpClient;
             }
         }
+
+        /// <summary>
+        /// Définit le RestaurantId pour toutes les requêtes futures via le header X-Restaurant-Id.
+        /// </summary>
+        /// <param name="restaurantId">L'ID du restaurant</param>
+        public void SetRestaurantId(int restaurantId)
+        {
+            if (HttpClient.DefaultRequestHeaders.Contains("X-Restaurant-Id"))
+            {
+                HttpClient.DefaultRequestHeaders.Remove("X-Restaurant-Id");
+            }
+            HttpClient.DefaultRequestHeaders.Add("X-Restaurant-Id", restaurantId.ToString());
+        }
+
+        /// <summary>
+        /// Supprime le RestaurantId des headers (utilisé à la déconnexion).
+        /// </summary>
+        public void ClearRestaurantId()
+        {
+            if (HttpClient.DefaultRequestHeaders.Contains("X-Restaurant-Id"))
+            {
+                HttpClient.DefaultRequestHeaders.Remove("X-Restaurant-Id");
+            }
+        }
     }
 }

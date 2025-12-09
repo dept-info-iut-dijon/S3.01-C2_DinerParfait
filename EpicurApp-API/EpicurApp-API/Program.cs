@@ -19,6 +19,8 @@ builder.Services.AddScoped<IRepasDAO, RepasDAO>();
 builder.Services.AddScoped<IIdeePlatDAO, IdeePlatDAO>();
 builder.Services.AddScoped<ServiceDAO>();
 builder.Services.AddScoped<ReservationDAO>();
+builder.Services.AddScoped<IUtilisateurDAO, UtilisateurDAO>();
+builder.Services.AddScoped<IRestaurantDAO, RestaurantDAO>();
 
 // Enregistrement des services
 builder.Services.AddScoped<IPlatService, PlatService>();
@@ -26,15 +28,27 @@ builder.Services.AddScoped<IClientService, ClientService>();
 builder.Services.AddScoped<IMenuService, MenuService>();
 builder.Services.AddScoped<IAllergeneService, AllergeneService>();
 builder.Services.AddScoped<IIdeePlatService, IdeePlatService>();
+builder.Services.AddScoped<IAuthService, AuthService>();
 
 builder.Services.AddControllers().AddJsonOptions(options =>
 {
     options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
-    options.JsonSerializerOptions.PropertyNamingPolicy = null; 
+    options.JsonSerializerOptions.PropertyNamingPolicy = null;
 });
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+// Configuration CORS pour permettre les requêtes depuis le navigateur
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAll", builder =>
+    {
+        builder.AllowAnyOrigin()
+               .AllowAnyMethod()
+               .AllowAnyHeader();
+    });
+});
 
 WebApplication app = builder.Build();
 
@@ -53,6 +67,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+// Activer CORS
+app.UseCors("AllowAll");
 
 app.UseAuthorization();
 app.MapControllers();
