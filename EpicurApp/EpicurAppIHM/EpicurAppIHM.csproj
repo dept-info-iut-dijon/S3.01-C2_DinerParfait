@@ -38,9 +38,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="Logo\logosae1.JPG">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
     <Content Include="Logo\logosae1-bgremove.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
