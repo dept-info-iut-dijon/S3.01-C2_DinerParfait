@@ -2,6 +2,7 @@
 using EpicurAPP_Partage.Exceptions;
 using Microsoft.AspNetCore.Mvc;
 using EpicurAppLogic.Interfaces;
+using System.Diagnostics;
 
 namespace EpicurApp_API.Controllers
 {
@@ -111,13 +112,33 @@ namespace EpicurApp_API.Controllers
         }
 
         /// <summary>
+        /// Méthode GET pour récupérer le dernier brouillon de menu.
+        /// </summary>
+        /// <returns>Le dernier menu en statut Brouillon ou NotFound</returns>
+        [HttpGet("brouillon")]
+        public ActionResult<Menu> GetBrouillon()
+        {
+            try
+            {
+                List<Menu> menus = _menuService.GetAll();
+                Menu? brouillon = menus.FirstOrDefault(m => m.Statut == "Brouillon");
+                if (brouillon == null) return NotFound();
+                return Ok(brouillon);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Erreur lors de la récupération du brouillon: {ex.Message}");
+            }
+        }
+
+        /// <summary>
         /// Méthode GET pour générer la liste de courses d'un menu.
         /// </summary>
         /// <param name="id">ID du menu</param>
         /// <exception cref="EntityNotFoundException">Lance une exception si le menu n'est pas trouvé.</exception>
         /// <exception cref="Exception">Lance une exception en cas d'erreur lors de la génération de la liste de courses.</exception>
         /// <returns>Promesse d'une liste d'elements pour la liste de course</returns>
-        [HttpGet("{id}/courses")]
+        [HttpGet("{id}/listecourses")]
         public ActionResult<List<ElementListeCourse>> GetListeCourses(int id)
         {
             try
@@ -232,6 +253,48 @@ namespace EpicurApp_API.Controllers
             catch (Exception ex)
             {
                 return StatusCode(500, $"Erreur lors de la suppression du menu: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Ajoute une note à un menu.
+        /// </summary>
+        /// <param name="menuId">Id du menu.</param>
+        /// <param name="note">Note à ajouter.</param>
+        /// <returns>Réponse HTTP.</returns>
+        [HttpPost("{menuId}/AddNote")]
+        public IActionResult AjouterNoteAuMenu(int menuId, [FromBody] int note)
+        {
+            try
+            {
+                _menuService.AjouterNoteAuMenu(menuId, note);
+                return Ok("Note ajoutée au menu avec succès.");
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex.ToString());
+                return StatusCode(StatusCodes.Status500InternalServerError, "Erreur lors de l'ajout de la note au menu.");
+            }
+        }
+
+        /// <summary>       
+        /// Met à jour une note d'un menu.
+        /// </summary>
+        /// <param name="menuId">Id du menu.</param>
+        /// <param name="note">Note à mettre à jour.</param>
+        /// <returns>Réponse HTTP.</returns>
+        [HttpPut("{menuId}/AddNote")]
+        public IActionResult MettreAJourNoteDuMenu(int menuId, [FromBody] int note)
+        {
+            try
+            {
+                _menuService.MettreAJourNoteDuMenu(menuId, note);
+                return Ok("Note mise à jour avec succès.");
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex.ToString());
+                return StatusCode(StatusCodes.Status500InternalServerError, "Erreur lors de la mise à jour de la note du menu.");
             }
         }
     }

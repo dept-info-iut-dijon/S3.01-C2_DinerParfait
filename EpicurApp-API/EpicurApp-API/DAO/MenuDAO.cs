@@ -102,7 +102,7 @@ namespace EpicurApp_API.DAO
             {
                 connection.Open();
 
-                string query = @"SELECT Id, Nom, Date, Statut, RestaurantId FROM Menus WHERE Id=@Id";
+                string query = @"SELECT Id, Nom, Date, Statut,ResataurantId Note, Retours FROM Menus WHERE Id=@Id";
 
                 using (SqliteCommand command = new SqliteCommand(query, connection))
                 {
@@ -130,7 +130,7 @@ namespace EpicurApp_API.DAO
             {
                 connection.Open();
 
-                string query = @"SELECT Id, Nom, Date, Statut, RestaurantId FROM Menus";
+                string query = @"SELECT Id, Nom, Date, Statut, RestaurantId, Note, Retours FROM Menus";
 
                 using (SqliteCommand command = new SqliteCommand(query, connection))
                 using (SqliteDataReader reader = command.ExecuteReader())
@@ -156,7 +156,7 @@ namespace EpicurApp_API.DAO
             {
                 connection.Open();
 
-                string query = @"SELECT Id, Nom, Date, Statut, RestaurantId
+                string query = @"SELECT Id, Nom, Date, Statut, RestaurantId, Note, Retours
                                 FROM Menus
                                 WHERE RestaurantId = @RestaurantId";
 
@@ -186,7 +186,7 @@ namespace EpicurApp_API.DAO
             {
                 connection.Open();
 
-                string query = @"SELECT Id, Nom, Date, Statut
+                string query = @"SELECT Id, Nom, Date, Statut, Note, Retours
                     FROM Menus
                     WHERE Statut = @Statut
                     ORDER BY Date DESC
@@ -226,7 +226,9 @@ namespace EpicurApp_API.DAO
                         string updateMenuQuery = @"UPDATE Menus SET
                             Nom = @Nom,
                             Date = @Date,
-                            Statut = @Statut
+                            Statut = @Statut,
+                            Note = @Note,
+                            Retours = @Retours
                             WHERE Id = @Id";
 
                         using (SqliteCommand command = new SqliteCommand(updateMenuQuery, connection, transaction))
@@ -235,6 +237,10 @@ namespace EpicurApp_API.DAO
                             command.Parameters.AddWithValue("@Date", menu.Date);
                             command.Parameters.AddWithValue("@Statut", menu.Statut);
                             command.Parameters.AddWithValue("@Id", menu.Id);
+                            command.Parameters.AddWithValue("@Note",
+                                menu.Note.HasValue ? (object)menu.Note.Value : DBNull.Value);
+                            command.Parameters.AddWithValue("@Retours",
+                                menu.Retours ?? (object)DBNull.Value);
 
                             command.ExecuteNonQuery();
                         }
@@ -324,6 +330,8 @@ namespace EpicurApp_API.DAO
             menu.Nom = reader.GetString(1);
             menu.Date = reader.GetDateTime(2);
             menu.Statut = reader.GetString(3);
+            menu.Note = reader.IsDBNull(4) ? null : reader.GetInt32(4);
+            menu.Retours = reader.IsDBNull(5) ? null : reader.GetString(5);
             menu.RestaurantId = reader.GetInt32(4);
 
             // Load elements from ElementMenus table

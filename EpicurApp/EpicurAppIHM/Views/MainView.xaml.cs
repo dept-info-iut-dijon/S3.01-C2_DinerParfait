@@ -24,6 +24,7 @@ namespace EpicurAppIHM.Views
             ClientsViewControl.Visibility = Visibility.Visible;
             MenusViewControl.Visibility = Visibility.Collapsed;
             BoiteIdeesViewControl.Visibility = Visibility.Collapsed;
+            ReservationsViewControl.Visibility = Visibility.Collapsed;
         }
 
         /// <summary>
@@ -34,6 +35,7 @@ namespace EpicurAppIHM.Views
             ClientsViewControl.Visibility = Visibility.Collapsed;
             MenusViewControl.Visibility = Visibility.Visible;
             BoiteIdeesViewControl.Visibility = Visibility.Collapsed;
+            ReservationsViewControl.Visibility = Visibility.Collapsed;
 
             MenusViewControl.ChargerMenus();
         }
@@ -46,8 +48,20 @@ namespace EpicurAppIHM.Views
             ClientsViewControl.Visibility = Visibility.Collapsed;
             MenusViewControl.Visibility = Visibility.Collapsed;
             BoiteIdeesViewControl.Visibility = Visibility.Visible;
+            ReservationsViewControl.Visibility = Visibility.Collapsed;
 
             BoiteIdeesViewControl.ChargerIdees();
+        }
+
+        /// <summary>
+        /// Affiche la vue des réservations
+        /// </summary>
+        private void AfficherReservations(object sender, RoutedEventArgs e)
+        {
+            ClientsViewControl.Visibility = Visibility.Collapsed;
+            MenusViewControl.Visibility = Visibility.Collapsed;
+            BoiteIdeesViewControl.Visibility = Visibility.Collapsed;
+            ReservationsViewControl.Visibility = Visibility.Visible;
         }
 
         /// <summary>

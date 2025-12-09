@@ -65,5 +65,11 @@ namespace EpicurAppIHM.Repositories
             List<Menu> menus = await GetAllAsync();
             return menus.Find(m => m.Statut != "Validé");
         }
+
+        public async Task<bool> AddNoteAsync(int menuId, int note)
+        {
+            HttpResponseMessage response = await _httpClient.PostAsJsonAsync($"{BaseEndpoint}/{menuId}/AddNote", note);
+            return response.IsSuccessStatusCode;
+        }
     }
 }

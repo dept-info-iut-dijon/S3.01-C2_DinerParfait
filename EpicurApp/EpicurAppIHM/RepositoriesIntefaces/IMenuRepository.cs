@@ -48,5 +48,10 @@ namespace EpicurAppIHM.RepositoriesIntefaces
         /// Récupère le menu brouillon.
         /// </summary>
         Task<Menu?> GetBrouillonAsync();
+
+        /// <summary>
+        /// Ajoute ou met à jour une note pour un menu.
+        /// </summary>
+        Task<bool> AddNoteAsync(int menuId, int note);
     }
 }
