@@ -30,6 +30,10 @@ namespace EpicurAPP_Partage.Models
         /// Retours éventuels du client sur ce repas (commentaires, satisfaction, etc.).
         /// </summary>
         public string? Retours { get; set; }
+        /// <summary>
+        /// Note du client pour ce repas (échelle de 1 à 5).
+        /// </summary>
+        public int? Note { get; set; }
 
         /// <summary>
         /// Menu associé à ce repas (navigation property).

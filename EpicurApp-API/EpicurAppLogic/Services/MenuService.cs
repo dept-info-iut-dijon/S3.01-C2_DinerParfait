@@ -236,5 +236,41 @@ namespace EpicurAppLogic.Services
                 throw new ApplicationException("Erreur lors de la suppression du menu.", ex);
             }
         }
+
+        /// <summary>
+        /// Met à jour une note d'un menu.
+        /// </summary>
+        public void MettreAJourNoteDuMenu(int menuId, int note)
+        {
+            AjouterNoteAuMenu(menuId, note);
+        }
+
+        /// <summary>
+        /// Ajoute ou modifie une note à un menu.
+        /// </summary>
+        public void AjouterNoteAuMenu(int menuId, int note)
+        {
+            if (note < 0 || note > 5)
+            {
+                throw new InvalidFieldException("La note doit être comprise entre 0 et 5.");
+            }
+
+            Menu? menu = _menuDAO.GetById(menuId);
+            if (menu == null)
+            {
+                throw new EntityNotFoundException("Le menu",menuId);
+            }
+
+            menu.Note = note;
+
+            try
+            {
+                _menuDAO.MettreAJourMenu(menu);
+            }
+            catch (Exception ex)
+            {
+                throw new ApplicationException("Erreur lors de la sauvegarde de la note.", ex);
+            }
+        }
     }
 }

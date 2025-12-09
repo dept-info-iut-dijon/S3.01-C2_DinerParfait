@@ -59,5 +59,15 @@
         /// Dessert du menu.
         /// </summary>
         public Plat? Dessert { get; set; }
+
+        /// <summary>
+        /// Note sur 5 du menu.
+        /// </summary>
+        public int? Note { get; set; }
+
+        /// <summary>
+        /// Retours clients sur le menu
+        /// </summary>
+        public string? Retours { get; set; }
     }
 }

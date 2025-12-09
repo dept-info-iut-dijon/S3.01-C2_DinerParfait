@@ -189,7 +189,9 @@ namespace EpicurApp_API.DAO
                     PlatPrincipalId = @PlatPrincipalId,
                     VinId = @VinId,
                     FromageId = @FromageId,
-                    DessertId = @DessertId
+                    DessertId = @DessertId,
+                    Note = @Note,
+                    Retours = @Retours
                     WHERE Id = @Id";
 
                 using (SqliteCommand command = new SqliteCommand(query, connection))
@@ -198,6 +200,10 @@ namespace EpicurApp_API.DAO
                     command.Parameters.AddWithValue("@Date", menu.Date);
                     command.Parameters.AddWithValue("@Statut", menu.Statut);
                     command.Parameters.AddWithValue("@Id", menu.Id);
+                    command.Parameters.AddWithValue("@Note", 
+                        menu.Note.HasValue ? (object)menu.Note.Value : DBNull.Value);
+                    command.Parameters.AddWithValue("@Retours", 
+                        menu.Retours ?? (object)DBNull.Value);
 
                     command.Parameters.AddWithValue("@AmuseBoucheId",
                         menu.AmuseBouche?.Id ?? (object)DBNull.Value);

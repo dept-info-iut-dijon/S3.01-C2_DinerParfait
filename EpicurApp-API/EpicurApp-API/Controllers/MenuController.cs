@@ -2,6 +2,7 @@
 using EpicurAPP_Partage.Exceptions;
 using Microsoft.AspNetCore.Mvc;
 using EpicurAppLogic.Interfaces;
+using System.Diagnostics;
 
 namespace EpicurApp_API.Controllers
 {
@@ -157,10 +158,8 @@ namespace EpicurApp_API.Controllers
         /// <param name="note">Note à ajouter.</param>
         /// <returns>Réponse HTTP.</returns>
         [HttpPost("{menuId}/AddNote")]
-        public IActionResult AjouterNoteAuMenu(int menuId, [FromBody] Note note)
+        public IActionResult AjouterNoteAuMenu(int menuId, [FromBody] int note)
         {
-            if (note == null)
-                return BadRequest("La note ne peut pas être nulle.");
             try
             {
                 _menuService.AjouterNoteAuMenu(menuId, note);
@@ -179,8 +178,8 @@ namespace EpicurApp_API.Controllers
         /// <param name="menuId">Id du menu.</param>
         /// <param name="note">Note à mettre à jour.</param>
         /// <returns>Réponse HTTP.</returns>
-        [HttpPut("{menuId}/AddNote"))]
-        public IActionResult MettreAJourNoteDuMenu(int menuId, [FromBody] Note note)
+        [HttpPut("{menuId}/AddNote")]
+        public IActionResult MettreAJourNoteDuMenu(int menuId, [FromBody] int note)
         {
             if (note == null)
                 return BadRequest("La note ne peut pas être nulle.");

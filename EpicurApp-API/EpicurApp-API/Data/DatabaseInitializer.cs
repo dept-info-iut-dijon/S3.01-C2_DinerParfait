@@ -93,6 +93,8 @@ namespace EpicurApp_API.Data
                         VinId INTEGER,
                         FromageId INTEGER,
                         DessertId INTEGER,
+                        Note INTEGER CHECK (Note<6 AND Note >= 0),
+                        Retours TEXT,
                         FOREIGN KEY (AmuseBoucheId) REFERENCES Plats(Id),
                         FOREIGN KEY (BoissonAperitifId) REFERENCES Plats(Id),
                         FOREIGN KEY (EntreeId) REFERENCES Plats(Id),
@@ -117,7 +119,7 @@ namespace EpicurApp_API.Data
                     CREATE TABLE IF NOT EXISTS ClientMenu (
                         ClientId INTEGER NOT NULL,
                         MenuId INTEGER NOT NULL,
-                         Note INTEGER CHECk (Note<=5 AND Note>=0),   
+                        Note INTEGER CHECk (Note<=5 AND Note>=0),   
                         Avis TEXT, 
                         PRIMARY KEY (ClientId, MenuId),
                         FOREIGN KEY (ClientId) REFERENCES Clients(Id) ON DELETE CASCADE,
@@ -451,14 +453,14 @@ namespace EpicurApp_API.Data
 
                 var menus = new[]
                 {
-                    ("Menu Découverte", "2024-11-15", "Validé", 1, 3, 5, 7, 9, 11, 13),
-                    ("Menu Végétarien", "2024-11-16", "Validé", 2, 4, 6, 8, 10, 12, 14),
-                    ("Menu du Jour", "2024-11-18", "Validé", 1, 3, 6, 7, 9, 11, 14),
+                    ("Menu Découverte", "2024-11-15", "Validé", 1, 3, 5, 7, 9, 11, 13,5, "Parfait, je reviendrai !"),
+                    ("Menu Végétarien", "2024-11-16", "Validé", 2, 4, 6, 8, 10, 12, 14,4, "Très bon, mais l'entrée manquait de sel."),
+                    ("Menu du Jour", "2024-11-18", "Validé", 1, 3, 6, 7, 9, 11, 14,3, null),
                 };
 
                 using (var insertCommand = new SqliteCommand(
-                    @"INSERT INTO Menus (Nom, Date, Statut, AmuseBoucheId, BoissonAperitifId, EntreeId, PlatPrincipalId, VinId, FromageId, DessertId)
-                      VALUES (@Nom, @Date, @Statut, @AmuseBoucheId, @BoissonAperitifId, @EntreeId, @PlatPrincipalId, @VinId, @FromageId, @DessertId);",
+                    @"INSERT INTO Menus (Nom, Date, Statut, AmuseBoucheId, BoissonAperitifId, EntreeId, PlatPrincipalId, VinId, FromageId, DessertId, Note, Retours)
+                      VALUES (@Nom, @Date, @Statut, @AmuseBoucheId, @BoissonAperitifId, @EntreeId, @PlatPrincipalId, @VinId, @FromageId, @DessertId, @Note, @Retours);",
                     connection, transaction))
                 {
                     insertCommand.Parameters.Add(new SqliteParameter("@Nom", SqliteType.Text));
@@ -471,6 +473,8 @@ namespace EpicurApp_API.Data
                     insertCommand.Parameters.Add(new SqliteParameter("@VinId", SqliteType.Integer));
                     insertCommand.Parameters.Add(new SqliteParameter("@FromageId", SqliteType.Integer));
                     insertCommand.Parameters.Add(new SqliteParameter("@DessertId", SqliteType.Integer));
+                    insertCommand.Parameters.Add(new SqliteParameter("@Note", SqliteType.Integer));
+                    insertCommand.Parameters.Add(new SqliteParameter("@Retours", SqliteType.Text)); 
 
                     foreach (var menu in menus)
                     {
@@ -484,6 +488,8 @@ namespace EpicurApp_API.Data
                         insertCommand.Parameters["@VinId"].Value = menu.Item8;
                         insertCommand.Parameters["@FromageId"].Value = menu.Item9;
                         insertCommand.Parameters["@DessertId"].Value = menu.Item10;
+                        insertCommand.Parameters["@Note"].Value = menu.Item11;
+                        insertCommand.Parameters["@Retours"].Value = menu.Item12 ?? (object)DBNull.Value; 
                         insertCommand.ExecuteNonQuery();
                     }
                 }

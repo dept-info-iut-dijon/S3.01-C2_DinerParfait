@@ -2,6 +2,8 @@ using EpicurAPP_Partage.Models;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Input;
 
 namespace EpicurAppIHM.Views
 {
@@ -115,5 +117,38 @@ namespace EpicurAppIHM.Views
         {
             this.Close();
         }
+        /// <summary>
+        /// Gère le clic sur une étoile pour mettre à jour la note localement et via l'API
+        /// </summary>
+        private async void Star_Click_Handler(object sender, MouseButtonEventArgs e)
+        {
+            //recuperation du conteneur
+            Border? border = sender as Border;
+            if (border == null) return;
+
+            //recuperation nouvelle note
+            if (!int.TryParse(border.Tag.ToString(), out int nouvelleNote)) return;
+
+            //recuperation repas
+            Repas? repas = border.DataContext as Repas;
+
+            if (repas != null && repas.Menu != null) 
+            {
+                
+                repas.Menu.Note = nouvelleNote;
+                dgRepas.Items.Refresh();
+
+                try
+                {
+                    var response = await _httpClient.PostAsJsonAsync($"Menu/{repas.MenuId}/AddNote", nouvelleNote);
+
+                }
+                catch (Exception ex)
+                {
+                    throw new Exception("Erreur lors de la mise à jour de la note : " + ex.Message);
+                }
+            }
+        
     }
+        }
 }
