@@ -44,6 +44,11 @@ namespace EpicurAPP_Partage.Models
         public int Id { get;  set; }
 
         /// <summary>
+        /// Identifiant du restaurant auquel appartient ce client
+        /// </summary>
+        public int RestaurantId { get; set; }
+
+        /// <summary>
         /// Liste des plats que le client n'apprécie pas.
         /// </summary>
         public List<Plat> PlatsNonApprecies { get; set; } = new List<Plat>();

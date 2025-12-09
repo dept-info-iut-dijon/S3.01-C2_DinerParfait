@@ -35,7 +35,14 @@ namespace EpicurAppIHM.Views
         {
             try
             {
+                // Assurer que le header X-Restaurant-Id est défini
+                if (App.CurrentRestaurant != null)
+                {
+                    App.ApiClient.SetRestaurantId(App.CurrentRestaurant.Id);
+                }
+
                 List<MenuModel> menus = await App.MenuRepository.GetAllAsync();
+
                 if (menus != null)
                 {
                     Menus.Clear();
@@ -49,6 +56,7 @@ namespace EpicurAppIHM.Views
                                 "Erreur API", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
+
 
         /// <summary>
         /// Consulte le menu sélectionné en double-cliquant dessus

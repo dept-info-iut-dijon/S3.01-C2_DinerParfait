@@ -53,6 +53,12 @@ namespace EpicurAppIHM.Views
         {
             try
             {
+                // S'assurer que le header X-Restaurant-Id est défini
+                if (App.CurrentRestaurant != null)
+                {
+                    App.ApiClient.SetRestaurantId(App.CurrentRestaurant.Id);
+                }
+
                 tousLesPlats = await App.PlatRepository.GetAllAsync();
 
                 if (tousLesPlats != null && tousLesPlats.Count > 0)
@@ -64,9 +70,18 @@ namespace EpicurAppIHM.Views
                     MessageBox.Show("Aucun plat disponible dans la base de données", "Information", MessageBoxButton.OK, MessageBoxImage.Information);
                 }
             }
-            catch
+            catch (Exception ex)
             {
-                MessageBox.Show("Impossible de contacter l'API.\nVérifiez qu'elle est bien lancée (ex: https://localhost:8081)", "Erreur de connexion", MessageBoxButton.OK, MessageBoxImage.Error);
+                string detailErreur = $"Erreur : {ex.Message}";
+                if (ex.InnerException != null)
+                {
+                    detailErreur += $"\n\nInner Exception: {ex.InnerException.Message}";
+                }
+                detailErreur += $"\n\nStack Trace: {ex.StackTrace}";
+                detailErreur += $"\n\nURL de l'API: {App.ApiClient.HttpClient.BaseAddress}";
+                detailErreur += $"\n\nRestaurant ID: {App.CurrentRestaurant?.Id}";
+
+                MessageBox.Show($"Impossible de contacter l'API.\n\n{detailErreur}", "Erreur de connexion", MessageBoxButton.OK, MessageBoxImage.Error);
             }
         }
 
@@ -88,23 +103,18 @@ namespace EpicurAppIHM.Views
         /// Configure une ComboBox avec les plats d'une catégorie donnée
         /// </summary>
         /// <param name="comboBox">combobox cible</param>
-        /// <param name="categorieStr">catégorie du pla</param>
+        /// <param name="categorieStr">catégorie du plat</param>
         private void ConfigurerComboBox(ComboBox comboBox, string categorieStr)
         {
             List<Plat> platsClasse = new List<Plat>();
 
-            // Convertir la string en enum CategoriePlat
             if (!Enum.TryParse<CategoriePlat>(categorieStr, out CategoriePlat categorieEnum))
-            {
                 return;
-            }
 
             foreach (Plat plat in tousLesPlats)
             {
                 if (plat.Categorie == categorieEnum)
-                {
                     platsClasse.Add(plat);
-                }
             }
 
             platsClasse.Sort(ComparerPlatsParNom);
@@ -118,22 +128,15 @@ namespace EpicurAppIHM.Views
         /// <summary>
         /// Compare deux plats par leur nom
         /// </summary>
-        /// <param name="p1">1er plat a comparer</param>
-        /// <param name="p2">2eme plat a comparer</param>
-        /// <returns>renvoie le plat qui est le plus "grand"</returns>
         private int ComparerPlatsParNom(Plat p1, Plat p2)
         {
-            int res;
-            if (p1 == null && p2 == null) res = 0;
-            if (p1 == null) res = -1;
-            if (p2 == null) res = 1;
-
-            if (p1.Nom == null && p2.Nom == null) res = 0;
-            if (p1.Nom == null) res = -1;
-            if (p2.Nom == null) res = 1;
-
-            res = p1.Nom.CompareTo(p2.Nom);
-            return res;
+            if (p1 == null && p2 == null) return 0;
+            if (p1 == null) return -1;
+            if (p2 == null) return 1;
+            if (p1.Nom == null && p2.Nom == null) return 0;
+            if (p1.Nom == null) return -1;
+            if (p2.Nom == null) return 1;
+            return p1.Nom.CompareTo(p2.Nom);
         }
 
         /// <summary>
@@ -147,7 +150,6 @@ namespace EpicurAppIHM.Views
         /// <summary>
         /// vérifie qu'au moins un plat est sélectionné
         /// </summary>
-        /// <returns>True si au moins un plat est selectionnée sinon faux</returns>
         private bool ValidationMenu()
         {
             if (cmbAmuseGueule.SelectedItem == null &&
@@ -187,21 +189,20 @@ namespace EpicurAppIHM.Views
         /// <summary>
         /// Charge un menu spécifique par son ID
         /// </summary>
-        /// <param name="menuId">ID du menu à charger</param>
-        /// <exception cref="Exception">Erreur lors de l'appel API</exception>
         private async void ChargerMenu(int menuId)
         {
             try
             {
+                if (App.CurrentRestaurant != null)
+                    App.ApiClient.SetRestaurantId(App.CurrentRestaurant.Id);
+
                 MenuModel? menu = await App.MenuRepository.GetByIdAsync(menuId);
 
                 if (menu != null)
                 {
                     _menuBrouillonId = menu.Id;
-
                     txtNomMenu.Text = menu.Nom;
 
-                    // Récupérer le premier plat de chaque catégorie depuis les éléments du menu
                     ElementMenu? amuseBouche = menu.Elements.FirstOrDefault(e => e.Categorie == CategoriePlat.AmuseBouche);
                     cmbAmuseGueule.SelectedValue = amuseBouche?.PlatId;
 
@@ -234,8 +235,7 @@ namespace EpicurAppIHM.Views
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Erreur lors du chargement du menu : {ex.Message}",
-                    "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
+                MessageBox.Show($"Erreur lors du chargement du menu : {ex.Message}", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
                 _menuBrouillonId = null;
                 btnSupprimer.Visibility = Visibility.Collapsed;
             }
@@ -244,20 +244,20 @@ namespace EpicurAppIHM.Views
         /// <summary>
         /// Charge le brouillon du menu
         /// </summary>
-        /// <exception cref="Exception">Erreur lors de l'appel API</exception>
         private async void ChargerBrouillon()
         {
             try
             {
+                if (App.CurrentRestaurant != null)
+                    App.ApiClient.SetRestaurantId(App.CurrentRestaurant.Id);
+
                 MenuModel? menu = await App.MenuRepository.GetBrouillonAsync();
 
                 if (menu != null)
                 {
                     _menuBrouillonId = menu.Id;
-
                     txtNomMenu.Text = menu.Nom;
 
-                    // Récupérer le premier plat de chaque catégorie depuis les éléments du menu
                     ElementMenu? amuseBouche = menu.Elements.FirstOrDefault(e => e.Categorie == CategoriePlat.AmuseBouche);
                     cmbAmuseGueule.SelectedValue = amuseBouche?.PlatId;
 
@@ -297,9 +297,6 @@ namespace EpicurAppIHM.Views
         /// <summary>
         /// Enregistre le menu
         /// </summary>
-        /// <param name="statut">menu brouillon ou validé</param>
-        /// <param name="estValidation">Si le menu va etre enregistré en mode validé</param>
-        /// <exception cref="Exception">Erreur lors de l'enregistrement</exception>
         private async void EnregistrerMenu(string statut, bool estValidation)
         {
             btnAnnuler.IsEnabled = false;
@@ -308,6 +305,9 @@ namespace EpicurAppIHM.Views
 
             try
             {
+                if (App.CurrentRestaurant != null)
+                    App.ApiClient.SetRestaurantId(App.CurrentRestaurant.Id);
+
                 MenuModel menu = ConstruireMenu(statut);
                 bool creation = !_menuBrouillonId.HasValue;
                 bool success;
@@ -322,18 +322,13 @@ namespace EpicurAppIHM.Views
                     }
                     catch
                     {
-                        // Si la création échoue, essayer de récupérer le brouillon
                         try
                         {
                             MenuModel? brouillon = await App.MenuRepository.GetBrouillonAsync();
                             if (brouillon != null)
-                            {
                                 _menuBrouillonId = brouillon.Id;
-                            }
                         }
-                        catch
-                        {
-                        }
+                        catch { }
                         success = false;
                     }
                 }
@@ -347,10 +342,7 @@ namespace EpicurAppIHM.Views
                 {
                     if (_menuBrouillonId == null && !estValidation)
                     {
-                        MessageBox.Show("Brouillon enregistré mais impossible de récupérer son identifiant.",
-                                        "Avertissement",
-                                        MessageBoxButton.OK,
-                                        MessageBoxImage.Warning);
+                        MessageBox.Show("Brouillon enregistré mais impossible de récupérer son identifiant.", "Avertissement", MessageBoxButton.OK, MessageBoxImage.Warning);
                     }
 
                     if (statut.Equals("Validé", StringComparison.OrdinalIgnoreCase))
@@ -368,10 +360,7 @@ namespace EpicurAppIHM.Views
                 }
                 else
                 {
-                    MessageBox.Show("Erreur lors de l'enregistrement du menu.",
-                        "Erreur détaillée",
-                        MessageBoxButton.OK,
-                        MessageBoxImage.Error);
+                    MessageBox.Show("Erreur lors de l'enregistrement du menu.", "Erreur détaillée", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
             catch (Exception ex)
@@ -379,9 +368,7 @@ namespace EpicurAppIHM.Views
                 MessageBox.Show(
                     "Erreur lors de l'enregistrement :\n\n" + ex.Message +
                     "\n\nInner: " + (ex.InnerException != null ? ex.InnerException.Message : "Aucune"),
-                    "Erreur",
-                    MessageBoxButton.OK,
-                    MessageBoxImage.Error);
+                    "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
             }
             finally
             {
@@ -395,102 +382,41 @@ namespace EpicurAppIHM.Views
         /// <summary>
         /// Construit un menu à partir des sélections de l'utilisateur
         /// </summary>
-        /// <param name="statut">si le menu est validé ou brouillon</param>
-        /// <returns>Le menu qui a été construit</returns>
         private MenuModel ConstruireMenu(string statut)
         {
             MenuModel menu = new MenuModel();
             menu.Nom = string.IsNullOrWhiteSpace(txtNomMenu.Text) ? "Nouveau menu" : txtNomMenu.Text.Trim();
             menu.Date = DateTime.Now;
             menu.Statut = statut;
-
-            // Vider la liste des éléments
             menu.Elements.Clear();
 
-            // Récupérer les plats sélectionnés depuis les ComboBox et les ajouter au menu
             Plat? amuseBouche = ObtenirPlatSelectionne(cmbAmuseGueule);
             if (amuseBouche != null)
-            {
-                menu.Elements.Add(new ElementMenu
-                {
-                    PlatId = amuseBouche.Id,
-                    Plat = amuseBouche,
-                    Categorie = CategoriePlat.AmuseBouche,
-                    Ordre = 1
-                });
-            }
+                menu.Elements.Add(new ElementMenu { PlatId = amuseBouche.Id, Plat = amuseBouche, Categorie = CategoriePlat.AmuseBouche, Ordre = 1 });
 
             Plat? boissonAperitif = ObtenirPlatSelectionne(cmbBoissonAperitif);
             if (boissonAperitif != null)
-            {
-                menu.Elements.Add(new ElementMenu
-                {
-                    PlatId = boissonAperitif.Id,
-                    Plat = boissonAperitif,
-                    Categorie = CategoriePlat.BoissonAperitif,
-                    Ordre = 1
-                });
-            }
+                menu.Elements.Add(new ElementMenu { PlatId = boissonAperitif.Id, Plat = boissonAperitif, Categorie = CategoriePlat.BoissonAperitif, Ordre = 1 });
 
             Plat? entree = ObtenirPlatSelectionne(cmbEntree);
             if (entree != null)
-            {
-                menu.Elements.Add(new ElementMenu
-                {
-                    PlatId = entree.Id,
-                    Plat = entree,
-                    Categorie = CategoriePlat.Entree,
-                    Ordre = 1
-                });
-            }
+                menu.Elements.Add(new ElementMenu { PlatId = entree.Id, Plat = entree, Categorie = CategoriePlat.Entree, Ordre = 1 });
 
             Plat? platPrincipal = ObtenirPlatSelectionne(cmbPlat);
             if (platPrincipal != null)
-            {
-                menu.Elements.Add(new ElementMenu
-                {
-                    PlatId = platPrincipal.Id,
-                    Plat = platPrincipal,
-                    Categorie = CategoriePlat.PlatPrincipal,
-                    Ordre = 1
-                });
-            }
+                menu.Elements.Add(new ElementMenu { PlatId = platPrincipal.Id, Plat = platPrincipal, Categorie = CategoriePlat.PlatPrincipal, Ordre = 1 });
 
             Plat? vin = ObtenirPlatSelectionne(cmbVin);
             if (vin != null)
-            {
-                menu.Elements.Add(new ElementMenu
-                {
-                    PlatId = vin.Id,
-                    Plat = vin,
-                    Categorie = CategoriePlat.Vin,
-                    Ordre = 1
-                });
-            }
+                menu.Elements.Add(new ElementMenu { PlatId = vin.Id, Plat = vin, Categorie = CategoriePlat.Vin, Ordre = 1 });
 
             Plat? fromage = ObtenirPlatSelectionne(cmbFromage);
             if (fromage != null)
-            {
-                menu.Elements.Add(new ElementMenu
-                {
-                    PlatId = fromage.Id,
-                    Plat = fromage,
-                    Categorie = CategoriePlat.Fromage,
-                    Ordre = 1
-                });
-            }
+                menu.Elements.Add(new ElementMenu { PlatId = fromage.Id, Plat = fromage, Categorie = CategoriePlat.Fromage, Ordre = 1 });
 
             Plat? dessert = ObtenirPlatSelectionne(cmbDessert);
             if (dessert != null)
-            {
-                menu.Elements.Add(new ElementMenu
-                {
-                    PlatId = dessert.Id,
-                    Plat = dessert,
-                    Categorie = CategoriePlat.Dessert,
-                    Ordre = 1
-                });
-            }
+                menu.Elements.Add(new ElementMenu { PlatId = dessert.Id, Plat = dessert, Categorie = CategoriePlat.Dessert, Ordre = 1 });
 
             return menu;
         }
@@ -498,14 +424,7 @@ namespace EpicurAppIHM.Views
         /// <summary>
         /// Obtient le plat sélectionné dans une ComboBox
         /// </summary>
-        /// <param name="comboBox">Combobox cible</param>
-        /// <returns>Le plat séléctionné</returns>
-        private static Plat? ObtenirPlatSelectionne(ComboBox comboBox)
-        {
-            return comboBox.SelectedItem as Plat;
-        }
-
-        
+        private static Plat? ObtenirPlatSelectionne(ComboBox comboBox) => comboBox.SelectedItem as Plat;
 
         /// <summary>
         /// Reinitialise la sélection des plats
@@ -525,13 +444,11 @@ namespace EpicurAppIHM.Views
         /// <summary>
         /// Supprime le menu/brouillon actuel
         /// </summary>
-        /// <exception cref="Exception">Erreur lors de la suppression</exception>
         private async void SupprimerMenu(object sender, RoutedEventArgs e)
         {
             if (!_menuBrouillonId.HasValue)
             {
-                MessageBox.Show("Aucun menu à supprimer.", "Information",
-                    MessageBoxButton.OK, MessageBoxImage.Information);
+                MessageBox.Show("Aucun menu à supprimer.", "Information", MessageBoxButton.OK, MessageBoxImage.Information);
                 return;
             }
 
@@ -548,12 +465,14 @@ namespace EpicurAppIHM.Views
                     btnSupprimer.IsEnabled = false;
                     btnSupprimer.Content = "Suppression...";
 
+                    if (App.CurrentRestaurant != null)
+                        App.ApiClient.SetRestaurantId(App.CurrentRestaurant.Id);
+
                     bool success = await App.MenuRepository.DeleteAsync(_menuBrouillonId.Value);
 
                     if (success)
                     {
-                        MessageBox.Show("Menu supprimé avec succès.", "Succès",
-                            MessageBoxButton.OK, MessageBoxImage.Information);
+                        MessageBox.Show("Menu supprimé avec succès.", "Succès", MessageBoxButton.OK, MessageBoxImage.Information);
 
                         _menuBrouillonId = null;
                         ReinitialiserSelection();
@@ -562,16 +481,14 @@ namespace EpicurAppIHM.Views
                     }
                     else
                     {
-                        MessageBox.Show("Erreur lors de la suppression du menu.",
-                            "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
+                        MessageBox.Show("Erreur lors de la suppression du menu.", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
                         btnSupprimer.IsEnabled = true;
                         btnSupprimer.Content = "Supprimer";
                     }
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show($"Erreur lors de la suppression du menu : {ex.Message}",
-                        "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show($"Erreur lors de la suppression du menu : {ex.Message}", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
                     btnSupprimer.IsEnabled = true;
                     btnSupprimer.Content = "Supprimer";
                 }

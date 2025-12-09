@@ -2,6 +2,7 @@
 using EpicurAppIHM.Services;
 using EpicurAppIHM.Repositories;
 using EpicurAppIHM.RepositoriesIntefaces;
+using EpicurAppIHM.Views;
 
 namespace EpicurAppIHM
 {
@@ -11,6 +12,16 @@ namespace EpicurAppIHM
         /// Instance partagée de l'ApiClient pour toute l'application
         /// </summary>
         public static ApiClient ApiClient { get; } = new ApiClient();
+
+        /// <summary>
+        /// Utilisateur actuellement connecté
+        /// </summary>
+        public static UtilisateurInfo? CurrentUser { get; set; }
+
+        /// <summary>
+        /// Restaurant de l'utilisateur connecté
+        /// </summary>
+        public static RestaurantInfo? CurrentRestaurant { get; set; }
 
         /// <summary>
         ///Couche d'abstraction pour l'accès aux données

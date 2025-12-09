@@ -26,6 +26,12 @@ namespace EpicurAppIHM.Views
         {
             try
             {
+                // S'assurer que le header X-Restaurant-Id est défini
+                if (App.CurrentRestaurant != null)
+                {
+                    App.ApiClient.SetRestaurantId(App.CurrentRestaurant.Id);
+                }
+
                 // Récupérer le menu depuis l'API
                 Menu menu = await App.MenuRepository.GetByIdAsync(_menuId);
 
@@ -68,7 +74,14 @@ namespace EpicurAppIHM.Views
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Erreur lors du chargement du menu : {ex.Message}",
+                string detailErreur = $"Erreur : {ex.Message}";
+                if (ex.InnerException != null)
+                {
+                    detailErreur += $"\n\nInner Exception: {ex.InnerException.Message}";
+                }
+                detailErreur += $"\n\nStack Trace: {ex.StackTrace}";
+
+                MessageBox.Show($"Erreur lors du chargement du menu :\n\n{detailErreur}",
                                 "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
                 this.Close();
             }

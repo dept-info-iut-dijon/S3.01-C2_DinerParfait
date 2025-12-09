@@ -10,7 +10,7 @@ namespace EpicurAppIHM.Repositories
     public class PlatRepository : IPlatRepository
     {
         private readonly HttpClient _httpClient;
-        private const string BaseEndpoint = "Plat";
+        private const string BaseEndpoint = "Plats";
 
         public PlatRepository(HttpClient httpClient)
         {

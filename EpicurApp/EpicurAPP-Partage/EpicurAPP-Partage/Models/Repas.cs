@@ -12,6 +12,11 @@ namespace EpicurAPP_Partage.Models
         public int Id { get; set; }
 
         /// <summary>
+        /// Identifiant du restaurant auquel appartient ce repas
+        /// </summary>
+        public int RestaurantId { get; set; }
+
+        /// <summary>
         /// Identifiant du client qui a pris ce repas.
         /// </summary>
         public int ClientId { get; set; }
@@ -32,7 +37,7 @@ namespace EpicurAPP_Partage.Models
         public string? Retours { get; set; }
 
         /// <summary>
-        /// Menu associé à ce repas (navigation property).
+        /// Menu associé à ce repas.
         /// </summary>
         public Menu? Menu { get; set; }
     }
