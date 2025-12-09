@@ -4,7 +4,7 @@ using System.Net.Http;
 namespace EpicurAppIHM.Services
 {
     /// <summary>
-    /// Client HTTP simple pour communiquer avec l'API EpicurApp.
+    /// Client HTTP pour communiquer avec l'API.
     /// </summary>
     public class ApiClient
     {

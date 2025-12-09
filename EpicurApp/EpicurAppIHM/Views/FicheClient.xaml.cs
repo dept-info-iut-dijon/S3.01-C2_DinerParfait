@@ -1,6 +1,4 @@
 ﻿using EpicurAPP_Partage.Models;
-using System.Net.Http;
-using System.Net.Http.Json;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
@@ -13,10 +11,6 @@ namespace EpicurAppIHM.Views
     /// </summary>
     public partial class FicheClient : Window
     {
-        /// <summary>
-        /// L'instance HttpClient pour les appels API
-        /// </summary>
-        private HttpClient _httpClient;
         /// <summary>
         /// Liste des allergènes disponibles
         /// </summary>
@@ -37,7 +31,6 @@ namespace EpicurAppIHM.Views
         public FicheClient()
         {
             InitializeComponent();
-            _httpClient = App.ApiClient.HttpClient;
             _modeModification = false;
             ChargerAllergenes();
         }
@@ -50,7 +43,6 @@ namespace EpicurAppIHM.Views
         public FicheClient(int clientId, bool modeConsultation = true)
         {
             InitializeComponent();
-            _httpClient = App.ApiClient.HttpClient;
             _clientId = clientId;
             _modeModification = true;
 
@@ -80,7 +72,7 @@ namespace EpicurAppIHM.Views
         {
             try
             {
-                List<Allergene> listeAllergenes = await _httpClient.GetFromJsonAsync<List<Allergene>>("Allergenes");
+                List<Allergene> listeAllergenes = await App.AllergeneRepository.GetAllAsync();
                 allergenes = listeAllergenes;
                 lstAllergenes.ItemsSource = allergenes;
             }
@@ -101,7 +93,7 @@ namespace EpicurAppIHM.Views
 
             try
             {
-                Client client = await _httpClient.GetFromJsonAsync<Client>($"Client/{_clientId.Value}");
+                Client client = await App.ClientRepository.GetByIdAsync(_clientId.Value);
 
                 if (client == null)
                 {
@@ -476,12 +468,12 @@ namespace EpicurAppIHM.Views
                         Preferences = txtPreferences.Text.Trim()
                     };
 
-                    HttpResponseMessage response = await _httpClient.PutAsJsonAsync($"Client/{_clientId.Value}", clientModifie);
+                    bool success = await App.ClientRepository.UpdateAsync(clientModifie);
 
-                    if (response.IsSuccessStatusCode)
+                    if (success)
                     {
                         List<int> allergenesCoches = GetAllergenesCoches();
-                        await _httpClient.PostAsJsonAsync($"Client/{_clientId.Value}/allergenes", allergenesCoches);
+                        await App.ClientRepository.UpdateAllergenesAsync(_clientId.Value, allergenesCoches);
 
                         MessageBox.Show("Modifications enregistrées",
                                         "Succès", MessageBoxButton.OK, MessageBoxImage.Information);
@@ -490,14 +482,8 @@ namespace EpicurAppIHM.Views
                     }
                     else
                     {
-                        string errorContent = await response.Content.ReadAsStringAsync();
-                        MessageBox.Show($"Erreur : {errorContent}", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
+                        MessageBox.Show("Erreur lors de la modification du client.", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
                     }
-                }
-                catch (HttpRequestException)
-                {
-                    MessageBox.Show("Impossible de contacter l'API.\nVérifiez qu'elle est bien lancée",
-                                    "Erreur de connexion", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
                 catch (Exception ex)
                 {
@@ -526,33 +512,18 @@ namespace EpicurAppIHM.Views
                         Preferences = txtPreferences.Text.Trim()
                     };
 
-                    HttpResponseMessage response = await _httpClient.PostAsJsonAsync("Client", client);
+                    Client clientCree = await App.ClientRepository.CreateAsync(client);
 
-                    if (response.IsSuccessStatusCode)
+                    List<int> allergenesCoches = GetAllergenesCoches();
+                    if (clientCree != null && allergenesCoches.Count > 0)
                     {
-                        Client clientCree = await response.Content.ReadFromJsonAsync<Client>();
-
-                        List<int> allergenesCoches = GetAllergenesCoches();
-                        if (clientCree != null && allergenesCoches.Count > 0)
-                        {
-                            await _httpClient.PostAsJsonAsync($"Client/{clientCree.Id}/allergenes", allergenesCoches);
-                        }
-
-                        MessageBox.Show($"Client {client.Prenom} {client.Nom} créé avec succès !",
-                                        "Succès", MessageBoxButton.OK, MessageBoxImage.Information);
-                        this.DialogResult = true;
-                        this.Close();
+                        await App.ClientRepository.UpdateAllergenesAsync(clientCree.Id, allergenesCoches);
                     }
-                    else
-                    {
-                        string errorContent = await response.Content.ReadAsStringAsync();
-                        MessageBox.Show($"Erreur : {errorContent}", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
-                    }
-                }
-                catch (HttpRequestException)
-                {
-                    MessageBox.Show("Impossible de contacter l'API.\nVérifiez qu'elle est bien lancée",
-                                    "Erreur de connexion", MessageBoxButton.OK, MessageBoxImage.Error);
+
+                    MessageBox.Show($"Client {client.Prenom} {client.Nom} créé avec succès !",
+                                    "Succès", MessageBoxButton.OK, MessageBoxImage.Information);
+                    this.DialogResult = true;
+                    this.Close();
                 }
                 catch (Exception ex)
                 {
@@ -567,7 +538,7 @@ namespace EpicurAppIHM.Views
         }
 
         /// <summary>
-        /// Supprime le client actuel 
+        /// Supprime le client actuel
         /// </summary>
         /// <exception cref="Exception">Erreur lors de la suppression du client</exception>
         private async void SupprimerClient(object sender, RoutedEventArgs e)
@@ -581,9 +552,9 @@ namespace EpicurAppIHM.Views
 
             try
             {
-                HttpResponseMessage response = await _httpClient.DeleteAsync($"Client/{_clientId}");
+                bool success = await App.ClientRepository.DeleteAsync(_clientId.Value);
 
-                if (response.IsSuccessStatusCode)
+                if (success)
                 {
                     MessageBox.Show("Client supprimé avec succès.", "Succès", MessageBoxButton.OK, MessageBoxImage.Information);
                     this.DialogResult = true;
@@ -591,8 +562,7 @@ namespace EpicurAppIHM.Views
                 }
                 else
                 {
-                    string error = await response.Content.ReadAsStringAsync();
-                    MessageBox.Show($"Erreur lors de la suppression : {error}", "Erreur API", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show("Erreur lors de la suppression du client.", "Erreur API", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
             catch (Exception ex)

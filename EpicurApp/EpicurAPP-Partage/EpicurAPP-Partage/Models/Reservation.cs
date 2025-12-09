@@ -29,12 +29,12 @@ namespace EpicurAPP_Partage.Models
         /// Nom du client (pour affichage uniquement).
         /// Non mappé en base de données.
         /// </summary>
-        public string NomClient { get; set; }
+        public string? NomClient { get; set; }
 
         /// <summary>
         /// Prénom du client (pour affichage uniquement).
         /// Non mappé en base de données.
         /// </summary>
-        public string PrenomClient { get; set; }
+        public string? PrenomClient { get; set; }
     }
 }
