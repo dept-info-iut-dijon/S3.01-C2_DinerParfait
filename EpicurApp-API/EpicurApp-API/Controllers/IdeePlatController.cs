@@ -44,6 +44,26 @@ namespace EpicurApp_API.Controllers
         }
 
         /// <summary>
+        /// Récupère une idée de plat par son ID.
+        /// </summary>
+        /// <param name="id">ID de l'idée à récupérer</param>
+        /// <exception cref="Exception">En cas d'erreur lors de la récupération</exception>
+        [HttpGet("{id}")]
+        public IActionResult GetById(int id)
+        {
+            try
+            {
+                var idee = _ideePlatService.ObtenirIdeeParId(id);
+                if (idee == null) return NotFound();
+                return Ok(idee);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Erreur lors de la récupération de l'idée : {ex.Message}");
+            }
+        }
+
+        /// <summary>
         /// Ajoute une nouvelle idée de plat.
         /// </summary>
         /// <exception cref="Exception">En cas d'erreur lors de l'ajout</exception>
