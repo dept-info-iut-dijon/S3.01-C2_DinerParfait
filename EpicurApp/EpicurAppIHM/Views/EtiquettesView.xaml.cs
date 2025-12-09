@@ -7,8 +7,6 @@ using iText.Layout;
 using iText.Layout.Element;
 using iText.Layout.Properties;
 using System.IO;
-using System.Net.Http;
-using System.Net.Http.Json;
 using System.Text;
 using System.Windows;
 using Path = System.IO.Path;
@@ -20,11 +18,6 @@ namespace EpicurAppIHM.Views
     /// </summary>
     public partial class EtiquettesView : Window
     {
-        /// <summary>
-        /// L'instance HttpClient pour les appels API
-        /// </summary>
-        private readonly HttpClient _httpClient;
-
         /// <summary>
         /// Liste utilisée pour l'affichage (contient le client + la case à cocher)
         /// </summary>
@@ -38,8 +31,6 @@ namespace EpicurAppIHM.Views
 
             // Configuration iText (Encodage)
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-
-            _httpClient = App.ApiClient.HttpClient;
 
             // Date du jour par défaut
             datePickerEvenement.SelectedDate = DateTime.Today;
@@ -56,7 +47,7 @@ namespace EpicurAppIHM.Views
             try
             {
                 // Récupération des clients depuis l'API
-                List<Client> clients = await _httpClient.GetFromJsonAsync<List<Client>>("Client");
+                List<Client> clients = await App.ClientRepository.GetAllAsync();
 
                 if (clients != null)
                 {

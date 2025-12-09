@@ -1,7 +1,5 @@
 ﻿using EpicurAPP_Partage.Models;
 using System.Collections.ObjectModel;
-using System.Net.Http;
-using System.Net.Http.Json;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -18,9 +16,6 @@ namespace EpicurAppIHM.Views
         /// </summary>
         public ObservableCollection<Client> Clients { get; set; } = new ObservableCollection<Client>();
 
-        //Client HTTP local
-        private readonly HttpClient _httpClient;
-
         /// <summary>
         /// Intancie la page d'affichage client
         /// </summary>
@@ -28,9 +23,6 @@ namespace EpicurAppIHM.Views
         {
             InitializeComponent();
 
-            // Utilisation du service ApiClient centralisé
-            _httpClient = App.ApiClient.HttpClient;
-            
             DataGridClients.ItemsSource = Clients;
             ChargerClients();
         }
@@ -43,7 +35,7 @@ namespace EpicurAppIHM.Views
         {
             try
             {
-                List<Client> clients = await _httpClient.GetFromJsonAsync<List<Client>>("Client");
+                List<Client> clients = await App.ClientRepository.GetAllAsync();
                 if (clients != null)
                 {
                     Clients.Clear();
@@ -116,9 +108,9 @@ namespace EpicurAppIHM.Views
             //Appel à l'API
             try
             {
-                HttpResponseMessage response = await _httpClient.DeleteAsync($"Client/{clientSelectionne.Id}");
+                bool success = await App.ClientRepository.DeleteAsync(clientSelectionne.Id);
 
-                if (response.IsSuccessStatusCode)
+                if (success)
                 {
                     //Afficher message "Fiche supprimée avec succès"
                     MessageBox.Show("Client supprimé avec succès.", "Succès", MessageBoxButton.OK, MessageBoxImage.Information);
@@ -128,8 +120,7 @@ namespace EpicurAppIHM.Views
                 }
                 else
                 {
-                    string errorContent = await response.Content.ReadAsStringAsync();
-                    MessageBox.Show($"Erreur lors de la suppression : {errorContent}", "Erreur API", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show("Erreur lors de la suppression du client.", "Erreur API", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
             catch (Exception ex)
