@@ -28,6 +28,13 @@ namespace EpicurAppLogic.Interfaces
         List<Menu> GetAll();
 
         /// <summary>
+        /// Récupère tous les menus d'un restaurant spécifique.
+        /// </summary>
+        /// <param name="restaurantId">Identifiant du restaurant.</param>
+        /// <returns>Liste des menus du restaurant.</returns>
+        List<Menu> GetAllByRestaurantId(int restaurantId);
+
+        /// <summary>
         /// Récupère le dernier menu en statut brouillon.
         /// </summary>
         /// <returns>Menu en brouillon ou null.</returns>

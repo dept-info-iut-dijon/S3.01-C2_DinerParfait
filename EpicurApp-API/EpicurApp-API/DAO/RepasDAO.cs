@@ -44,7 +44,7 @@ namespace EpicurApp_API.DAO
                 connection.Open();
 
                 string query = @"
-                    SELECT r.Id, r.ClientId, r.MenuId, r.Date, r.Retours
+                    SELECT r.Id, r.ClientId, r.MenuId, r.Date, r.Retours, r.RestaurantId
                     FROM Repas r
                     WHERE r.ClientId = @ClientId
                     ORDER BY r.Date DESC";
@@ -67,6 +67,7 @@ namespace EpicurApp_API.DAO
                                 MenuId = menuId,
                                 Date = DateTime.Parse(reader.GetString(3)),
                                 Retours = reader.IsDBNull(4) ? null : reader.GetString(4),
+                                RestaurantId = reader.GetInt32(5),
                                 Menu = menu
                             });
                         }
@@ -88,8 +89,8 @@ namespace EpicurApp_API.DAO
                 connection.Open();
 
                 string query = @"
-                    INSERT INTO Repas (ClientId, MenuId, Date, Retours)
-                    VALUES (@ClientId, @MenuId, @Date, @Retours);
+                    INSERT INTO Repas (ClientId, MenuId, Date, Retours, RestaurantId)
+                    VALUES (@ClientId, @MenuId, @Date, @Retours, @RestaurantId);
                     SELECT last_insert_rowid();";
 
                 using (var command = new SqliteCommand(query, connection))
@@ -98,6 +99,7 @@ namespace EpicurApp_API.DAO
                     command.Parameters.AddWithValue("@MenuId", repas.MenuId);
                     command.Parameters.AddWithValue("@Date", repas.Date.ToString("yyyy-MM-dd HH:mm:ss"));
                     command.Parameters.AddWithValue("@Retours", repas.Retours ?? (object)DBNull.Value);
+                    command.Parameters.AddWithValue("@RestaurantId", repas.RestaurantId);
 
                     var result = command.ExecuteScalar();
                     if (result != null)

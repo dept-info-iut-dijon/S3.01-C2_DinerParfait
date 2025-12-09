@@ -45,8 +45,8 @@ namespace EpicurApp_API.DAO
                     try
                     {
                         // Insert menu into Menus table
-                        string menuQuery = @"INSERT INTO Menus (Nom, Date, Statut)
-                                           VALUES (@Nom, @Date, @Statut);
+                        string menuQuery = @"INSERT INTO Menus (Nom, Date, Statut, RestaurantId)
+                                           VALUES (@Nom, @Date, @Statut, @RestaurantId);
                                            SELECT last_insert_rowid();";
 
                         int menuId;
@@ -55,6 +55,7 @@ namespace EpicurApp_API.DAO
                             command.Parameters.AddWithValue("@Nom", menu.Nom);
                             command.Parameters.AddWithValue("@Date", menu.Date);
                             command.Parameters.AddWithValue("@Statut", menu.Statut);
+                            command.Parameters.AddWithValue("@RestaurantId", menu.RestaurantId);
 
                             menuId = Convert.ToInt32(command.ExecuteScalar());
                         }
@@ -101,7 +102,7 @@ namespace EpicurApp_API.DAO
             {
                 connection.Open();
 
-                string query = @"SELECT Id, Nom, Date, Statut FROM Menus WHERE Id=@Id";
+                string query = @"SELECT Id, Nom, Date, Statut, RestaurantId FROM Menus WHERE Id=@Id";
 
                 using (SqliteCommand command = new SqliteCommand(query, connection))
                 {
@@ -129,7 +130,7 @@ namespace EpicurApp_API.DAO
             {
                 connection.Open();
 
-                string query = @"SELECT Id, Nom, Date, Statut FROM Menus";
+                string query = @"SELECT Id, Nom, Date, Statut, RestaurantId FROM Menus";
 
                 using (SqliteCommand command = new SqliteCommand(query, connection))
                 using (SqliteDataReader reader = command.ExecuteReader())
@@ -137,6 +138,38 @@ namespace EpicurApp_API.DAO
                     while (reader.Read())
                     {
                         menus.Add(AvoirMenu(reader, connection));
+                    }
+                }
+            }
+            return menus;
+        }
+
+        /// <summary>
+        /// Récupère tous les menus d'un restaurant spécifique.
+        /// </summary>
+        /// <param name="restaurantId">Identifiant du restaurant.</param>
+        /// <returns>Liste des menus du restaurant.</returns>
+        public List<Menu> GetAllByRestaurantId(int restaurantId)
+        {
+            List<Menu> menus = new List<Menu>();
+            using (SqliteConnection connection = new SqliteConnection(_connectionString))
+            {
+                connection.Open();
+
+                string query = @"SELECT Id, Nom, Date, Statut, RestaurantId
+                                FROM Menus
+                                WHERE RestaurantId = @RestaurantId";
+
+                using (SqliteCommand command = new SqliteCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@RestaurantId", restaurantId);
+
+                    using (SqliteDataReader reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            menus.Add(AvoirMenu(reader, connection));
+                        }
                     }
                 }
             }
@@ -291,6 +324,7 @@ namespace EpicurApp_API.DAO
             menu.Nom = reader.GetString(1);
             menu.Date = reader.GetDateTime(2);
             menu.Statut = reader.GetString(3);
+            menu.RestaurantId = reader.GetInt32(4);
 
             // Load elements from ElementMenus table
             menu.Elements = new List<ElementMenu>();

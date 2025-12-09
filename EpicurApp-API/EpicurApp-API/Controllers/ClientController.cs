@@ -16,17 +16,40 @@ namespace EpicurApp_API.Controllers
         /// Service permettant de gérer les opérations sur les clients.
         /// </summary>
         private readonly IClientService _clientService;
+        private readonly IClientDAO _clientDAO;
 
         /// <summary>
-        /// Constructeur : injection du service client.
+        /// Constructeur : injection du service client et du DAO.
         /// </summary>
-        public ClientController(IClientService clientService)
+        public ClientController(IClientService clientService, IClientDAO clientDAO)
         {
             _clientService = clientService;
+            _clientDAO = clientDAO;
+        }
+
+        /// <summary>
+        /// Helper pour récupérer le RestaurantId depuis le header X-Restaurant-Id.
+        /// </summary>
+        /// <returns>RestaurantId ou null si non fourni.</returns>
+        private int? GetRestaurantIdFromHeader()
+        {
+            Microsoft.Extensions.Primitives.StringValues restaurantIdValue;
+
+            if (Request.Headers.TryGetValue("X-Restaurant-Id", out restaurantIdValue))
+            {
+                int restaurantId;
+                if (int.TryParse(restaurantIdValue, out restaurantId))
+                {
+                    return restaurantId;
+                }
+            }
+
+            return null;
         }
 
         /// <summary>
         /// Récupère tous les clients enregistrés dans la base.
+        /// Utilise le header X-Restaurant-Id pour filtrer par restaurant.
         /// </summary
         /// <exception cref="Exception">En cas d'erreur lors de la récupération</exception>
         /// <returns>Liste de clients</returns>
@@ -35,8 +58,21 @@ namespace EpicurApp_API.Controllers
         {
             try
             {
-                // Récupération de tous les clients via le service
-                List<Client> clients = _clientService.ObtenirTousLesClients();
+                // Récupération du RestaurantId depuis le header
+                int? restaurantId = GetRestaurantIdFromHeader();
+
+                List<Client> clients;
+
+                if (restaurantId.HasValue)
+                {
+                    // Filtrage par restaurant
+                    clients = _clientDAO.GetAllByRestaurantId(restaurantId.Value);
+                }
+                else
+                {
+                    // Sans filtre (pour compatibilité)
+                    clients = _clientService.ObtenirTousLesClients();
+                }
 
                 // Renvoie un code 200 avec les données
                 return Ok(clients);
@@ -50,6 +86,7 @@ namespace EpicurApp_API.Controllers
 
         /// <summary>
         /// Récupère un client grâce à son identifiant.
+        /// Vérifie que le client appartient au restaurant de l'utilisateur via X-Restaurant-Id.
         /// </summary>
         /// <param name="id">Id du client</param>
         /// <exception cref="Exception">En cas d'erreur lors de la récupération</exception>
@@ -62,6 +99,18 @@ namespace EpicurApp_API.Controllers
                 // Récupération d'un client par son id
                 Client client = _clientService.ObtenirClientParId(id);
 
+                if (client == null)
+                {
+                    return NotFound($"Client avec l'ID {id} introuvable");
+                }
+
+                // Vérifier que le client appartient au restaurant de l'utilisateur
+                int? restaurantId = GetRestaurantIdFromHeader();
+                if (restaurantId.HasValue && client.RestaurantId != restaurantId.Value)
+                {
+                    return Forbid(); // 403 Forbidden
+                }
+
                 return Ok(client);
             }
             catch (Exception)
@@ -72,6 +121,7 @@ namespace EpicurApp_API.Controllers
 
         /// <summary>
         /// Crée un nouveau client.
+        /// Assigne automatiquement le RestaurantId depuis le header X-Restaurant-Id.
         /// </summary>
         /// <param name="client">Données du client</param
         /// <exception cref="InvalidFieldException">Si un champ obligatoire est invalide</exception>
@@ -87,6 +137,13 @@ namespace EpicurApp_API.Controllers
                 if (!ModelState.IsValid)
                 {
                     return BadRequest(ModelState);
+                }
+
+                // Assigner automatiquement le RestaurantId depuis le header
+                int? restaurantId = GetRestaurantIdFromHeader();
+                if (restaurantId.HasValue)
+                {
+                    client.RestaurantId = restaurantId.Value;
                 }
 
                 // Appel du service pour l'ajouter
@@ -114,6 +171,7 @@ namespace EpicurApp_API.Controllers
 
         /// <summary>
         /// Modifie un client existant (US 1.3).
+        /// Vérifie que le client appartient au restaurant de l'utilisateur.
         /// </summary>
         /// <param name="id">Id du client</param>
         /// <param name="client">Données modifiées</param
@@ -129,6 +187,22 @@ namespace EpicurApp_API.Controllers
                 {
                     return BadRequest(ModelState);
                 }
+
+                // Vérifier que le client appartient au restaurant de l'utilisateur
+                Client existingClient = _clientService.ObtenirClientParId(id);
+                if (existingClient == null)
+                {
+                    return NotFound($"Client avec l'ID {id} introuvable");
+                }
+
+                int? restaurantId = GetRestaurantIdFromHeader();
+                if (restaurantId.HasValue && existingClient.RestaurantId != restaurantId.Value)
+                {
+                    return Forbid(); // 403 Forbidden
+                }
+
+                // S'assurer que le RestaurantId ne change pas
+                client.RestaurantId = existingClient.RestaurantId;
 
                 _clientService.ModifierClient(client);
                 return Ok(client);
