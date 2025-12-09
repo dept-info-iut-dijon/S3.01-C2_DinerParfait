@@ -26,6 +26,18 @@
         public string Statut { get; set; } = "Brouillon";
 
         /// <summary>
+        /// Indique si le menu est verrouillé (moins de 48h avant le service).
+        /// </summary>
+        public bool EstVerrouille
+        {
+            get
+            {
+                // Si le service est passé ou s'il reste moins de 48h
+                return (Date - DateTime.Now).TotalHours < 48;
+            }
+        }
+
+        /// <summary>
         /// Plat amuse-bouche du menu.
         /// </summary>
         public Plat? AmuseBouche { get; set; }

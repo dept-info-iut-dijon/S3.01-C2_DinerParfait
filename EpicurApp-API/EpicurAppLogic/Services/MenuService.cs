@@ -113,7 +113,17 @@ namespace EpicurAppLogic.Services
         public void MettreAJourMenu(Menu menu)
         {
             if (menu.Id <= 0)
-                throw new InvalidFieldException("L'identifiant du menu est obligatoire pour la mise à jour.");
+                throw new InvalidFieldException("L'identifiant du menu est obligatoire.");
+
+            var menuExistant = _menuDAO.GetById(menu.Id);
+
+            if (menuExistant != null)
+            {
+                if (menuExistant.EstVerrouille)
+                {
+                    throw new ValidationException("Modifications impossibles : délai de 48 h dépassé. Le menu est verrouillé.");
+                }
+            }
 
             if (string.IsNullOrWhiteSpace(menu.Nom))
                 throw new InvalidFieldException("Le nom du menu est obligatoire.");
