@@ -201,8 +201,6 @@ namespace EpicurApp_API.Controllers
         [HttpPut("{menuId}/AddNote")]
         public IActionResult MettreAJourNoteDuMenu(int menuId, [FromBody] int note)
         {
-            if (note == null)
-                return BadRequest("La note ne peut pas être nulle.");
             try
             {
                 _menuService.MettreAJourNoteDuMenu(menuId, note);
