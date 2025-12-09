@@ -2,6 +2,7 @@
 {
     /// <summary>
     /// Représente un menu composé de plusieurs plats.
+    /// Modèle extensible permettant plusieurs plats par catégorie.
     /// </summary>
     public class Menu
     {
@@ -13,7 +14,7 @@
         /// <summary>
         /// Nom du menu.
         /// </summary>
-        public string Nom {  get; set; }
+        public string Nom { get; set; }
 
         /// <summary>
         /// Date du menu.
@@ -26,39 +27,24 @@
         public string Statut { get; set; } = "Brouillon";
 
         /// <summary>
+        /// Indique si le menu est verrouillé (moins de 48h avant le service).
+        /// </summary>
+        public bool EstVerrouille
+        {
+            get
+            {
+                // Si le service est passé ou s'il reste moins de 48h
+                return (Date - DateTime.Now).TotalHours < 48;
+            }
+        }
+
+        /// <summary>
         /// Plat amuse-bouche du menu.
+        /// Liste des éléments (plats) du menu.
+        /// Permet d'avoir plusieurs plats de la même catégorie.
         /// </summary>
-        public Plat? AmuseBouche { get; set; }
-
-        /// <summary>
-        /// Boisson apéritive du menu.
-        /// </summary>
-        public Plat? BoissonAperitif { get; set; }
-
-        /// <summary>
-        /// Entrée du menu.
-        /// </summary>
-        public Plat? Entree { get; set; }
-
-        /// <summary>
-        /// Plat principal du menu.
-        /// </summary>
-        public Plat? PlatPrincipal { get; set; }
-
-        /// <summary>
-        /// Vin du menu.
-        /// </summary>
-        public Plat? Vin { get; set; }
-
-        /// <summary>
-        /// Fromage du menu.
-        /// </summary>
-        public Plat? Fromage { get; set; }
-
-        /// <summary>
-        /// Dessert du menu.
-        /// </summary>
-        public Plat? Dessert { get; set; }
+        
+        public List<ElementMenu> Elements { get; set; } = new List<ElementMenu>();
 
         /// <summary>
         /// Note sur 5 du menu.

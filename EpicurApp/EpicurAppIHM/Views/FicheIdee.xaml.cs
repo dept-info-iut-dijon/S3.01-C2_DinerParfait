@@ -1,6 +1,4 @@
 ﻿using EpicurAPP_Partage.Models;
-using System.Net.Http;
-using System.Net.Http.Json;
 using System.Windows;
 using System.Windows.Controls;
 
@@ -12,10 +10,6 @@ namespace EpicurAppIHM.Views
     public partial class FicheIdee : Window
     {
         /// <summary>
-        /// L'instance HttpClient pour les appels API
-        /// </summary>
-        private readonly HttpClient _httpClient;
-        /// <summary>
         /// ID de l'idée en cours de modification (null si création)
         /// </summary>
         private int? _ideeId;
@@ -26,7 +20,6 @@ namespace EpicurAppIHM.Views
         public FicheIdee()
         {
             InitializeComponent();
-            _httpClient = App.ApiClient.HttpClient;
             _ideeId = null;
         }
 
@@ -36,7 +29,6 @@ namespace EpicurAppIHM.Views
         public FicheIdee(int ideeId)
         {
             InitializeComponent();
-            _httpClient = App.ApiClient.HttpClient;
             _ideeId = ideeId;
 
             this.Title = "Modifier Idée";
@@ -54,8 +46,7 @@ namespace EpicurAppIHM.Views
 
             try
             {
-                List<IdeePlat> idees = await _httpClient.GetFromJsonAsync<List<IdeePlat>>("IdeePlat");
-                IdeePlat idee = idees != null ? idees.FirstOrDefault(i => i.Id == _ideeId.Value) : null;
+                IdeePlat idee = await App.IdeePlatRepository.GetByIdAsync(_ideeId.Value);
 
                 if (idee == null)
                 {
@@ -110,21 +101,22 @@ namespace EpicurAppIHM.Views
                     Categorie = (cmbCategorie.SelectedItem as ComboBoxItem)?.Content.ToString() ?? ""
                 };
 
-                HttpResponseMessage response;
+                bool success;
 
                 if (_ideeId.HasValue)
                 {
                     // Mode modification
                     idee.Id = _ideeId.Value;
-                    response = await _httpClient.PutAsJsonAsync($"IdeePlat/{_ideeId.Value}", idee);
+                    success = await App.IdeePlatRepository.UpdateAsync(idee);
                 }
                 else
                 {
                     // Mode création
-                    response = await _httpClient.PostAsJsonAsync("IdeePlat", idee);
+                    IdeePlat ideeCreee = await App.IdeePlatRepository.CreateAsync(idee);
+                    success = ideeCreee != null;
                 }
 
-                if (response.IsSuccessStatusCode)
+                if (success)
                 {
                     MessageBox.Show("Idée enregistrée avec succès !",
                                    "Succès", MessageBoxButton.OK, MessageBoxImage.Information);
@@ -133,8 +125,7 @@ namespace EpicurAppIHM.Views
                 }
                 else
                 {
-                    string error = await response.Content.ReadAsStringAsync();
-                    MessageBox.Show($"Erreur : {error}", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show("Erreur lors de l'enregistrement de l'idée.", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
             catch (Exception ex)
@@ -162,9 +153,9 @@ namespace EpicurAppIHM.Views
 
             try
             {
-                HttpResponseMessage response = await _httpClient.DeleteAsync($"IdeePlat/{_ideeId.Value}");
+                bool success = await App.IdeePlatRepository.DeleteAsync(_ideeId.Value);
 
-                if (response.IsSuccessStatusCode)
+                if (success)
                 {
                     MessageBox.Show("Idée supprimée avec succès", "Succès",
                                    MessageBoxButton.OK, MessageBoxImage.Information);
@@ -173,8 +164,7 @@ namespace EpicurAppIHM.Views
                 }
                 else
                 {
-                    string error = await response.Content.ReadAsStringAsync();
-                    MessageBox.Show($"Erreur : {error}", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show("Erreur lors de la suppression de l'idée.", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
             catch (Exception ex)

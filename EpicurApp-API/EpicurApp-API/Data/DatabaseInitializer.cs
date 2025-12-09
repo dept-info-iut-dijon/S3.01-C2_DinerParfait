@@ -85,23 +85,19 @@ namespace EpicurApp_API.Data
                         Id INTEGER PRIMARY KEY AUTOINCREMENT,
                         Nom TEXT NOT NULL,
                         Date DATETIME NOT NULL,
-                        Statut TEXT NOT NULL,
-                        AmuseBoucheId INTEGER,
-                        BoissonAperitifId INTEGER,
-                        EntreeId INTEGER,
-                        PlatPrincipalId INTEGER,
-                        VinId INTEGER,
-                        FromageId INTEGER,
-                        DessertId INTEGER,
-                        Note INTEGER CHECK (Note<6 AND Note >= 0),
-                        Retours TEXT,
-                        FOREIGN KEY (AmuseBoucheId) REFERENCES Plats(Id),
-                        FOREIGN KEY (BoissonAperitifId) REFERENCES Plats(Id),
-                        FOREIGN KEY (EntreeId) REFERENCES Plats(Id),
-                        FOREIGN KEY (PlatPrincipalId) REFERENCES Plats(Id),
-                        FOREIGN KEY (VinId) REFERENCES Plats(Id),
-                        FOREIGN KEY (FromageId) REFERENCES Plats(Id),
-                        FOREIGN KEY (DessertId) REFERENCES Plats(Id)
+                        Statut TEXT NOT NULL
+                    );";
+
+                // Table ElementMenus (nouvelle structure extensible)
+                string createElementMenusTable = @"
+                    CREATE TABLE IF NOT EXISTS ElementMenus (
+                        Id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        MenuId INTEGER NOT NULL,
+                        PlatId INTEGER NOT NULL,
+                        Categorie TEXT NOT NULL,
+                        Ordre INTEGER NOT NULL,
+                        FOREIGN KEY (MenuId) REFERENCES Menus(Id) ON DELETE CASCADE,
+                        FOREIGN KEY (PlatId) REFERENCES Plats(Id)
                     );";
 
                 // Table MenuPlat
@@ -149,6 +145,28 @@ namespace EpicurApp_API.Data
                         DateCreation DATETIME DEFAULT CURRENT_TIMESTAMP
                     );";
 
+                // Table Services (gestion des services midi/soir)
+                var createServicesTable = @"
+                    CREATE TABLE IF NOT EXISTS Services (
+                        Id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        Date DATETIME NOT NULL,
+                        MidiSoir TEXT NOT NULL,
+                        MenuId INTEGER NOT NULL,
+                        Statut TEXT NOT NULL DEFAULT 'Ouvert',
+                        FOREIGN KEY (MenuId) REFERENCES Menus(Id) ON DELETE CASCADE
+                    );";
+
+                // Table Reservations (réservations clients pour les services)
+                var createReservationsTable = @"
+                    CREATE TABLE IF NOT EXISTS Reservations (
+                        Id INTEGER PRIMARY KEY AUTOINCREMENT,
+                        ServiceId INTEGER NOT NULL,
+                        ClientId INTEGER NOT NULL,
+                        NbCouverts INTEGER NOT NULL,
+                        FOREIGN KEY (ServiceId) REFERENCES Services(Id) ON DELETE CASCADE,
+                        FOREIGN KEY (ClientId) REFERENCES Clients(Id) ON DELETE CASCADE
+                    );";
+
                 using (var command = connection.CreateCommand())
                 {
                     command.CommandText = createAllergenesTable;
@@ -172,6 +190,9 @@ namespace EpicurApp_API.Data
                     command.CommandText = createMenusTable;
                     command.ExecuteNonQuery();
 
+                    command.CommandText = createElementMenusTable;
+                    command.ExecuteNonQuery();
+
                     command.CommandText = createMenuPlatTable;
                     command.ExecuteNonQuery();
 
@@ -183,6 +204,12 @@ namespace EpicurApp_API.Data
 
                     command.CommandText = createIdeesPlatTable;
                     command.ExecuteNonQuery();
+
+                    command.CommandText = createServicesTable;
+                    command.ExecuteNonQuery();
+
+                    command.CommandText = createReservationsTable;
+                    command.ExecuteNonQuery();
                 }
 
                 SeedAllergenes(connection);
@@ -192,6 +219,8 @@ namespace EpicurApp_API.Data
                 SeedMenus(connection);
                 SeedRepas(connection);
                 SeedIdeesPlats(connection);
+                SeedServices(connection);
+                SeedReservations(connection);
             }
         }
 
@@ -451,48 +480,86 @@ namespace EpicurApp_API.Data
                     }
                 }
 
+                // Insertion des menus
                 var menus = new[]
                 {
-                    ("Menu Découverte", "2024-11-15", "Validé", 1, 3, 5, 7, 9, 11, 13,5, "Parfait, je reviendrai !"),
-                    ("Menu Végétarien", "2024-11-16", "Validé", 2, 4, 6, 8, 10, 12, 14,4, "Très bon, mais l'entrée manquait de sel."),
-                    ("Menu du Jour", "2024-11-18", "Validé", 1, 3, 6, 7, 9, 11, 14,3, null),
+                    ("Menu Découverte", "2024-11-15", "Validé","Parfait, je reviendrai !"),
+                    ("Menu Végétarien", "2024-11-16", "Validé", "Très bon mais l'entrée manquais un peu de sel"),
+                    ("Menu du Jour", "2024-11-18", "Validé", null),
                 };
 
-                using (var insertCommand = new SqliteCommand(
-                    @"INSERT INTO Menus (Nom, Date, Statut, AmuseBoucheId, BoissonAperitifId, EntreeId, PlatPrincipalId, VinId, FromageId, DessertId, Note, Retours)
-                      VALUES (@Nom, @Date, @Statut, @AmuseBoucheId, @BoissonAperitifId, @EntreeId, @PlatPrincipalId, @VinId, @FromageId, @DessertId, @Note, @Retours);",
+                using (var insertMenuCommand = new SqliteCommand(
+                    "INSERT INTO Menus (Nom, Date, Statut,Note,Remarques) VALUES (@Nom, @Date, @Statut,@Note,@Remarques);",
                     connection, transaction))
                 {
-                    insertCommand.Parameters.Add(new SqliteParameter("@Nom", SqliteType.Text));
-                    insertCommand.Parameters.Add(new SqliteParameter("@Date", SqliteType.Text));
-                    insertCommand.Parameters.Add(new SqliteParameter("@Statut", SqliteType.Text));
-                    insertCommand.Parameters.Add(new SqliteParameter("@AmuseBoucheId", SqliteType.Integer));
-                    insertCommand.Parameters.Add(new SqliteParameter("@BoissonAperitifId", SqliteType.Integer));
-                    insertCommand.Parameters.Add(new SqliteParameter("@EntreeId", SqliteType.Integer));
-                    insertCommand.Parameters.Add(new SqliteParameter("@PlatPrincipalId", SqliteType.Integer));
-                    insertCommand.Parameters.Add(new SqliteParameter("@VinId", SqliteType.Integer));
-                    insertCommand.Parameters.Add(new SqliteParameter("@FromageId", SqliteType.Integer));
-                    insertCommand.Parameters.Add(new SqliteParameter("@DessertId", SqliteType.Integer));
-                    insertCommand.Parameters.Add(new SqliteParameter("@Note", SqliteType.Integer));
-                    insertCommand.Parameters.Add(new SqliteParameter("@Retours", SqliteType.Text)); 
+                    insertMenuCommand.Parameters.Add(new SqliteParameter("@Nom", SqliteType.Text));
+                    insertMenuCommand.Parameters.Add(new SqliteParameter("@Date", SqliteType.Text));
+                    insertMenuCommand.Parameters.Add(new SqliteParameter("@Statut", SqliteType.Text));
+                    insertMenuCommand.Parameters.Add(new SqliteParameter("@Note", SqliteType.Integer));
+                    insertMenuCommand.Parameters.Add(new SqliteParameter("@Retours", SqliteType.Text));
 
                     foreach (var menu in menus)
                     {
-                        insertCommand.Parameters["@Nom"].Value = menu.Item1;
-                        insertCommand.Parameters["@Date"].Value = menu.Item2;
-                        insertCommand.Parameters["@Statut"].Value = menu.Item3;
-                        insertCommand.Parameters["@AmuseBoucheId"].Value = menu.Item4;
-                        insertCommand.Parameters["@BoissonAperitifId"].Value = menu.Item5;
-                        insertCommand.Parameters["@EntreeId"].Value = menu.Item6;
-                        insertCommand.Parameters["@PlatPrincipalId"].Value = menu.Item7;
-                        insertCommand.Parameters["@VinId"].Value = menu.Item8;
-                        insertCommand.Parameters["@FromageId"].Value = menu.Item9;
-                        insertCommand.Parameters["@DessertId"].Value = menu.Item10;
-                        insertCommand.Parameters["@Note"].Value = menu.Item11;
-                        insertCommand.Parameters["@Retours"].Value = menu.Item12 ?? (object)DBNull.Value; 
-                        insertCommand.ExecuteNonQuery();
+                        insertMenuCommand.Parameters["@Nom"].Value = menu.Item1;
+                        insertMenuCommand.Parameters["@Date"].Value = menu.Item2;
+                        insertMenuCommand.Parameters["@Statut"].Value = menu.Item3;
+                        insertMenuCommand.Parameters["@Note"].Value = menu.Item4;
+                        insertMenuCommand.Parameters["@Remarques"].Value = menu.Item5;
+                        insertMenuCommand.ExecuteNonQuery();
                     }
                 }
+
+                // Insertion des éléments des menus (ElementMenus)
+                // Format: (MenuId, PlatId, Categorie, Ordre)
+                var elements = new (int MenuId, int PlatId, string Categorie, int Ordre)[]
+                {
+                    // Menu Découverte (Menu 1)
+                    (1, 1, "AmuseBouche", 1),
+                    (1, 3, "BoissonAperitif", 1),
+                    (1, 5, "Entree", 1),
+                    (1, 7, "PlatPrincipal", 1),
+                    (1, 9, "Vin", 1),
+                    (1, 11, "Fromage", 1),
+                    (1, 13, "Dessert", 1),
+
+                    // Menu Végétarien (Menu 2)
+                    (2, 2, "AmuseBouche", 1),
+                    (2, 4, "BoissonAperitif", 1),
+                    (2, 6, "Entree", 1),
+                    (2, 8, "PlatPrincipal", 1),
+                    (2, 10, "Vin", 1),
+                    (2, 12, "Fromage", 1),
+                    (2, 14, "Dessert", 1),
+
+                    // Menu du Jour (Menu 3)
+                    (3, 1, "AmuseBouche", 1),
+                    (3, 3, "BoissonAperitif", 1),
+                    (3, 6, "Entree", 1),
+                    (3, 7, "PlatPrincipal", 1),
+                    (3, 9, "Vin", 1),
+                    (3, 11, "Fromage", 1),
+                    (3, 14, "Dessert", 1),
+                };
+
+                using (var insertElementCommand = new SqliteCommand(
+                    "INSERT INTO ElementMenus (MenuId, PlatId, Categorie, Ordre) VALUES (@MenuId, @PlatId, @Categorie, @Ordre);",
+                    connection, transaction))
+                {
+                    insertElementCommand.Parameters.Add(new SqliteParameter("@MenuId", SqliteType.Integer));
+                    insertElementCommand.Parameters.Add(new SqliteParameter("@PlatId", SqliteType.Integer));
+                    insertElementCommand.Parameters.Add(new SqliteParameter("@Categorie", SqliteType.Text));
+                    insertElementCommand.Parameters.Add(new SqliteParameter("@Ordre", SqliteType.Integer));
+
+                    foreach (var element in elements)
+                    {
+                        insertElementCommand.Parameters["@MenuId"].Value = element.MenuId;
+                        insertElementCommand.Parameters["@PlatId"].Value = element.PlatId;
+                        insertElementCommand.Parameters["@Categorie"].Value = element.Categorie;
+                        insertElementCommand.Parameters["@Ordre"].Value = element.Ordre;
+                        insertElementCommand.ExecuteNonQuery();
+                    }
+                }
+
                 using (var insertCM = new SqliteCommand("INSERT INTO ClientMenu (ClientId, MenuId) VALUES (1, 1), (2, 2), (3, 1), (4, 3), (5, 2);", connection, transaction))
                 {
                     insertCM.ExecuteNonQuery();
@@ -609,6 +676,105 @@ namespace EpicurApp_API.Data
                         insertCommand.Parameters["@Description"].Value = idee.Description;
                         insertCommand.Parameters["@Categorie"].Value = idee.Categorie;
                         insertCommand.Parameters["@Notes"].Value = idee.Notes;
+                        insertCommand.ExecuteNonQuery();
+                    }
+                }
+
+                transaction.Commit();
+            }
+        }
+
+        /// <summary>
+        /// Méthode pour insérer des services de test dans la table Services.
+        /// </summary>
+        /// <param name="connection">connexion a la db</param>
+        private static void SeedServices(SqliteConnection connection)
+        {
+            using (var transaction = connection.BeginTransaction())
+            {
+                using (var countCommand = new SqliteCommand("SELECT COUNT(*) FROM Services;", connection, transaction))
+                {
+                    long count = (long)(countCommand.ExecuteScalar() ?? 0);
+                    if (count > 0)
+                    {
+                        transaction.Commit();
+                        return;
+                    }
+                }
+
+                var services = new (string Date, string MidiSoir, int MenuId, string Statut)[]
+                {
+                    ("2024-12-10 12:00:00", "Midi", 1, "Ouvert"),
+                    ("2024-12-10 19:00:00", "Soir", 2, "Ouvert"),
+                    ("2024-12-11 12:00:00", "Midi", 3, "Ouvert"),
+                    ("2024-12-11 19:00:00", "Soir", 1, "Complet"),
+                    ("2024-12-12 12:00:00", "Midi", 2, "Ouvert")
+                };
+
+                using (var insertCommand = new SqliteCommand(
+                    "INSERT INTO Services (Date, MidiSoir, MenuId, Statut) VALUES (@Date, @MidiSoir, @MenuId, @Statut);",
+                    connection, transaction))
+                {
+                    insertCommand.Parameters.Add(new SqliteParameter("@Date", SqliteType.Text));
+                    insertCommand.Parameters.Add(new SqliteParameter("@MidiSoir", SqliteType.Text));
+                    insertCommand.Parameters.Add(new SqliteParameter("@MenuId", SqliteType.Integer));
+                    insertCommand.Parameters.Add(new SqliteParameter("@Statut", SqliteType.Text));
+
+                    foreach (var service in services)
+                    {
+                        insertCommand.Parameters["@Date"].Value = service.Date;
+                        insertCommand.Parameters["@MidiSoir"].Value = service.MidiSoir;
+                        insertCommand.Parameters["@MenuId"].Value = service.MenuId;
+                        insertCommand.Parameters["@Statut"].Value = service.Statut;
+                        insertCommand.ExecuteNonQuery();
+                    }
+                }
+
+                transaction.Commit();
+            }
+        }
+
+        /// <summary>
+        /// Méthode pour insérer des réservations de test dans la table Reservations.
+        /// </summary>
+        /// <param name="connection">connexion a la db</param>
+        private static void SeedReservations(SqliteConnection connection)
+        {
+            using (var transaction = connection.BeginTransaction())
+            {
+                using (var countCommand = new SqliteCommand("SELECT COUNT(*) FROM Reservations;", connection, transaction))
+                {
+                    long count = (long)(countCommand.ExecuteScalar() ?? 0);
+                    if (count > 0)
+                    {
+                        transaction.Commit();
+                        return;
+                    }
+                }
+
+                var reservations = new (int ServiceId, int ClientId, int NbCouverts)[]
+                {
+                    (1, 1, 2),
+                    (1, 2, 4),
+                    (2, 3, 2),
+                    (3, 4, 3),
+                    (4, 5, 2),
+                    (4, 1, 4)
+                };
+
+                using (var insertCommand = new SqliteCommand(
+                    "INSERT INTO Reservations (ServiceId, ClientId, NbCouverts) VALUES (@ServiceId, @ClientId, @NbCouverts);",
+                    connection, transaction))
+                {
+                    insertCommand.Parameters.Add(new SqliteParameter("@ServiceId", SqliteType.Integer));
+                    insertCommand.Parameters.Add(new SqliteParameter("@ClientId", SqliteType.Integer));
+                    insertCommand.Parameters.Add(new SqliteParameter("@NbCouverts", SqliteType.Integer));
+
+                    foreach (var reservation in reservations)
+                    {
+                        insertCommand.Parameters["@ServiceId"].Value = reservation.ServiceId;
+                        insertCommand.Parameters["@ClientId"].Value = reservation.ClientId;
+                        insertCommand.Parameters["@NbCouverts"].Value = reservation.NbCouverts;
                         insertCommand.ExecuteNonQuery();
                     }
                 }

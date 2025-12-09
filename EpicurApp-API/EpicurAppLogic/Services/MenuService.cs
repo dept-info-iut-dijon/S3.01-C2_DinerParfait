@@ -113,7 +113,17 @@ namespace EpicurAppLogic.Services
         public void MettreAJourMenu(Menu menu)
         {
             if (menu.Id <= 0)
-                throw new InvalidFieldException("L'identifiant du menu est obligatoire pour la mise à jour.");
+                throw new InvalidFieldException("L'identifiant du menu est obligatoire.");
+
+            var menuExistant = _menuDAO.GetById(menu.Id);
+
+            if (menuExistant != null)
+            {
+                if (menuExistant.EstVerrouille)
+                {
+                    throw new ValidationException("Modifications impossibles : délai de 48 h dépassé. Le menu est verrouillé.");
+                }
+            }
 
             if (string.IsNullOrWhiteSpace(menu.Nom))
                 throw new InvalidFieldException("Le nom du menu est obligatoire.");
@@ -164,16 +174,11 @@ namespace EpicurAppLogic.Services
             if (menu == null)
                 throw new InvalidFieldException($"Menu {menuId} introuvable.");
 
-            List<int> idsPlats = new List<int?>
-            {
-                menu.AmuseBouche?.Id,
-                menu.BoissonAperitif?.Id,
-                menu.Entree?.Id,
-                menu.PlatPrincipal?.Id,
-                menu.Vin?.Id,
-                menu.Fromage?.Id,
-                menu.Dessert?.Id
-            }.Where(id => id.HasValue).Select(id => id!.Value).ToList();
+            // Récupérer tous les IDs de plats depuis les éléments du menu
+            List<int> idsPlats = menu.Elements
+                .Select(e => e.PlatId)
+                .Distinct()
+                .ToList();
 
             List<Ingredient> tousLesIngredients = new List<Ingredient>();
 
@@ -188,7 +193,7 @@ namespace EpicurAppLogic.Services
 
             return tousLesIngredients
                 .GroupBy(ing => ing.Id)
-                .Select(g => new ElementListeCourse 
+                .Select(g => new ElementListeCourse
                 {
                     Ingredient = g.First(),
                     Quantite = g.Count()

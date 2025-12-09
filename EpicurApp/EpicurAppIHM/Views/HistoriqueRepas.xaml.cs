@@ -1,6 +1,4 @@
 using EpicurAPP_Partage.Models;
-using System.Net.Http;
-using System.Net.Http.Json;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -12,11 +10,6 @@ namespace EpicurAppIHM.Views
     /// </summary>
     public partial class HistoriqueRepas : Window
     {
-        /// <summary>
-        /// L'instance HttpClient pour les appels API
-        /// </summary>
-        private HttpClient _httpClient;
-
         /// <summary>
         /// L'ID du client pour lequel afficher l'historique
         /// </summary>
@@ -30,7 +23,6 @@ namespace EpicurAppIHM.Views
         public HistoriqueRepas(int clientId, string nomClient)
         {
             InitializeComponent();
-            _httpClient = App.ApiClient.HttpClient;
             _clientId = clientId;
 
             // Mise à jour du titre avec le nom du client
@@ -44,54 +36,24 @@ namespace EpicurAppIHM.Views
         /// Charge l'historique des repas depuis l'API
         /// </summary>
         /// <exception cref="Exception">Lancée en cas d'erreur lors de l'appel API</exception>
-        /// <exception cref="HttpRequestException">Lancée en cas de problème de connexion à l'API</exception>
         private async void ChargerHistoriqueRepas()
         {
             try
             {
-                // Appel à l'API pour récupérer l'historique
-                var response = await _httpClient.GetAsync($"Client/{_clientId}/repas");
+                // Appel au repository pour récupérer l'historique
+                var repas = await App.ClientRepository.GetRepasAsync(_clientId);
 
-                if (response.IsSuccessStatusCode)
+                if (repas == null || repas.Count == 0)
                 {
-                    // Lecture du contenu de la réponse
-                    string content = await response.Content.ReadAsStringAsync();
-
-                    // Vérifier si c'est un message d'absence de repas
-                    if (content.Contains("Aucun repas enregistré"))
-                    {
-                        AfficherAucunRepas();
-                    }
-                    else
-                    {
-                        // Désérialiser la liste des repas
-                        var repas = await response.Content.ReadFromJsonAsync<List<Repas>>();
-
-                        if (repas == null || repas.Count == 0)
-                        {
-                            AfficherAucunRepas();
-                        }
-                        else
-                        {
-                            // Afficher les repas dans le DataGrid
-                            dgRepas.ItemsSource = repas;
-                            dgRepas.Visibility = Visibility.Visible;
-                            txtAucunRepas.Visibility = Visibility.Collapsed;
-                        }
-                    }
+                    AfficherAucunRepas();
                 }
                 else
                 {
-                    MessageBox.Show($"Erreur lors du chargement de l'historique : {response.StatusCode}",
-                                   "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
-                    AfficherAucunRepas();
+                    // Afficher les repas dans le DataGrid
+                    dgRepas.ItemsSource = repas;
+                    dgRepas.Visibility = Visibility.Visible;
+                    txtAucunRepas.Visibility = Visibility.Collapsed;
                 }
-            }
-            catch (HttpRequestException)
-            {
-                MessageBox.Show("Impossible de contacter l'API.\nVérifiez qu'elle est bien lancée.",
-                               "Erreur de connexion", MessageBoxButton.OK, MessageBoxImage.Error);
-                AfficherAucunRepas();
             }
             catch (Exception ex)
             {
@@ -132,16 +94,15 @@ namespace EpicurAppIHM.Views
             //recuperation repas
             Repas? repas = border.DataContext as Repas;
 
-            if (repas != null && repas.Menu != null) 
+            if (repas != null && repas.Menu != null)
             {
-                
+
                 repas.Menu.Note = nouvelleNote;
                 dgRepas.Items.Refresh();
 
                 try
                 {
-                    var response = await _httpClient.PostAsJsonAsync($"Menu/{repas.MenuId}/AddNote", nouvelleNote);
-
+                    await App.MenuRepository.AddNoteAsync(repas.MenuId, nouvelleNote);
                 }
                 catch (Exception ex)
                 {
