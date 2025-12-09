@@ -1,5 +1,4 @@
 ﻿using EpicurAPP_Partage.Models;
-using System.Net;
 using System.Windows;
 using System.Windows.Controls;
 using MenuModel = EpicurAPP_Partage.Models.Menu;
@@ -194,10 +193,9 @@ namespace EpicurAppIHM.Views
         {
             try
             {
-                // GET direct
-                HttpResponseMessage response = await _httpClient.GetAsync($"Menu/{menuId}");
+                MenuModel menu = await App.MenuRepository.GetByIdAsync(menuId);
 
-                if (response.StatusCode == HttpStatusCode.NotFound)
+                if (menu == null)
                 {
                     MessageBox.Show("Menu introuvable.", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
                     _menuBrouillonId = null;
@@ -207,13 +205,7 @@ namespace EpicurAppIHM.Views
                     return;
                 }
 
-                response.EnsureSuccessStatusCode();
-                MenuModel menu = await response.Content.ReadFromJsonAsync<MenuModel>();
-
-                if (menu != null)
-                {
-                    MettreAJourUI(menu);
-                }
+                MettreAJourUI(menu);
             }
             catch (Exception ex)
             {
@@ -229,20 +221,15 @@ namespace EpicurAppIHM.Views
         {
             try
             {
-                // GET direct
-                HttpResponseMessage response = await _httpClient.GetAsync("Menu/Brouillon");
+                MenuModel? menu = await App.MenuRepository.GetBrouillonAsync();
 
-                if (response.IsSuccessStatusCode)
+                if (menu != null)
                 {
-                    MenuModel menu = await response.Content.ReadFromJsonAsync<MenuModel>();
-                    if (menu != null)
-                    {
-                        MettreAJourUI(menu);
-                        return;
-                    }
+                    MettreAJourUI(menu);
+                    return;
                 }
 
-                // Si pas de brouillon ou erreur 404
+                // Si pas de brouillon
                 _menuBrouillonId = null;
                 dpDateMenu.SelectedDate = DateTime.Today;
                 btnSupprimer.Visibility = Visibility.Collapsed;
@@ -267,13 +254,13 @@ namespace EpicurAppIHM.Views
             txtNomMenu.Text = menu.Nom;
             dpDateMenu.SelectedDate = menu.Date;
 
-            cmbAmuseGueule.SelectedValue = menu.AmuseBouche?.Id;
-            cmbBoissonAperitif.SelectedValue = menu.BoissonAperitif?.Id;
-            cmbEntree.SelectedValue = menu.Entree?.Id;
-            cmbPlat.SelectedValue = menu.PlatPrincipal?.Id;
-            cmbVin.SelectedValue = menu.Vin?.Id;
-            cmbFromage.SelectedValue = menu.Fromage?.Id;
-            cmbDessert.SelectedValue = menu.Dessert?.Id;
+            cmbAmuseGueule.SelectedValue = menu.Elements.FirstOrDefault(e => e.Categorie == CategoriePlat.AmuseBouche)?.PlatId;
+            cmbBoissonAperitif.SelectedValue = menu.Elements.FirstOrDefault(e => e.Categorie == CategoriePlat.BoissonAperitif)?.PlatId;
+            cmbEntree.SelectedValue = menu.Elements.FirstOrDefault(e => e.Categorie == CategoriePlat.Entree)?.PlatId;
+            cmbPlat.SelectedValue = menu.Elements.FirstOrDefault(e => e.Categorie == CategoriePlat.PlatPrincipal)?.PlatId;
+            cmbVin.SelectedValue = menu.Elements.FirstOrDefault(e => e.Categorie == CategoriePlat.Vin)?.PlatId;
+            cmbFromage.SelectedValue = menu.Elements.FirstOrDefault(e => e.Categorie == CategoriePlat.Fromage)?.PlatId;
+            cmbDessert.SelectedValue = menu.Elements.FirstOrDefault(e => e.Categorie == CategoriePlat.Dessert)?.PlatId;
 
             btnSupprimer.Visibility = Visibility.Visible;
 
