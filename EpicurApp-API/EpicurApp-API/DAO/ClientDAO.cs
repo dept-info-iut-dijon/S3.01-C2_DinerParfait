@@ -559,5 +559,51 @@ namespace EpicurApp_API.DAO
 
             return clientsInactifs;
         }
+
+        /// <summary>
+        /// Récupère les clients VIP (7+ visites sur l'année écoulée)
+        /// </summary>
+        public List<Client> GetClientsVIP()
+        {
+            List<Client> clientsVIP = new List<Client>();
+
+            using (SqliteConnection connection = new SqliteConnection(_connectionString))
+            {
+                connection.Open();
+
+                string query = @"
+            SELECT c.Id, c.Nom, c.Prenom, c.Email, c.Telephone, c.PlatsNonApprecies, c.Preferences, COUNT(r.Id) as NbVisites
+            FROM Clients c
+            INNER JOIN Repas r ON c.Id = r.ClientId
+            WHERE r.Date >= date('now', '-1 year')
+            GROUP BY c.Id
+            HAVING COUNT(r.Id) >= 7
+            ORDER BY NbVisites DESC";
+
+                using (SqliteCommand command = new SqliteCommand(query, connection))
+                using (SqliteDataReader reader = command.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        string platsNonAppreciesIds = reader.IsDBNull(5) ? "" : reader.GetString(5);
+
+                        Client client = new Client
+                        {
+                            Id = reader.GetInt32(0),
+                            Nom = reader.GetString(1),
+                            Prenom = reader.GetString(2),
+                            Email = reader.IsDBNull(3) ? "" : reader.GetString(3),
+                            Telephone = reader.IsDBNull(4) ? "" : reader.GetString(4),
+                            PlatsNonApprecies = ConvertirIdsEnPlats(platsNonAppreciesIds),
+                            Preferences = reader.IsDBNull(6) ? "" : reader.GetString(6)
+                        };
+
+                        clientsVIP.Add(client);
+                    }
+                }
+            }
+
+            return clientsVIP;
+        }
     }
 }

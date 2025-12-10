@@ -85,6 +85,16 @@ namespace EpicurApp_API.Controllers
         }
 
         /// <summary>
+        /// Récupère les clients VIP (7+ visites/an)
+        /// </summary>
+        [HttpGet("VIP")]
+        public IActionResult GetClientsVIP()
+        {
+            var clients = _clientService.ObtenirClientsVIP();
+            return Ok(clients);
+        }
+
+        /// <summary>
         /// Récupère un client grâce à son identifiant.
         /// </summary>
         /// <param name="id">Id du client</param>

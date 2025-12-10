@@ -43,12 +43,12 @@
 
         <!-- En-tête avec titre et bouton accueil -->
         <Grid Grid.Row="0" Margin="0,0,0,20">
-            <TextBlock Text="Boîte à Idées" 
-               FontSize="28" 
-               FontWeight="Bold" 
-               Foreground="#8B1538" 
-               HorizontalAlignment="Left"
-               VerticalAlignment="Center"/>
+            <TextBlock Text="Boîte à idées" 
+            FontSize="28" 
+            FontWeight="Bold" 
+            Foreground="#8B1538" 
+            HorizontalAlignment="Left"
+            VerticalAlignment="Center"/>
 
             <Button Content="Accueil" 
             HorizontalAlignment="Left" 
@@ -61,7 +61,7 @@
             FontWeight="SemiBold"
             BorderThickness="0"
             Cursor="Hand"
-            Click="RetourAccueil_Click" Margin="667,0,0,0"/>
+            Click="RetourAccueil_Click" Margin="810,0,0,0"/>
         </Grid>
 
         <!-- Boutons -->

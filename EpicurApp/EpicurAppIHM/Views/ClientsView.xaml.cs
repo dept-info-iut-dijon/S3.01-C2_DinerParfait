@@ -23,11 +23,15 @@ namespace EpicurAppIHM.Views
         public string Preferences { get; set; }
         public List<Allergene> Allergenes { get; set; }
         public bool EstInactif { get; set; }
+        public string IconeStatut => EstVIP ? "*" : (EstInactif ? "!" : "");
 
         public string IconeInactif
         {
             get { return EstInactif ? "!" : ""; }
         }
+
+        public bool EstVIP;
+        
     }
 
     /// <summary>
@@ -69,9 +73,10 @@ namespace EpicurAppIHM.Views
             {
                 // Récupérer tous les clients
                 List<Client> clients = await _httpClient.GetFromJsonAsync<List<Client>>("Client");
-
                 // Récupérer les clients inactifs
                 List<Client> clientsInactifs = await _httpClient.GetFromJsonAsync<List<Client>>("Client/Inactifs");
+                // Récupérer les clients VIP
+                List<Client> clientsVIP = await _httpClient.GetFromJsonAsync<List<Client>>("Client/VIP");
 
                 // Créer la liste des IDs inactifs
                 idsClientsInactifs = new List<int>();
@@ -83,9 +88,18 @@ namespace EpicurAppIHM.Views
                     }
                 }
 
+                // Créer la liste des IDs VIP
+                List<int> idsClientsVIP = new List<int>();
+                if (clientsVIP != null)
+                {
+                    foreach (Client c in clientsVIP)
+                    {
+                        idsClientsVIP.Add(c.Id);
+                    }
+                }
+
                 // Créer la liste d'affichage
                 tousLesClientsAffichage = new List<ClientAffichage>();
-
                 if (clients != null)
                 {
                     foreach (Client client in clients)
@@ -99,7 +113,8 @@ namespace EpicurAppIHM.Views
                             Telephone = client.Telephone,
                             Preferences = client.Preferences,
                             Allergenes = client.Allergenes,
-                            EstInactif = idsClientsInactifs.Contains(client.Id)
+                            EstInactif = idsClientsInactifs.Contains(client.Id),
+                            EstVIP = idsClientsVIP.Contains(client.Id)  // ← AJOUT ICI
                         };
                         tousLesClientsAffichage.Add(ca);
                     }

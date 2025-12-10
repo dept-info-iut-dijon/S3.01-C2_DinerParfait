@@ -74,7 +74,7 @@
             <Button x:Name="btnNouveauClient" Content="+ Nouveau Client" Width="200" Background="#8B1538" Foreground="White" Style="{StaticResource EpicurAppButtonStyle}" Click="NouveauClient_Click"/>
 
             <CheckBox x:Name="ChkVoirInactifs" 
-              Content="⚠️ Voir seulement les clients inactifs" 
+              Content="Voir seulement les clients inactifs" 
               VerticalAlignment="Center" 
               Margin="30,0,0,0"
               FontSize="13"
@@ -103,15 +103,12 @@
                   BorderThickness="1">
 
             <DataGrid.Columns>
-                <!-- Icône inactif -->
+                <!-- Icône -->
                 <DataGridTemplateColumn Header="" Width="40">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <TextBlock Text="{Binding IconeInactif}" 
-                           FontSize="16" 
-                           HorizontalAlignment="Center" 
-                           VerticalAlignment="Center"
-                           ToolTip="Client inactif depuis plus de 60 jours"/>
+                            <TextBlock Text="{Binding IconeStatut}" 
+                           FontSize="14" />
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>

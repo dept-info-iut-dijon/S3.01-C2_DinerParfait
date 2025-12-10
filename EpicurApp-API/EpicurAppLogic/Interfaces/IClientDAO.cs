@@ -68,10 +68,15 @@ namespace EpicurAppLogic.Interfaces
         List<Client> GetClientsReguliers();
 
         /// <summary>
-        /// Récupère les clients inactifs
+        /// clients inactifs
         /// </summary>
         /// <returns>Liste des clients inactifs.</returns>
         List<Client> GetClientsInactifs();
+
+        /// <summary>
+        /// clients vip
+        /// </summary>
+        List<Client> GetClientsVIP(); 
     }
 }
 

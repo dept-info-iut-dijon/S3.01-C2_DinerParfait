@@ -254,5 +254,13 @@ namespace EpicurAppLogic.Services
                 throw new ApplicationException("Erreur lors de la récupération des clients inactifs.", ex);
             }
         }
+
+        /// <summary>
+        /// Récupère les clients VIP (7+ visites/an)
+        /// </summary>
+        public List<Client> ObtenirClientsVIP()
+        {
+            return _clientRepository.GetClientsVIP();
+        }
     }
 }
