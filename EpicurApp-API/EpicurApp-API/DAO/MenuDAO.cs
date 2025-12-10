@@ -102,7 +102,7 @@ namespace EpicurApp_API.DAO
             {
                 connection.Open();
 
-                string query = @"SELECT Id, Nom, Date, Statut,ResataurantId Note, Retours FROM Menus WHERE Id=@Id";
+                string query = @"SELECT Id, Nom, Date, Statut, RestaurantId, Note, Retours FROM Menus WHERE Id=@Id";
 
                 using (SqliteCommand command = new SqliteCommand(query, connection))
                 {
@@ -186,7 +186,7 @@ namespace EpicurApp_API.DAO
             {
                 connection.Open();
 
-                string query = @"SELECT Id, Nom, Date, Statut, Note, Retours
+                string query = @"SELECT Id, Nom, Date, Statut, RestaurantId, Note, Retours
                     FROM Menus
                     WHERE Statut = @Statut
                     ORDER BY Date DESC
@@ -330,9 +330,9 @@ namespace EpicurApp_API.DAO
             menu.Nom = reader.GetString(1);
             menu.Date = reader.GetDateTime(2);
             menu.Statut = reader.GetString(3);
-            menu.Note = reader.IsDBNull(4) ? null : reader.GetInt32(4);
-            menu.Retours = reader.IsDBNull(5) ? null : reader.GetString(5);
             menu.RestaurantId = reader.GetInt32(4);
+            menu.Note = reader.IsDBNull(5) ? null : reader.GetInt32(5);
+            menu.Retours = reader.IsDBNull(6) ? null : reader.GetString(6);
 
             // Load elements from ElementMenus table
             menu.Elements = new List<ElementMenu>();
