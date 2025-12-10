@@ -45,17 +45,17 @@ namespace EpicurApp_API.DAO
                     try
                     {
                         // Insert menu into Menus table
-                        string menuQuery = @"INSERT INTO Menus (Nom, Date, Statut, RestaurantId)
-                                           VALUES (@Nom, @Date, @Statut, @RestaurantId);
+                        string menuQuery = @"INSERT INTO Menus (Nom, Statut, RestaurantId, DateCreation)
+                                           VALUES (@Nom, @Statut, @RestaurantId, @DateCreation);
                                            SELECT last_insert_rowid();";
 
                         int menuId;
                         using (SqliteCommand command = new SqliteCommand(menuQuery, connection, transaction))
                         {
                             command.Parameters.AddWithValue("@Nom", menu.Nom);
-                            command.Parameters.AddWithValue("@Date", menu.Date);
                             command.Parameters.AddWithValue("@Statut", menu.Statut);
                             command.Parameters.AddWithValue("@RestaurantId", menu.RestaurantId);
+                            command.Parameters.AddWithValue("@DateCreation", menu.DateCreation.ToString("yyyy-MM-dd HH:mm:ss"));
 
                             menuId = Convert.ToInt32(command.ExecuteScalar());
                         }
@@ -102,7 +102,7 @@ namespace EpicurApp_API.DAO
             {
                 connection.Open();
 
-                string query = @"SELECT Id, Nom, Date, Statut, RestaurantId, Note, Retours FROM Menus WHERE Id=@Id";
+                string query = @"SELECT Id, Nom, Statut, RestaurantId, Note, Retours, DateCreation FROM Menus WHERE Id=@Id";
 
                 using (SqliteCommand command = new SqliteCommand(query, connection))
                 {
@@ -130,7 +130,7 @@ namespace EpicurApp_API.DAO
             {
                 connection.Open();
 
-                string query = @"SELECT Id, Nom, Date, Statut, RestaurantId, Note, Retours FROM Menus";
+                string query = @"SELECT Id, Nom, Statut, RestaurantId, Note, Retours, DateCreation FROM Menus";
 
                 using (SqliteCommand command = new SqliteCommand(query, connection))
                 using (SqliteDataReader reader = command.ExecuteReader())
@@ -156,7 +156,7 @@ namespace EpicurApp_API.DAO
             {
                 connection.Open();
 
-                string query = @"SELECT Id, Nom, Date, Statut, RestaurantId, Note, Retours
+                string query = @"SELECT Id, Nom, Statut, RestaurantId, Note, Retours, DateCreation
                                 FROM Menus
                                 WHERE RestaurantId = @RestaurantId";
 
@@ -186,10 +186,10 @@ namespace EpicurApp_API.DAO
             {
                 connection.Open();
 
-                string query = @"SELECT Id, Nom, Date, Statut, RestaurantId, Note, Retours
+                string query = @"SELECT Id, Nom, Statut, RestaurantId, Note, Retours, DateCreation
                     FROM Menus
                     WHERE Statut = @Statut
-                    ORDER BY Date DESC
+                    ORDER BY Id DESC
                     LIMIT 1";
 
                 using (SqliteCommand command = new SqliteCommand(query, connection))
@@ -225,7 +225,6 @@ namespace EpicurApp_API.DAO
                         // Update Menus table
                         string updateMenuQuery = @"UPDATE Menus SET
                             Nom = @Nom,
-                            Date = @Date,
                             Statut = @Statut,
                             Note = @Note,
                             Retours = @Retours
@@ -234,7 +233,6 @@ namespace EpicurApp_API.DAO
                         using (SqliteCommand command = new SqliteCommand(updateMenuQuery, connection, transaction))
                         {
                             command.Parameters.AddWithValue("@Nom", menu.Nom);
-                            command.Parameters.AddWithValue("@Date", menu.Date);
                             command.Parameters.AddWithValue("@Statut", menu.Statut);
                             command.Parameters.AddWithValue("@Id", menu.Id);
                             command.Parameters.AddWithValue("@Note",
@@ -328,11 +326,11 @@ namespace EpicurApp_API.DAO
             Menu menu = new Menu();
             menu.Id = reader.GetInt32(0);
             menu.Nom = reader.GetString(1);
-            menu.Date = reader.GetDateTime(2);
-            menu.Statut = reader.GetString(3);
-            menu.RestaurantId = reader.GetInt32(4);
-            menu.Note = reader.IsDBNull(5) ? null : reader.GetInt32(5);
-            menu.Retours = reader.IsDBNull(6) ? null : reader.GetString(6);
+            menu.Statut = reader.GetString(2);
+            menu.RestaurantId = reader.GetInt32(3);
+            menu.Note = reader.IsDBNull(4) ? null : reader.GetInt32(4);
+            menu.Retours = reader.IsDBNull(5) ? null : reader.GetString(5);
+            menu.DateCreation = reader.IsDBNull(6) ? DateTime.Now : DateTime.Parse(reader.GetString(6));
 
             // Load elements from ElementMenus table
             menu.Elements = new List<ElementMenu>();
@@ -396,6 +394,31 @@ namespace EpicurApp_API.DAO
                 {
                     command.Parameters.AddWithValue("@Id", id);
                     command.ExecuteNonQuery();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Vérifie si un menu est associé à un service dans les prochaines 24 heures.
+        /// </summary>
+        /// <param name="menuId">Identifiant du menu à vérifier.</param>
+        /// <returns>True si le menu a un service dans les 24h, False sinon.</returns>
+        public bool AServiceDansLes24Heures(int menuId)
+        {
+            using (SqliteConnection connection = new SqliteConnection(_connectionString))
+            {
+                connection.Open();
+
+                string query = @"SELECT COUNT(*) FROM Services
+                                WHERE MenuId = @MenuId
+                                AND datetime(Date) >= datetime('now')
+                                AND datetime(Date) <= datetime('now', '+24 hours')";
+
+                using (SqliteCommand command = new SqliteCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@MenuId", menuId);
+                    long count = (long)(command.ExecuteScalar() ?? 0);
+                    return count > 0;
                 }
             }
         }

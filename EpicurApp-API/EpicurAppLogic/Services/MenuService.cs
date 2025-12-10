@@ -109,26 +109,21 @@ namespace EpicurAppLogic.Services
         /// </summary>
         /// <param name="menu">Menu a mettre à jour</param>
         /// <exception cref="InvalidFieldException">Informations du menu insuffisantes id,nom</exception>
+        /// <exception cref="InvalidOperationException">Le menu ne peut pas être modifié car il est associé à un service dans les 24 heures</exception>
         /// <exception cref="ApplicationException">Impossible de mettre à jour le menu</exception>
         public void MettreAJourMenu(Menu menu)
         {
             if (menu.Id <= 0)
                 throw new InvalidFieldException("L'identifiant du menu est obligatoire.");
 
-            var menuExistant = _menuDAO.GetById(menu.Id);
-
-            if (menuExistant != null)
-            {
-                if (menuExistant.EstVerrouille)
-                {
-                    throw new ValidationException("Modifications impossibles : délai de 48 h dépassé. Le menu est verrouillé.");
-                }
-            }
-
             if (string.IsNullOrWhiteSpace(menu.Nom))
                 throw new InvalidFieldException("Le nom du menu est obligatoire.");
 
             ValiderStatut(menu.Statut);
+
+            // Vérifier si le menu est associé à un service dans les 24 heures
+            if (_menuDAO.AServiceDansLes24Heures(menu.Id))
+                throw new InvalidOperationException("Le menu ne peut pas être modifié car il est associé à un service prévu dans les 24 prochaines heures.");
 
             try
             {

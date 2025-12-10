@@ -58,6 +58,13 @@ namespace EpicurAppLogic.Interfaces
         /// </summary>
         /// <param name="id">Id du menu à supprimer.</param>
         void SupprimerMenu(int id);
+
+        /// <summary>
+        /// Vérifie si un menu est associé à un service dans les prochaines 24 heures.
+        /// </summary>
+        /// <param name="menuId">Id du menu à vérifier.</param>
+        /// <returns>True si le menu a un service dans les 24h, False sinon.</returns>
+        bool AServiceDansLes24Heures(int menuId);
     }
 }
 

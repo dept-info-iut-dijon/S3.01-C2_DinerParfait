@@ -440,11 +440,11 @@ namespace EpicurApp_API.DAO
                 }
 
                 // Charger l'historique des menus
-                const string historyQuery = @"SELECT m.Id, m.Nom, m.Date, m.Statut 
-                    FROM Menus m 
-                    JOIN ClientMenu cm ON m.Id = cm.MenuId 
-                    WHERE cm.ClientId = @ClientId 
-                    ORDER BY m.Date DESC";
+                const string historyQuery = @"SELECT m.Id, m.Nom, m.Statut
+                    FROM Menus m
+                    JOIN ClientMenu cm ON m.Id = cm.MenuId
+                    WHERE cm.ClientId = @ClientId
+                    ORDER BY m.Id DESC";
 
                 using (var cmdHistory = new SqliteCommand(historyQuery, connection))
                 {
@@ -457,8 +457,7 @@ namespace EpicurApp_API.DAO
                             {
                                 Id = reader.GetInt32(0),
                                 Nom = reader.GetString(1),
-                                Date = DateTime.Parse(reader.GetString(2)),
-                                Statut = reader.GetString(3)
+                                Statut = reader.GetString(2)
                             });
                         }
                     }
