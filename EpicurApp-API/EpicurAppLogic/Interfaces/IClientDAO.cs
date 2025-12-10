@@ -62,13 +62,13 @@ namespace EpicurAppLogic.Interfaces
         Client? RechercherClientParId(int id);
 
         /// <summary>
-        /// Récupère les clients réguliers (3 visites ou plus sur l'année).
+        /// Récupère les clients réguliers
         /// </summary>
         /// <returns>Liste des clients réguliers avec leur nombre de visites.</returns>
         List<Client> GetClientsReguliers();
 
         /// <summary>
-        /// Récupère les clients inactifs (pas de visite depuis plus de 60 jours).
+        /// Récupère les clients inactifs
         /// </summary>
         /// <returns>Liste des clients inactifs.</returns>
         List<Client> GetClientsInactifs();

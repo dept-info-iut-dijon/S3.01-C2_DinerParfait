@@ -26,7 +26,7 @@ namespace EpicurAppIHM.Views
 
         public string IconeInactif
         {
-            get { return EstInactif ? "⚠️" : ""; }
+            get { return EstInactif ? "!" : ""; }
         }
     }
 
