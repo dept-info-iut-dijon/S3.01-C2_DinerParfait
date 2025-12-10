@@ -58,5 +58,23 @@ namespace EpicurAppLogic.Interfaces
         /// </summary>
         /// <param name="id">L'ID du client à supprimer.</param>
         void Delete(int id);
+
+        /// <summary>
+        /// Récupère les clients réguliers (3 visites ou plus sur l'année).
+        /// </summary>
+        /// <returns>Liste des clients réguliers.</returns>
+        List<Client> ObtenirClientsReguliers();
+
+        /// <summary>
+        /// Récupère les clients inactifs (pas de visite depuis plus de 60 jours).
+        /// </summary>
+        /// <returns>Liste des clients inactifs.</returns>
+        List<Client> ObtenirClientsInactifs();
+
+
+        /// <summary>
+        /// Récupère les clients vip
+        /// </summary>
+        List<Client> ObtenirClientsVIP();
     }
 }

@@ -46,18 +46,30 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!-- En-tête avec titre -->
-        <TextBlock Grid.Row="0" 
-                   Text="Gestion des Clients" 
-                   FontSize="28" 
-                   FontWeight="Bold" 
-                   Foreground="#8B1538" 
-                   Margin="0,0,0,20"/>
+        <!-- En-tête avec titre et bouton accueil -->
+        <Grid Grid.Row="0" Margin="0,0,0,20">
+            <TextBlock Text="Gestion des Clients" 
+               FontSize="28" 
+               FontWeight="Bold" 
+               Foreground="#8B1538" 
+               HorizontalAlignment="Left"
+               VerticalAlignment="Center"/>
 
+            
+        </Grid>
 
         <!-- Bouton Nouveau Client -->
         <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,15">
             <Button x:Name="btnNouveauClient" Content="+ Nouveau Client" Width="200" Background="#8B1538" Foreground="White" Style="{StaticResource EpicurAppButtonStyle}" Click="NouveauClient_Click"/>
+
+            <CheckBox x:Name="ChkVoirInactifs" 
+              Content="Voir seulement les clients inactifs" 
+              VerticalAlignment="Center" 
+              Margin="30,0,0,0"
+              FontSize="13"
+              Foreground="#8B1538"
+              Checked="ChkVoirInactifs_Changed"
+              Unchecked="ChkVoirInactifs_Changed"/>
         </StackPanel>
 
 
@@ -80,6 +92,15 @@
                   BorderThickness="1">
 
             <DataGrid.Columns>
+                <!-- Icône -->
+                <DataGridTemplateColumn Header="" Width="40">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding IconeStatut}" 
+                           FontSize="14" />
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
                 <!-- Nom complet -->
                 <DataGridTemplateColumn Header="Client" Width="200">
                     <DataGridTemplateColumn.CellTemplate>

@@ -85,6 +85,52 @@ namespace EpicurApp_API.Controllers
         }
 
         /// <summary>
+        /// Récupère les clients réguliers (3 visites ou plus sur l'année) - US 4.1
+        /// </summary>
+        /// <returns>Liste des clients réguliers</returns>
+        [HttpGet("Reguliers")]
+        public IActionResult GetClientsReguliers()
+        {
+            try
+            {
+                List<Client> clients = _clientService.ObtenirClientsReguliers();
+                return Ok(clients);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "Erreur lors de la récupération des clients réguliers : " + ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// Récupère les clients inactifs (pas de visite depuis plus de 60 jours) - US 5.1
+        /// </summary>
+        /// <returns>Liste des clients inactifs</returns>
+        [HttpGet("Inactifs")]
+        public IActionResult GetClientsInactifs()
+        {
+            try
+            {
+                List<Client> clients = _clientService.ObtenirClientsInactifs();
+                return Ok(clients);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "Erreur lors de la récupération des clients inactifs : " + ex.Message);
+            }
+        }
+
+        /// <summary>
+        /// Récupère les clients VIP (7+ visites/an)
+        /// </summary>
+        [HttpGet("VIP")]
+        public IActionResult GetClientsVIP()
+        {
+            var clients = _clientService.ObtenirClientsVIP();
+            return Ok(clients);
+        }
+
+        /// <summary>
         /// Récupère un client grâce à son identifiant.
         /// Vérifie que le client appartient au restaurant de l'utilisateur via X-Restaurant-Id.
         /// </summary>

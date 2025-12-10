@@ -67,6 +67,23 @@ namespace EpicurAppLogic.Interfaces
         /// <param name="id">Identifiant du client.</param> 
         /// <returns>Le client trouvé ou null si non trouvé.</returns>
         Client? RechercherClientParId(int id);
+
+        /// <summary>
+        /// Récupère les clients réguliers
+        /// </summary>
+        /// <returns>Liste des clients réguliers avec leur nombre de visites.</returns>
+        List<Client> GetClientsReguliers();
+
+        /// <summary>
+        /// clients inactifs
+        /// </summary>
+        /// <returns>Liste des clients inactifs.</returns>
+        List<Client> GetClientsInactifs();
+
+        /// <summary>
+        /// clients vip
+        /// </summary>
+        List<Client> GetClientsVIP(); 
     }
 }
 
