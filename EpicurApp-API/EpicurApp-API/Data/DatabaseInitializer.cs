@@ -80,6 +80,16 @@ namespace EpicurApp_API.Data
                         Categorie TEXT NOT NULL DEFAULT 'Autre'
                     );";
 
+                // Table de liaison IngredientAllergene (pour associer allergènes aux ingrédients)
+                string createIngredientAllergeneTable = @"
+                    CREATE TABLE IF NOT EXISTS IngredientAllergene (
+                        IngredientId INTEGER NOT NULL,
+                        AllergeneId INTEGER NOT NULL,
+                        PRIMARY KEY (IngredientId, AllergeneId),
+                        FOREIGN KEY (IngredientId) REFERENCES Ingredients(Id) ON DELETE CASCADE,
+                        FOREIGN KEY (AllergeneId) REFERENCES Allergenes(Id) ON DELETE CASCADE
+                    );";
+
                 // Table Plats
                 string createPlatsTable = @"
                     CREATE TABLE IF NOT EXISTS Plats (
@@ -210,6 +220,9 @@ namespace EpicurApp_API.Data
                     command.ExecuteNonQuery();
 
                     command.CommandText = createIngredientsTable;
+                    command.ExecuteNonQuery();
+
+                    command.CommandText = createIngredientAllergeneTable;
                     command.ExecuteNonQuery();
 
                     command.CommandText = createClientsTable;
