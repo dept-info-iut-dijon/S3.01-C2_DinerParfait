@@ -65,22 +65,11 @@ namespace EpicurAppIHM.Views
         {
             if (ListBoxMenus.SelectedItem is MenuModel menuSelectionne)
             {
-                // Si c'est un brouillon, ouvrir en mode édition
-                if (menuSelectionne.Statut == "Brouillon")
-                {
-                    CreationMenu creationMenu = new CreationMenu(menuSelectionne.Id);
-                    creationMenu.Closed += (s, args) => ChargerMenus();
-                    creationMenu.ShowDialog();
-                }
-                else
-                {
-                    // Sinon, ouvrir la fenêtre de consultation du menu (lecture seule)
-                    ConsultationMenu ficheMenu = new ConsultationMenu(menuSelectionne.Id);
-                    ficheMenu.ShowDialog();
-
-                    // Recharger la liste après fermeture
-                    ChargerMenus();
-                }
+                // Toujours ouvrir la fenêtre de consultation (lecture seule)
+                // La fenêtre ConsultationMenu aura un bouton "Modifier" pour les brouillons
+                ConsultationMenu ficheMenu = new ConsultationMenu(menuSelectionne.Id);
+                ficheMenu.Closed += (s, args) => ChargerMenus();
+                ficheMenu.ShowDialog();
             }
         }
 

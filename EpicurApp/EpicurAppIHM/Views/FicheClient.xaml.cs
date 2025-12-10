@@ -16,6 +16,10 @@ namespace EpicurAppIHM.Views
         /// </summary>
         private List<Allergene> allergenes;
         /// <summary>
+        /// Dictionnaire pour tracker les allergènes sélectionnés (ID -> IsSelected)
+        /// </summary>
+        private Dictionary<int, bool> _allergenesSelectionnes = new Dictionary<int, bool>();
+        /// <summary>
         /// L'ID du client en consultation/modification
         /// </summary>
         private int? _clientId;
@@ -60,8 +64,17 @@ namespace EpicurAppIHM.Views
                 btnCreer.Content = "Enregistrer";
                 btnCreer.Visibility = Visibility.Visible;
             }
+            // Charger d'abord le client pour obtenir ses allergènes, puis charger la liste des allergènes
+            ChargerClientPuisAllergenes();
+        }
+
+        /// <summary>
+        /// Charge le client puis les allergènes (nécessaire pour avoir _allergenesClient avant de charger la liste)
+        /// </summary>
+        private async void ChargerClientPuisAllergenes()
+        {
+            await ChargerClientAsync();
             ChargerAllergenes();
-            ChargerClient();
         }
 
         /// <summary>
@@ -72,8 +85,15 @@ namespace EpicurAppIHM.Views
         {
             try
             {
-                List<Allergene> listeAllergenes = await App.AllergeneRepository.GetAllAsync();
-                allergenes = listeAllergenes;
+                allergenes = await App.AllergeneRepository.GetAllAsync();
+
+                // Initialiser le dictionnaire de sélection
+                _allergenesSelectionnes.Clear();
+                foreach (Allergene allergene in allergenes)
+                {
+                    _allergenesSelectionnes[allergene.Id] = _allergenesClient.Contains(allergene.Id);
+                }
+
                 lstAllergenes.ItemsSource = allergenes;
             }
             catch (Exception ex)
@@ -88,6 +108,16 @@ namespace EpicurAppIHM.Views
         /// </summary>
         /// <exception cref="Exception">Erreur de chargement du client</exception>
         private async void ChargerClient()
+        {
+            await ChargerClientAsync();
+            ChargerAllergenes();
+        }
+
+        /// <summary>
+        /// Charge les données du client de manière asynchrone
+        /// </summary>
+        /// <exception cref="Exception">Erreur de chargement du client</exception>
+        private async Task ChargerClientAsync()
         {
             if (!_clientId.HasValue) return;
 
@@ -149,45 +179,43 @@ namespace EpicurAppIHM.Views
         }
 
         /// <summary>
-        /// Trouve la CheckBox dans un élément de liste
-        /// </summary>
-        /// <returns>CheckBox trouvée ou null</returns>
-        private CheckBox TrouverCheckBox(DependencyObject parent)
-        {
-            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
-            {
-                DependencyObject child = VisualTreeHelper.GetChild(parent, i);
-                if (child is CheckBox checkBox)
-                    return checkBox;
-
-                CheckBox result = TrouverCheckBox(child);
-                if (result != null)
-                    return result;
-            }
-            return null;
-        }
-
-        /// <summary>
-        /// Gère l'expansion de l'Expander pour cocher les allergènes du client
+        /// Gère l'expansion de l'Expander
         /// </summary>
         private void ExpanderAllergenes_Expanded(object sender, RoutedEventArgs e)
         {
-            // Forcer la génération des conteneurs
-            lstAllergenes.UpdateLayout();
+            // Les événements des CheckBox gèrent maintenant la sélection
+        }
 
-            // Cocher les allergènes correspondants
-            foreach (object item in lstAllergenes.Items)
+        /// <summary>
+        /// Initialise l'état de la CheckBox lors du chargement
+        /// </summary>
+        private void CheckBoxAllergene_Loaded(object sender, RoutedEventArgs e)
+        {
+            if (sender is CheckBox checkBox && checkBox.Tag is int id)
             {
-                ContentPresenter container = lstAllergenes.ItemContainerGenerator.ContainerFromItem(item) as ContentPresenter;
-                if (container != null)
-                {
-                    CheckBox checkBox = TrouverCheckBox(container);
-                    if (checkBox != null && checkBox.Tag != null)
-                    {
-                        int allergeneId = (int)checkBox.Tag;
-                        checkBox.IsChecked = _allergenesClient.Contains(allergeneId);
-                    }
-                }
+                checkBox.IsChecked = _allergenesSelectionnes.ContainsKey(id) && _allergenesSelectionnes[id];
+            }
+        }
+
+        /// <summary>
+        /// Met à jour le dictionnaire quand une CheckBox est cochée
+        /// </summary>
+        private void CheckBoxAllergene_Checked(object sender, RoutedEventArgs e)
+        {
+            if (sender is CheckBox checkBox && checkBox.Tag is int id)
+            {
+                _allergenesSelectionnes[id] = true;
+            }
+        }
+
+        /// <summary>
+        /// Met à jour le dictionnaire quand une CheckBox est décochée
+        /// </summary>
+        private void CheckBoxAllergene_Unchecked(object sender, RoutedEventArgs e)
+        {
+            if (sender is CheckBox checkBox && checkBox.Tag is int id)
+            {
+                _allergenesSelectionnes[id] = false;
             }
         }
 
@@ -197,22 +225,10 @@ namespace EpicurAppIHM.Views
         /// <returns>Liste des IDs cochés</returns>
         private List<int> GetAllergenesCoches()
         {
-            List<int> ids = new List<int>();
-
-            foreach (object item in lstAllergenes.Items)
-            {
-                ContentPresenter container = lstAllergenes.ItemContainerGenerator.ContainerFromItem(item) as ContentPresenter;
-                if (container != null)
-                {
-                    CheckBox checkBox = TrouverCheckBox(container);
-                    if (checkBox != null && checkBox.IsChecked == true)
-                    {
-                        ids.Add((int)checkBox.Tag);
-                    }
-                }
-            }
-
-            return ids;
+            return _allergenesSelectionnes
+                .Where(kvp => kvp.Value)
+                .Select(kvp => kvp.Key)
+                .ToList();
         }
 
         /// <summary>

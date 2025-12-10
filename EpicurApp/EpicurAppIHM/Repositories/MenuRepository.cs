@@ -50,7 +50,7 @@ namespace EpicurAppIHM.Repositories
 
         public async Task<List<ElementListeCourse>> GetListeCoursesAsync(int menuId)
         {
-            List<ElementListeCourse>? list = await _httpClient.GetFromJsonAsync<List<ElementListeCourse>>($"{BaseEndpoint}/{menuId}/courses");
+            List<ElementListeCourse>? list = await _httpClient.GetFromJsonAsync<List<ElementListeCourse>>($"{BaseEndpoint}/{menuId}/listecourses");
             return list ?? new List<ElementListeCourse>();
         }
 

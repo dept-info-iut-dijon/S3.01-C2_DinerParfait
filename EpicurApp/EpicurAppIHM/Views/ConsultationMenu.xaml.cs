@@ -6,6 +6,7 @@ namespace EpicurAppIHM.Views
     public partial class ConsultationMenu : Window
     {
         private int _menuId;
+        private string _menuStatut = "";
 
         /// <summary>
         /// Intancie la fenetre avec les menus
@@ -47,8 +48,14 @@ namespace EpicurAppIHM.Views
 
                 // Afficher les informations générales
                 txtNom.Text = menu.Nom;
-                txtDate.Text = menu.Date.ToString("dd/MM/yyyy");
                 txtStatut.Text = menu.Statut;
+                _menuStatut = menu.Statut;
+
+                // Afficher le bouton "Modifier" uniquement pour les brouillons
+                if (menu.Statut == "Brouillon")
+                {
+                    btnModifier.Visibility = Visibility.Visible;
+                }
 
                 // Récupérer le premier plat de chaque catégorie et afficher son nom
                 ElementMenu? amuseBouche = menu.Elements.FirstOrDefault(e => e.Categorie == CategoriePlat.AmuseBouche);
@@ -191,6 +198,19 @@ namespace EpicurAppIHM.Views
         /// </summary>
         private void Fermer_Click(object sender, RoutedEventArgs e)
         {
+            this.Close();
+        }
+
+        /// <summary>
+        /// Ouvre la fenêtre d'édition pour modifier le brouillon
+        /// </summary>
+        private void Modifier_Click(object sender, RoutedEventArgs e)
+        {
+            // Ouvrir la fenêtre de création en mode édition
+            CreationMenu creationMenu = new CreationMenu(_menuId);
+            creationMenu.ShowDialog();
+
+            // Fermer la fenêtre de consultation
             this.Close();
         }
     }

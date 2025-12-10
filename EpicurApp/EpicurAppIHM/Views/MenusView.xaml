@@ -93,24 +93,26 @@
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="250"/>
+                                <ColumnDefinition Width="20"/>
                                 <ColumnDefinition Width="150"/>
+                                <ColumnDefinition Width="20"/>
                                 <ColumnDefinition Width="120"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
 
-                            <TextBlock Grid.Column="0" 
-                                       Text="{Binding Nom}" 
-                                       FontWeight="SemiBold" 
+                            <TextBlock Grid.Column="0"
+                                       Text="{Binding Nom}"
+                                       FontWeight="SemiBold"
                                        Foreground="#475569"
                                        VerticalAlignment="Center"/>
 
-                            <TextBlock Grid.Column="1" 
-                                       Text="{Binding Date, StringFormat='dd/MM/yyyy'}" 
+                            <TextBlock Grid.Column="2"
+                                       Text="{Binding DateCreation, StringFormat='dd/MM/yyyy HH:mm'}"
                                        Foreground="#475569"
                                        VerticalAlignment="Center"/>
 
-                            <Border Grid.Column="2" 
-                                    CornerRadius="4" 
+                            <Border Grid.Column="4"
+                                    CornerRadius="4"
                                     Padding="8,4"
                                     HorizontalAlignment="Left"
                                     VerticalAlignment="Center">
@@ -126,8 +128,8 @@
                                         </Style.Triggers>
                                     </Style>
                                 </Border.Style>
-                                <TextBlock Text="{Binding Statut}" 
-                                           Foreground="White" 
+                                <TextBlock Text="{Binding Statut}"
+                                           Foreground="White"
                                            FontSize="12"
                                            FontWeight="SemiBold"/>
                             </Border>
