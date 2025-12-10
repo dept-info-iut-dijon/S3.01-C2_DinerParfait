@@ -20,6 +20,7 @@
 	<PackageReference Include="itext" Version="9.4.0" />
 	<PackageReference Include="itext.bouncy-castle-adapter" Version="9.4.0" />
 	<PackageReference Include="itext7" Version="9.4.0" />
+	<PackageReference Include="LiveCharts.Wpf.Core" Version="0.9.8" />
 	<PackageReference Include="System.Net.Http.Json" Version="9.0.10" />
 	<PackageReference Include="System.Text.Encoding.CodePages" Version="10.0.0" />
   </ItemGroup>

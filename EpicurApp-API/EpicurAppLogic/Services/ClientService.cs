@@ -222,5 +222,45 @@ namespace EpicurAppLogic.Services
                 throw new ApplicationException($"Erreur service : {ex.Message}", ex);
             }
         }
+
+        /// <summary>
+        /// Récupère les clients réguliers (3 visites ou plus sur l'année).
+        /// </summary>
+        /// <returns>Liste des clients réguliers.</returns>
+        public List<Client> ObtenirClientsReguliers()
+        {
+            try
+            {
+                return _clientRepository.GetClientsReguliers();
+            }
+            catch (Exception ex)
+            {
+                throw new ApplicationException("Erreur lors de la récupération des clients réguliers.", ex);
+            }
+        }
+
+        /// <summary>
+        /// Récupère les clients inactifs (pas de visite depuis plus de 60 jours).
+        /// </summary>
+        /// <returns>Liste des clients inactifs.</returns>
+        public List<Client> ObtenirClientsInactifs()
+        {
+            try
+            {
+                return _clientRepository.GetClientsInactifs();
+            }
+            catch (Exception ex)
+            {
+                throw new ApplicationException("Erreur lors de la récupération des clients inactifs.", ex);
+            }
+        }
+
+        /// <summary>
+        /// Récupère les clients VIP (7+ visites/an)
+        /// </summary>
+        public List<Client> ObtenirClientsVIP()
+        {
+            return _clientRepository.GetClientsVIP();
+        }
     }
 }
