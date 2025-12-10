@@ -31,6 +31,13 @@ namespace EpicurAppLogic.Interfaces
         List<Client> GetAll();
 
         /// <summary>
+        /// Récupère tous les clients d'un restaurant spécifique.
+        /// </summary>
+        /// <param name="restaurantId">Identifiant du restaurant.</param>
+        /// <returns>Liste des clients du restaurant.</returns>
+        List<Client> GetAllByRestaurantId(int restaurantId);
+
+        /// <summary>
         /// Ajoute un nouveau client dans la base de données.
         /// </summary>
         /// <param name="client">Le client à ajouter.</param>

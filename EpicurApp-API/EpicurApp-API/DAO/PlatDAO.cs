@@ -40,7 +40,7 @@ namespace EpicurApp_API.DAO
         public List<Plat> GetAll()
         {
             List<Plat> plats = new List<Plat>();
-            const string query = "SELECT Id, Nom, Categorie FROM Plats ORDER BY Categorie, Nom;";
+            const string query = "SELECT Id, Nom, Categorie, RestaurantId FROM Plats ORDER BY Categorie, Nom;";
 
             using (SqliteConnection connexion = new SqliteConnection(_connexionString))
             {
@@ -61,6 +61,38 @@ namespace EpicurApp_API.DAO
         }
 
         /// <summary>
+        /// Récupère tous les plats d'un restaurant spécifique triés par catégorie et nom.
+        /// </summary>
+        /// <param name="restaurantId">Identifiant du restaurant.</param>
+        /// <returns>Liste des plats du restaurant.</returns>
+        public List<Plat> GetAllByRestaurantId(int restaurantId)
+        {
+            List<Plat> plats = new List<Plat>();
+            const string query = "SELECT Id, Nom, Categorie, RestaurantId FROM Plats WHERE RestaurantId = @RestaurantId ORDER BY Categorie, Nom;";
+
+            using (SqliteConnection connexion = new SqliteConnection(_connexionString))
+            {
+                connexion.Open();
+                using (SqliteCommand cmd = new SqliteCommand(query, connexion))
+                {
+                    cmd.Parameters.AddWithValue("@RestaurantId", restaurantId);
+
+                    using (SqliteDataReader reader = cmd.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            var plat = MapperPlatDepuisReader(reader);
+                            // Remplissage de la List<Ingredient> via le DAO injecté
+                            plat.IngredientsPrincipaux = _ingredientDAO.GetIngredientsByPlatId(plat.Id);
+                            plats.Add(plat);
+                        }
+                    }
+                }
+            }
+            return plats;
+        }
+
+        /// <summary>
         /// Récupère un plat par son identifiant.
         /// </summary>
         /// <param name="id">Identifiant du plat.</param>
@@ -68,7 +100,7 @@ namespace EpicurApp_API.DAO
         public Plat? GetById(int id)
         {
             Plat? plat = null;
-            const string query = "SELECT Id, Nom, Categorie FROM Plats WHERE Id = @Id;";
+            const string query = "SELECT Id, Nom, Categorie, RestaurantId FROM Plats WHERE Id = @Id;";
 
             using (SqliteConnection connection = new SqliteConnection(_connexionString))
             {
@@ -98,7 +130,7 @@ namespace EpicurApp_API.DAO
         public void Add(Plat plat)
         {
             // On insert le plat. La colonne IngredientsPrincipaux (texte) est laissée vide ou par défaut.
-            const string query = "INSERT INTO Plats (Nom, Categorie, IngredientsPrincipaux) VALUES (@Nom, @Categorie, '');";
+            const string query = "INSERT INTO Plats (Nom, Categorie, IngredientsPrincipaux, RestaurantId) VALUES (@Nom, @Categorie, '', @RestaurantId);";
 
             using (SqliteConnection connection = new SqliteConnection(_connexionString))
             {
@@ -107,6 +139,7 @@ namespace EpicurApp_API.DAO
                 {
                     command.Parameters.AddWithValue("@Nom", plat.Nom);
                     command.Parameters.AddWithValue("@Categorie", plat.Categorie.ToString());
+                    command.Parameters.AddWithValue("@RestaurantId", plat.RestaurantId);
 
                     command.ExecuteNonQuery();
 
@@ -193,6 +226,7 @@ namespace EpicurApp_API.DAO
                 Id = reader.GetInt32(0),
                 Nom = reader.GetString(1),
                 Categorie = categorie,
+                RestaurantId = reader.GetInt32(3),
                 IngredientsPrincipaux = new List<Ingredient>()
             };
         }

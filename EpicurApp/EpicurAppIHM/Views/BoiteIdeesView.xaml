@@ -50,18 +50,7 @@
             HorizontalAlignment="Left"
             VerticalAlignment="Center"/>
 
-            <Button Content="Accueil" 
-            HorizontalAlignment="Left" 
-            VerticalAlignment="Center"
-            Width="140"
-            Height="40"
-            Background="#D4AF37"
-            Foreground="White"
-            FontSize="14"
-            FontWeight="SemiBold"
-            BorderThickness="0"
-            Cursor="Hand"
-            Click="RetourAccueil_Click" Margin="810,0,0,0"/>
+           
         </Grid>
 
         <!-- Boutons -->

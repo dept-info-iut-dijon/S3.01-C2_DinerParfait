@@ -14,6 +14,13 @@ namespace EpicurAppLogic.Interfaces
         List<IdeePlat> GetAll();
 
         /// <summary>
+        /// Récupère toutes les idées de plats d'un restaurant spécifique.
+        /// </summary>
+        /// <param name="restaurantId">Identifiant du restaurant.</param>
+        /// <returns>Liste des idées de plats du restaurant.</returns>
+        List<IdeePlat> GetAllByRestaurantId(int restaurantId);
+
+        /// <summary>
         /// Récupère une idée de plat par son identifiant.
         /// </summary>
         /// <param name="id">Identifiant de l'idée de plat.</param>

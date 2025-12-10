@@ -58,6 +58,19 @@ namespace EpicurAppLogic.Interfaces
         /// </summary>
         /// <param name="id">Id du menu à supprimer.</param>
         void SupprimerMenu(int id);
+
+        /// <summary>
+        /// Met à jour la note d'un menu.
+        /// </summary>
+        /// <param name="menuId">Id du menu a update</param>
+        /// <param name="note">Note attribué</param>
+        void MettreAJourNoteDuMenu(int menuId, int note);
+        /// <summary>
+        /// Ajoute une note à un menu.
+        /// </summary>
+        /// <param name="menuId">Id du menu avec la note</param>
+        /// <param name="note">Note attribué</param>
+        void AjouterNoteAuMenu(int menuId, int note);
     }
 }
 

@@ -1,6 +1,7 @@
 ﻿using EpicurAPP_Partage.Models;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Windows;
@@ -47,6 +48,11 @@ namespace EpicurAppIHM.Views
 
         // Liste des IDs des clients inactifs
         private List<int> idsClientsInactifs;
+
+        /// <summary>
+        /// Collection des clients
+        /// </summary>
+        public ObservableCollection<Client> Clients { get; set; } = new ObservableCollection<Client>();
 
         /// <summary>
         /// Instancie la page d'affichage client
@@ -221,17 +227,16 @@ namespace EpicurAppIHM.Views
 
             try
             {
-                HttpResponseMessage response = await _httpClient.DeleteAsync($"Client/{clientSelectionne.Id}");
+                bool success = await App.ClientRepository.DeleteAsync(clientSelectionne.Id);
 
-                if (response.IsSuccessStatusCode)
+                if (success)
                 {
                     MessageBox.Show("Client supprimé avec succès.", "Succès", MessageBoxButton.OK, MessageBoxImage.Information);
                     ChargerClients();
                 }
                 else
                 {
-                    string errorContent = await response.Content.ReadAsStringAsync();
-                    MessageBox.Show($"Erreur lors de la suppression : {errorContent}", "Erreur API", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show("Erreur lors de la suppression du client.", "Erreur API", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
             catch (Exception ex)

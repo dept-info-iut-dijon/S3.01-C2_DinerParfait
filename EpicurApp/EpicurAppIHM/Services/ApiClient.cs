@@ -4,7 +4,7 @@ using System.Net.Http;
 namespace EpicurAppIHM.Services
 {
     /// <summary>
-    /// Client HTTP simple pour communiquer avec l'API EpicurApp.
+    /// Client HTTP pour communiquer avec l'API.
     /// </summary>
     public class ApiClient
     {
@@ -21,7 +21,7 @@ namespace EpicurAppIHM.Services
                 {
                     // Détermination de l'URL de base
                     string baseUrl = Environment.GetEnvironmentVariable("EPICURAPP_API_BASEURL")
-                        ?? "https://localhost:7068/";
+                        ?? "https://localhost:7068";
 
                     // Configuration du handler pour accepter tous les certificats SSL
                     HttpClientHandler handler = new HttpClientHandler
@@ -36,6 +36,30 @@ namespace EpicurAppIHM.Services
                     };
                 }
                 return _httpClient;
+            }
+        }
+
+        /// <summary>
+        /// Définit le RestaurantId pour toutes les requêtes futures via le header X-Restaurant-Id.
+        /// </summary>
+        /// <param name="restaurantId">L'ID du restaurant</param>
+        public void SetRestaurantId(int restaurantId)
+        {
+            if (HttpClient.DefaultRequestHeaders.Contains("X-Restaurant-Id"))
+            {
+                HttpClient.DefaultRequestHeaders.Remove("X-Restaurant-Id");
+            }
+            HttpClient.DefaultRequestHeaders.Add("X-Restaurant-Id", restaurantId.ToString());
+        }
+
+        /// <summary>
+        /// Supprime le RestaurantId des headers (utilisé à la déconnexion).
+        /// </summary>
+        public void ClearRestaurantId()
+        {
+            if (HttpClient.DefaultRequestHeaders.Contains("X-Restaurant-Id"))
+            {
+                HttpClient.DefaultRequestHeaders.Remove("X-Restaurant-Id");
             }
         }
     }

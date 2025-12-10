@@ -7,8 +7,6 @@ using iText.Layout;
 using iText.Layout.Element;
 using iText.Layout.Properties;
 using System.IO;
-using System.Net.Http;
-using System.Net.Http.Json;
 using System.Text;
 using System.Windows;
 using Path = System.IO.Path;
@@ -20,11 +18,6 @@ namespace EpicurAppIHM.Views
     /// </summary>
     public partial class EtiquettesView : Window
     {
-        /// <summary>
-        /// L'instance HttpClient pour les appels API
-        /// </summary>
-        private readonly HttpClient _httpClient;
-
         /// <summary>
         /// Liste utilisée pour l'affichage (contient le client + la case à cocher)
         /// </summary>
@@ -38,8 +31,6 @@ namespace EpicurAppIHM.Views
 
             // Configuration iText (Encodage)
             Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
-
-            _httpClient = App.ApiClient.HttpClient;
 
             // Date du jour par défaut
             datePickerEvenement.SelectedDate = DateTime.Today;
@@ -56,7 +47,7 @@ namespace EpicurAppIHM.Views
             try
             {
                 // Récupération des clients depuis l'API
-                List<Client> clients = await _httpClient.GetFromJsonAsync<List<Client>>("Client");
+                List<Client> clients = await App.ClientRepository.GetAllAsync();
 
                 if (clients != null)
                 {
@@ -115,85 +106,133 @@ namespace EpicurAppIHM.Views
                     PdfDocument pdf = new PdfDocument(writer);
                     using (pdf)
                     {
-                        // CONFIGURATION FORMAT A6
-                        Document document = new Document(pdf, PageSize.A6);
-                        document.SetMargins(20, 20, 20, 20);
+                        
+                        // A6 Paysage (148mm x 105mm)
+                        PageSize formatPage = PageSize.A6.Rotate();
+                        Document document = new Document(pdf, formatPage);
+                        document.SetMargins(5, 5, 5, 5);
 
-                        //GESTION POLICE
+                        // POLICE
                         string cheminPolice = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Police", "arial.ttf");
-                        if (!File.Exists(cheminPolice)) throw new FileNotFoundException("Police introuvable.");
-                        PdfFont font = PdfFontFactory.CreateFont(cheminPolice, PdfEncodings.IDENTITY_H);
+                        PdfFont font;
+                        if (File.Exists(cheminPolice))
+                            font = PdfFontFactory.CreateFont(cheminPolice, PdfEncodings.IDENTITY_H);
+                        else
+                            font = PdfFontFactory.CreateFont(iText.IO.Font.Constants.StandardFonts.HELVETICA);
 
-                        // Récupération des options
                         string dateEvent = datePickerEvenement.SelectedDate?.ToString("dd/MM/yyyy") ?? "";
                         string message = txtMessage.Text;
 
-                        // BOUCLE SUR LES INVITÉS
                         for (int i = 0; i < selection.Count; i++)
                         {
                             InviteSelection invite = selection[i];
 
-                            // Création du contenu de l'étiquette
-                            // On ajoute des sauts de ligne pour centrer verticalement
-                            document.Add(new Paragraph("\n\n"));
+                            
+                            Paragraph spacer = new Paragraph("")
+                                .SetHeight(155f)
+                                .SetMargin(0)
+                                .SetPadding(0);
+
+                            document.Add(spacer);
+
+                           
+                            Table tableContenu = new Table(1); 
+                            tableContenu.SetWidth(UnitValue.CreatePercentValue(100)); 
+                            tableContenu.SetBorder(iText.Layout.Borders.Border.NO_BORDER); 
 
                             // Prénom
-                            document.Add(new Paragraph(invite.Client.Prenom)
+                            tableContenu.AddCell(new Cell().Add(new Paragraph(invite.Client.Prenom))
                                 .SetFont(font)
-                                .SetFontSize(18)
+                                .SetFontSize(14)
+                                .SetFontColor(iText.Kernel.Colors.ColorConstants.GRAY)
                                 .SetTextAlignment(iText.Layout.Properties.TextAlignment.CENTER)
-                                .SetFontColor(iText.Kernel.Colors.ColorConstants.GRAY));
+                                .SetBorder(iText.Layout.Borders.Border.NO_BORDER) 
+                                .SetPaddingBottom(0)); 
 
                             // NOM
-                            document.Add(new Paragraph(invite.Client.Nom.ToUpper())
+                            tableContenu.AddCell(new Cell().Add(new Paragraph(invite.Client.Nom.ToUpper())
                                 .SetFont(font)
-                                .SetFontSize(26)
-                                .SetTextAlignment(iText.Layout.Properties.TextAlignment.CENTER)
-                                .SetFontColor(new iText.Kernel.Colors.DeviceRgb(139, 21, 56))); // Couleur Bordeaux #8B1538
+                                .SetFontSize(22)
+                                .SetFontColor(new iText.Kernel.Colors.DeviceRgb(139, 21, 56))
+                                .SetTextAlignment(iText.Layout.Properties.TextAlignment.CENTER))
+                                .SetBorder(iText.Layout.Borders.Border.NO_BORDER));
 
-                            // Ligne de séparation
-                            document.Add(new Paragraph("_________________")
-                                .SetTextAlignment(iText.Layout.Properties.TextAlignment.CENTER)
-                                .SetFontColor(iText.Kernel.Colors.ColorConstants.LIGHT_GRAY));
+                            // Ligne
+                            tableContenu.AddCell(new Cell().Add(new Paragraph("__________")
+                                .SetFontColor(iText.Kernel.Colors.ColorConstants.LIGHT_GRAY)
+                                .SetTextAlignment(iText.Layout.Properties.TextAlignment.CENTER))
+                                .SetBorder(iText.Layout.Borders.Border.NO_BORDER)
+                                .SetPaddingTop(-5) // Remonter un peu la ligne
+                                .SetPaddingBottom(5));
 
-                            // Message personnalisé
+                            // Message 
                             if (!string.IsNullOrWhiteSpace(message))
                             {
-                                document.Add(new Paragraph(message)
-                                    .SetFont(font)
-                                    .SetFontSize(12)
-                                    .SetTextAlignment(iText.Layout.Properties.TextAlignment.CENTER)
-                                    .SetMarginTop(10));
-                            }
-
-                            // Date en bas
-                            if (!string.IsNullOrWhiteSpace(dateEvent))
-                            {
-                                // On positionne la date en bas de page
-                                document.Add(new Paragraph($"\n{dateEvent}")
+                                tableContenu.AddCell(new Cell().Add(new Paragraph(message))
                                     .SetFont(font)
                                     .SetFontSize(10)
-                                    .SetTextAlignment(iText.Layout.Properties.TextAlignment.CENTER));
+                                    .SetTextAlignment(iText.Layout.Properties.TextAlignment.CENTER)
+                                    .SetBorder(iText.Layout.Borders.Border.NO_BORDER));
                             }
 
-                            //Saut de page (sauf pour le dernier)
-                            //AreaBreakType.NEXT_PAGE crée une nouvelle page A6
+                            // Date
+                            if (!string.IsNullOrWhiteSpace(dateEvent))
+                            {
+                                tableContenu.AddCell(new Cell().Add(new Paragraph(dateEvent))
+                                    .SetFont(font)
+                                    .SetFontSize(8)
+                                    .SetFontColor(iText.Kernel.Colors.ColorConstants.GRAY)
+                                    .SetTextAlignment(iText.Layout.Properties.TextAlignment.CENTER)
+                                    .SetBorder(iText.Layout.Borders.Border.NO_BORDER)
+                                    .SetPaddingTop(5));
+                            }
+
+                            document.Add(tableContenu);
+
+
+                            PliurePdf(pdf, formatPage);
+
                             if (i < selection.Count - 1)
                             {
                                 document.Add(new AreaBreak(AreaBreakType.NEXT_PAGE));
                             }
                         }
-
                         document.Close();
                     }
                 }
-
                 MessageBox.Show("Étiquettes générées avec succès !", "Succès", MessageBoxButton.OK, MessageBoxImage.Information);
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Erreur PDF : {ex.Message}", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
             }
+        }
+
+        /// <summary>
+        /// Genere le trait sur lequel pliser la carte
+        /// </summary>
+        /// <param name="pdf">pdf sur lequel l'appliquer</param>
+        /// <param name="pageSize">taille de ce pdf</param>
+        private void PliurePdf(PdfDocument pdf, PageSize pageSize)
+        {
+            try
+            {
+                var page = pdf.GetLastPage();
+                if (page == null) return;
+                var pdfCanvas = new iText.Kernel.Pdf.Canvas.PdfCanvas(page);
+
+                float middleY = pageSize.GetHeight() / 2;
+                float width = pageSize.GetWidth();
+
+                pdfCanvas.SetLineDash(3, 3);
+                pdfCanvas.SetLineWidth(0.5f);
+                pdfCanvas.SetStrokeColor(iText.Kernel.Colors.ColorConstants.LIGHT_GRAY);
+
+                pdfCanvas.MoveTo(5, middleY);
+                pdfCanvas.LineTo(width - 5, middleY);
+                pdfCanvas.Stroke();
+            }
+            catch { }
         }
 
         private void Fermer_Click(object sender, RoutedEventArgs e)

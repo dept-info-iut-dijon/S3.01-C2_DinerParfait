@@ -11,6 +11,11 @@
         public int Id { get; set; }
 
         /// <summary>
+        /// Identifiant du restaurant auquel appartient ce plat
+        /// </summary>
+        public int RestaurantId { get; set; }
+
+        /// <summary>
         /// Nom du plat.
         /// </summary>
         public string Nom { get; set; }
