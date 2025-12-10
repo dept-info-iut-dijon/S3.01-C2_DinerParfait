@@ -16,6 +16,16 @@ namespace EpicurAPP_Partage.Models
         public int MenuId { get; set; }
 
         /// <summary>
+        /// Identifiant du service.
+        /// </summary>
+        public int ServiceId { get; set; }
+
+        /// <summary>
+        /// Nombre de couverts.
+        /// </summary>
+        public int NbCouverts { get; set; } = 1;
+
+        /// <summary>
         /// Indique si le restaurateur force la réservation malgré les conflits.
         /// </summary>
         public bool ForceReservation { get; set; } = false;

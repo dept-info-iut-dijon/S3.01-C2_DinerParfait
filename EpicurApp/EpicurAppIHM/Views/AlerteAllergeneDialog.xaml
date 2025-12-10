@@ -1,0 +1,60 @@
+﻿<Window x:Class="EpicurAppIHM.Views.AlerteAllergeneDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Alerte Allergènes" 
+        Height="350" Width="500"
+        WindowStartupLocation="CenterOwner"
+        ResizeMode="NoResize"
+        Background="#1E1E1E">
+
+    <Grid Margin="20">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <!-- Icône et Titre -->
+        <StackPanel Grid.Row="0" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,0,0,15">
+            <TextBlock x:Name="txtTitre" Text="Conflit d'Allergènes Détecté" 
+                       FontSize="20" FontWeight="Bold" Foreground="#FF6B6B" 
+                       VerticalAlignment="Center"/>
+        </StackPanel>
+
+        <!-- Message de détail -->
+        <Border Grid.Row="1" Background="#2D2D2D" CornerRadius="8" Padding="15" Margin="0,0,0,15">
+            <TextBlock x:Name="txtMessage" TextWrapping="Wrap" Foreground="#FFFFFF" FontSize="14"/>
+        </Border>
+
+        <!-- Zone note override -->
+        <StackPanel Grid.Row="2" Margin="0,0,0,15">
+            <TextBlock Text="Note de justification (obligatoire pour forcer) :" 
+                       Foreground="#AAAAAA" FontSize="12" Margin="0,0,0,5"/>
+            <TextBox x:Name="txtNoteOverride" 
+                     Height="60" 
+                     TextWrapping="Wrap" 
+                     AcceptsReturn="True"
+                     Background="#2D2D2D" 
+                     Foreground="#FFFFFF" 
+                     BorderBrush="#D4AF37"
+                     Padding="8"/>
+        </StackPanel>
+
+        <!-- Boutons -->
+        <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,10,0,0">
+            <Button x:Name="btnAnnuler" Content="❌ Annuler la réservation" 
+                    Click="Annuler_Click"
+                    Background="#444444" Foreground="White" 
+                    Padding="15,10" Margin="0,0,10,0" 
+                    Cursor="Hand"/>
+            <Button x:Name="btnForcer" Content="⚡ Forcer la réservation" 
+                    Click="Forcer_Click"
+                    Background="#D4AF37" Foreground="#1E1E1E" 
+                    FontWeight="Bold"
+                    Padding="15,10" 
+                    Cursor="Hand"/>
+        </StackPanel>
+    </Grid>
+</Window>

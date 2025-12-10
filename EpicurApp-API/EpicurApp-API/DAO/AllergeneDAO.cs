@@ -158,7 +158,7 @@ namespace EpicurApp_API.DAO
                     INNER JOIN Ingredients i ON ia.IngredientId = i.Id
                     INNER JOIN PlatIngredient pi ON i.Id = pi.IngredientId
                     INNER JOIN Plats p ON pi.PlatId = p.Id
-                    INNER JOIN ElementsMenu em ON p.Id = em.PlatId
+                    INNER JOIN ElementMenus em ON p.Id = em.PlatId
                     WHERE em.MenuId = @MenuId";
 
                 using (var command = new SqliteCommand(query, connection))
@@ -199,7 +199,7 @@ namespace EpicurApp_API.DAO
                     INNER JOIN IngredientAllergene ia ON i.Id = ia.IngredientId
                     INNER JOIN PlatIngredient pi ON i.Id = pi.IngredientId
                     INNER JOIN Plats p ON pi.PlatId = p.Id
-                    INNER JOIN ElementsMenu em ON p.Id = em.PlatId
+                    INNER JOIN ElementMenus em ON p.Id = em.PlatId
                     WHERE em.MenuId = @MenuId AND ia.AllergeneId = @AllergeneId";
 
                 using (var command = new SqliteCommand(query, connection))

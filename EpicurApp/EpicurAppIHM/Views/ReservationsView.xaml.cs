@@ -177,7 +177,32 @@ namespace EpicurAppIHM.Views
             }
 
             var client = cmbClients.SelectedItem as Client;
+            if (client == null) return;
 
+            // Vérification des conflits d'allergènes
+            var detectionService = new AllergeneDetectionService(App.ApiClient.HttpClient);
+            var conflit = await detectionService.DetecterConflitAsync(client.Id, _serviceSelectionne.MenuId);
+
+            bool forceOverride = false;
+            string? noteOverride = null;
+
+            if (conflit != null && conflit.AllergenesEnConflit != null && conflit.AllergenesEnConflit.Count > 0)
+            {
+                // Afficher la popup d'alerte
+                var dialog = new AlerteAllergeneDialog(conflit);
+                dialog.Owner = Window.GetWindow(this);
+                
+                if (dialog.ShowDialog() != true)
+                {
+                    // L'utilisateur a annulé
+                    return;
+                }
+
+                forceOverride = dialog.ReservationForcee;
+                noteOverride = dialog.NoteOverride;
+            }
+
+            // Créer la réservation via l'endpoint existant
             var nouvelleResa = new Reservation
             {
                 Id = 0,
@@ -188,13 +213,18 @@ namespace EpicurAppIHM.Views
 
             try
             {
-                // Appel API : POST /Services/Reservation
+                // Appel API : POST /Services/Reservation (endpoint existant)
                 var response = await App.ApiClient.HttpClient.PostAsJsonAsync("Services/Reservation", nouvelleResa);
 
                 if (response.IsSuccessStatusCode)
                 {
+                    string message = forceOverride 
+                        ? $"Réservation créée avec override allergène.\nNote : {noteOverride}" 
+                        : "Réservation créée avec succès !";
+                    MessageBox.Show(message, "Succès", MessageBoxButton.OK, MessageBoxImage.Information);
+                    
                     await ChargerReservations(_serviceSelectionne.Id);
-                    txtCouverts.Text = "2"; // Reset
+                    txtCouverts.Text = "2";
                 }
                 else
                 {

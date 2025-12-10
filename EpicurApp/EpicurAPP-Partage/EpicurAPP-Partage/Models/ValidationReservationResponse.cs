@@ -34,5 +34,10 @@ namespace EpicurAPP_Partage.Models
         /// Message global de validation.
         /// </summary>
         public string Message { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Identifiant de la réservation créée (si succès).
+        /// </summary>
+        public int? ReservationId { get; set; }
     }
 }

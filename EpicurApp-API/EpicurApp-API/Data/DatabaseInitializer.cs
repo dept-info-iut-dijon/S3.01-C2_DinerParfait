@@ -275,6 +275,7 @@ namespace EpicurApp_API.Data
                 SeedIdeesPlats(connection);
                 SeedServices(connection);
                 SeedReservations(connection);
+                SeedIngredientAllergene(connection);
             }
         }
 
@@ -1034,6 +1035,114 @@ namespace EpicurApp_API.Data
                         insertCommand.Parameters["@ServiceId"].Value = reservation.ServiceId;
                         insertCommand.Parameters["@ClientId"].Value = reservation.ClientId;
                         insertCommand.Parameters["@NbCouverts"].Value = reservation.NbCouverts;
+                        insertCommand.ExecuteNonQuery();
+                    }
+                }
+
+                transaction.Commit();
+            }
+        }
+
+        /// <summary>
+        /// Méthode pour insérer les associations ingrédients-allergènes.
+        /// Permet la détection des conflits d'allergènes dans les menus.
+        /// </summary>
+        /// <param name="connection">Connexion à la base de données.</param>
+        private static void SeedIngredientAllergene(SqliteConnection connection)
+        {
+            using (var transaction = connection.BeginTransaction())
+            {
+                using (var countCommand = new SqliteCommand("SELECT COUNT(*) FROM IngredientAllergene;", connection, transaction))
+                {
+                    long count = (long)(countCommand.ExecuteScalar() ?? 0);
+                    if (count > 0)
+                    {
+                        transaction.Commit();
+                        return;
+                    }
+                }
+
+                // Associations ingrédients -> allergènes
+                // Format: (IngredientId, AllergeneId)
+                // 
+                // Rappel des allergènes (IDs):
+                // 1=Gluten, 2=Crustacés, 3=Œufs, 4=Poissons, 5=Arachides, 6=Soja, 
+                // 7=Lait, 8=Fruits à coque, 9=Céleri, 10=Moutarde, 11=Sésame, 
+                // 12=Sulfites, 13=Lupin, 14=Mollusques
+                //
+                // Rappel des ingrédients (IDs):
+                // 1=Tomates, 2=Basilic, 3=Huile d'olive, 4=Saumon fumé, 5=Avocat,
+                // 6=Citron vert, 7=Prosecco, 8=Aperol, 9=Eau pétillante, 10=Framboise,
+                // 11=Myrtille, 12=Citron, 13=Potiron, 14=Crème fraîche, 15=Muscade,
+                // 16=Dorade, 17=Agrumes, 18=Ciboulette, 19=Magret de canard, 20=Miel,
+                // 21=Romarin, 22=Riz arborio, 23=Cèpes, 24=Parmesan, 25=Comté,
+                // 26=Brie, 27=Roquefort, 28=Chèvre, 29=Miel d'acacia, 30=Noix,
+                // 31=Meringue italienne, 32=Chocolat noir, 33=Crème, 34=Œufs
+
+                var associations = new (int IngredientId, int AllergeneId)[]
+                {
+                    // Saumon fumé -> Poissons
+                    (4, 4),
+                    
+                    // Dorade -> Poissons
+                    (16, 4),
+                    
+                    // Crème fraîche -> Lait
+                    (14, 7),
+                    
+                    // Parmesan -> Lait
+                    (24, 7),
+                    
+                    // Comté -> Lait
+                    (25, 7),
+                    
+                    // Brie -> Lait
+                    (26, 7),
+                    
+                    // Roquefort -> Lait
+                    (27, 7),
+                    
+                    // Chèvre -> Lait
+                    (28, 7),
+                    
+                    // Crème -> Lait
+                    (33, 7),
+                    
+                    // Noix -> Fruits à coque
+                    (30, 8),
+                    
+                    // Œufs -> Œufs
+                    (34, 3),
+                    
+                    // Meringue italienne -> Œufs (contient des blancs d'œufs)
+                    (31, 3),
+                    
+                    // Prosecco -> Sulfites
+                    (7, 12),
+                    
+                    // Aperol -> Sulfites
+                    (8, 12),
+                    
+                    // Riz arborio -> Gluten (traces possibles)
+                    // Note: Le riz ne contient pas de gluten, mais certains produits peuvent avoir des traces
+                    // Décommentez si nécessaire: (22, 1),
+                    
+                    // Chocolat noir -> peut contenir Lait et traces de Fruits à coque
+                    (32, 7),
+                    (32, 8),
+                };
+
+                using (var insertCommand = new SqliteCommand(
+                    "INSERT INTO IngredientAllergene (IngredientId, AllergeneId) VALUES (@IngredientId, @AllergeneId);",
+                    connection, transaction))
+                {
+                    insertCommand.Parameters.Add(new SqliteParameter("@IngredientId", SqliteType.Integer));
+                    insertCommand.Parameters.Add(new SqliteParameter("@AllergeneId", SqliteType.Integer));
+
+                    foreach (var association in associations)
+                    {
+                        insertCommand.Parameters["@IngredientId"].Value = association.IngredientId;
+                        insertCommand.Parameters["@AllergeneId"].Value = association.AllergeneId;
                         insertCommand.ExecuteNonQuery();
                     }
                 }
