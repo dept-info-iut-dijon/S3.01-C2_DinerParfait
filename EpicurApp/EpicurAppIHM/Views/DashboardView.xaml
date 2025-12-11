@@ -103,8 +103,8 @@
                                             <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
                                                 <Ellipse Width="12" Height="12" Fill="#FFD700" Margin="0,0,8,0"/>
                                                 <TextBlock FontSize="11" FontWeight="SemiBold" Foreground="#8B1538" TextWrapping="Wrap" VerticalAlignment="Center">
-                            <Run Text="{Binding Prenom}"/>
-                            <Run Text="{Binding Nom}"/>
+                            <Run Text="{Binding Client.Prenom}"/>
+                            <Run Text="{Binding Client.Nom}"/>
                                                 </TextBlock>
                                             </StackPanel>
                                             <TextBlock Text="{Binding InfoVisites}" FontSize="9" Foreground="#666" Margin="20,2,0,0"/>
