@@ -88,5 +88,28 @@ namespace EpicurAppIHM.Views
         {
             AfficherDashboard();
         }
+
+        /// <summary>
+        /// Gère la déconnexion de l'utilisateur
+        /// </summary>
+        private void OnLogout_Click(object sender, RoutedEventArgs e)
+        {
+            // Nettoyer les données de session
+            App.CurrentUser = null;
+            App.CurrentRestaurant = null;
+
+            // Supprimer le header RestaurantId
+            App.ApiClient.ClearRestaurantId();
+
+            // Retourner à la page de connexion
+            LoginView loginView = new LoginView();
+            loginView.Show();
+
+            // Fermer la fenêtre principale
+            if (Window.GetWindow(this) is MainWindow mainWindow)
+            {
+                mainWindow.Close();
+            }
+        }
     }
 }

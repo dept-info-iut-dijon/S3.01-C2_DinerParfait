@@ -13,7 +13,7 @@ namespace EpicurAppIHM.Repositories
     public class AllergeneRepository : IAllergeneRepository
     {
         private readonly HttpClient _httpClient;
-        private const string BaseEndpoint = "Allergenes";
+        private const string BaseEndpoint = "Allergene";
 
         public AllergeneRepository(HttpClient httpClient)
         {
@@ -25,8 +25,8 @@ namespace EpicurAppIHM.Repositories
         /// </summary>
         public async Task<List<Allergene>> GetAllAsync()
         {
-            List<Allergene>? list = await _httpClient.GetFromJsonAsync<List<Allergene>>(BaseEndpoint);
-            return list ?? new List<Allergene>();
+            List<Allergene>? allergenes = await _httpClient.GetFromJsonAsync<List<Allergene>>(BaseEndpoint);
+            return allergenes ?? new List<Allergene>();
         }
 
         /// <summary>

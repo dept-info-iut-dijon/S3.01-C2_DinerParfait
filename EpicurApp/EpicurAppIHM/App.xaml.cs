@@ -29,8 +29,8 @@ namespace EpicurAppIHM
         public static IMenuRepository MenuRepository { get; } = new MenuRepository(ApiClient.HttpClient);
         public static IPlatRepository PlatRepository { get; } = new PlatRepository(ApiClient.HttpClient);
         public static IClientRepository ClientRepository { get; } = new ClientRepository(ApiClient.HttpClient);
-        public static IAllergeneRepository AllergeneRepository { get; } = new AllergeneRepository(ApiClient.HttpClient);
         public static IIdeePlatRepository IdeePlatRepository { get; } = new IdeePlatRepository(ApiClient.HttpClient);
+        public static IAllergeneRepository AllergeneRepository { get; } = new AllergeneRepository(ApiClient.HttpClient);
     }
 
 }
