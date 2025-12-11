@@ -11,14 +11,17 @@ namespace EpicurAppLogic.Services
     public class AuthService : IAuthService
     {
         private readonly IUtilisateurDAO _utilisateurDAO;
+        private readonly IRestaurantDAO _restaurantDAO;
 
         /// <summary>
         /// Initialise une nouvelle instance de AuthService.
         /// </summary>
         /// <param name="utilisateurDAO">DAO pour accéder aux utilisateurs.</param>
-        public AuthService(IUtilisateurDAO utilisateurDAO)
+        /// <param name="restaurantDAO">DAO pour accéder aux restaurants.</param>
+        public AuthService(IUtilisateurDAO utilisateurDAO, IRestaurantDAO restaurantDAO)
         {
             _utilisateurDAO = utilisateurDAO;
+            _restaurantDAO = restaurantDAO;
         }
 
         /// <summary>
@@ -70,6 +73,76 @@ namespace EpicurAppLogic.Services
         {
             string passwordHash = HashPassword(password);
             return passwordHash == hash;
+        }
+
+        /// <summary>
+        /// Valide qu'un mot de passe respecte les critères de sécurité.
+        /// </summary>
+        /// <param name="password">Le mot de passe à valider.</param>
+        /// <returns>True si valide, false sinon.</returns>
+        public bool ValidatePasswordStrength(string password)
+        {
+            if (string.IsNullOrWhiteSpace(password) || password.Length < 8)
+                return false;
+
+            bool hasUpper = password.Any(char.IsUpper);
+            bool hasLower = password.Any(char.IsLower);
+            bool hasDigit = password.Any(char.IsDigit);
+            bool hasSpecial = password.Any(ch => !char.IsLetterOrDigit(ch));
+
+            return hasUpper && hasLower && hasDigit && hasSpecial;
+        }
+
+        /// <summary>
+        /// Enregistre un nouvel utilisateur et crée son restaurant.
+        /// </summary>
+        /// <param name="email">Email de l'utilisateur.</param>
+        /// <param name="password">Mot de passe en clair.</param>
+        /// <param name="restaurantNom">Nom du restaurant.</param>
+        /// <param name="restaurantVille">Ville du restaurant.</param>
+        /// <returns>L'utilisateur créé avec son restaurant associé.</returns>
+        /// <exception cref="ArgumentException">Si le mot de passe ne respecte pas les critères de sécurité.</exception>
+        /// <exception cref="InvalidOperationException">Si l'email existe déjà.</exception>
+        public (Utilisateur utilisateur, Restaurant restaurant) Register(
+            string email,
+            string password,
+            string restaurantNom,
+            string restaurantVille)
+        {
+            // 1. Valider la force du mot de passe
+            if (!ValidatePasswordStrength(password))
+            {
+                throw new ArgumentException(
+                    "Le mot de passe doit contenir au moins 8 caractères, " +
+                    "une majuscule, une minuscule, un chiffre et un caractère spécial."
+                );
+            }
+
+            // 2. Vérifier que l'email n'existe pas déjà
+            var existingUser = _utilisateurDAO.GetByEmail(email);
+            if (existingUser != null)
+            {
+                throw new InvalidOperationException("Un compte avec cet email existe déjà.");
+            }
+
+            // 3. Créer le restaurant
+            var restaurant = new Restaurant
+            {
+                Nom = restaurantNom,
+                Ville = restaurantVille
+            };
+            _restaurantDAO.AjouterRestaurant(restaurant);
+
+            // 4. Créer l'utilisateur avec le mot de passe hashé
+            var utilisateur = new Utilisateur
+            {
+                Email = email,
+                PasswordHash = HashPassword(password),
+                RestaurantId = restaurant.Id
+            };
+            _utilisateurDAO.AjouterUtilisateur(utilisateur);
+
+            return (utilisateur, restaurant);
         }
     }
 }

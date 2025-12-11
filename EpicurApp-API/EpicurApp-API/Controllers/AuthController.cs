@@ -97,5 +97,88 @@ namespace EpicurApp_API.Controllers
                 });
             }
         }
+
+        /// <summary>
+        /// Endpoint pour créer un nouveau compte utilisateur avec son restaurant.
+        /// </summary>
+        /// <param name="request">Requête contenant les informations d'inscription.</param>
+        /// <returns>Informations de l'utilisateur créé et de son restaurant.</returns>
+        [HttpPost("register")]
+        public IActionResult Register([FromBody] RegisterRequest request)
+        {
+            try
+            {
+                // Validation du modèle
+                if (!ModelState.IsValid)
+                {
+                    return BadRequest(new
+                    {
+                        success = false,
+                        message = "Veuillez remplir tous les champs obligatoires."
+                    });
+                }
+
+                // Validation de la confirmation du mot de passe
+                if (request.Password != request.ConfirmPassword)
+                {
+                    return BadRequest(new
+                    {
+                        success = false,
+                        message = "Les mots de passe ne correspondent pas."
+                    });
+                }
+
+                // Création du compte
+                var (utilisateur, restaurant) = _authService.Register(
+                    request.Email,
+                    request.Password,
+                    request.RestaurantNom,
+                    request.RestaurantVille
+                );
+
+                // Retourner les informations (même format que le login)
+                return Ok(new
+                {
+                    success = true,
+                    message = "Compte créé avec succès.",
+                    utilisateur = new
+                    {
+                        id = utilisateur.Id,
+                        email = utilisateur.Email,
+                        restaurantId = utilisateur.RestaurantId
+                    },
+                    restaurant = new
+                    {
+                        id = restaurant.Id,
+                        nom = restaurant.Nom,
+                        ville = restaurant.Ville
+                    }
+                });
+            }
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new
+                {
+                    success = false,
+                    message = ex.Message
+                });
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(new
+                {
+                    success = false,
+                    message = ex.Message
+                });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    success = false,
+                    message = "Erreur interne lors de la création du compte : " + ex.Message
+                });
+            }
+        }
     }
 }
