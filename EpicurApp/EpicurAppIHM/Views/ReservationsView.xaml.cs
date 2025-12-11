@@ -33,6 +33,12 @@ namespace EpicurAppIHM.Views
 
             // Chargement initial
             this.Loaded += ReservationsView_Loaded;
+
+            // Rafraîchir les données quand la vue devient visible
+            this.IsVisibleChanged += ReservationsView_IsVisibleChanged;
+
+            // Rafraîchir les menus quand l'utilisateur ouvre la liste déroulante
+            cmbMenus.DropDownOpened += CmbMenus_DropDownOpened;
         }
 
         private async void ReservationsView_Loaded(object sender, RoutedEventArgs e)
@@ -44,13 +50,14 @@ namespace EpicurAppIHM.Views
         {
             try
             {
-                //Charger les Menus (pour la création de service)
-                var menus = await App.ApiClient.HttpClient.GetFromJsonAsync<List<EpicurAPP_Partage.Models.Menu>>("Menu");
-                if (menus != null)
+                // S'assurer que le header X-Restaurant-Id est défini
+                if (App.CurrentRestaurant != null)
                 {
-                    ListeMenus = menus;
-                    cmbMenus.ItemsSource = ListeMenus;
+                    App.ApiClient.SetRestaurantId(App.CurrentRestaurant.Id);
                 }
+
+                //Charger les Menus (pour la création de service)
+                await ChargerMenusValides();
 
                 //Charger les Clients (pour la prise de réservation)
                 var clients = await App.ApiClient.HttpClient.GetFromJsonAsync<List<Client>>("Client");
@@ -67,6 +74,66 @@ namespace EpicurAppIHM.Views
             {
                 MessageBox.Show($"Erreur de chargement : {ex.Message}");
             }
+        }
+
+        private async Task ChargerMenusValides()
+        {
+            try
+            {
+                // S'assurer que le header X-Restaurant-Id est défini
+                if (App.CurrentRestaurant != null)
+                {
+                    App.ApiClient.SetRestaurantId(App.CurrentRestaurant.Id);
+                }
+
+                var menuSelectionne = cmbMenus.SelectedItem as EpicurAPP_Partage.Models.Menu;
+                int? menuSelectionneId = menuSelectionne?.Id;
+
+                var menus = await App.ApiClient.HttpClient.GetFromJsonAsync<List<EpicurAPP_Partage.Models.Menu>>("menu/valides");
+                if (menus != null)
+                {
+                    ListeMenus = menus;
+                    cmbMenus.ItemsSource = ListeMenus;
+
+                    // Essayer de réappliquer la sélection précédente si elle existe toujours
+                    if (menuSelectionneId.HasValue)
+                    {
+                        var menuToReselect = ListeMenus.Find(m => m.Id == menuSelectionneId.Value);
+                        if (menuToReselect != null)
+                        {
+                            cmbMenus.SelectedItem = menuToReselect;
+                        }
+                        else
+                        {
+                            cmbMenus.SelectedIndex = ListeMenus.Count > 0 ? 0 : -1;
+                        }
+                    }
+                    else
+                    {
+                        cmbMenus.SelectedIndex = ListeMenus.Count > 0 ? 0 : -1;
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Erreur lors du chargement des menus : {ex.Message}");
+            }
+        }
+
+        private async void ReservationsView_IsVisibleChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            // Recharger les données quand la vue devient visible
+            if (this.IsVisible)
+            {
+                await ChargerMenusValides();
+                await ChargerServices();
+            }
+        }
+
+        private async void CmbMenus_DropDownOpened(object sender, EventArgs e)
+        {
+            // Recharger les menus quand l'utilisateur ouvre la liste
+            await ChargerMenusValides();
         }
 
         private async Task ChargerServices()
