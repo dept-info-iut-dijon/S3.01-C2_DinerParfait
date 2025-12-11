@@ -113,45 +113,12 @@
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
-                    <Label Grid.Row="0" Grid.Column="0" Content="Nom et Date" Foreground="#475569" FontWeight="SemiBold" FontSize="13" VerticalAlignment="Center" Margin="0,0,10,10"/>
+                    <Label Grid.Row="0" Grid.Column="0" Content="Nom du menu" Foreground="#475569" FontWeight="SemiBold" FontSize="13" VerticalAlignment="Center" Margin="0,0,10,10"/>
 
-                    <StackPanel Grid.Row="0" Grid.Column="1">
-                        <TextBox x:Name="txtNomMenu"
-                                 Height="40" FontSize="14" Padding="10,0,0,0" VerticalContentAlignment="Center"
-                                 Background="#2a2a2a" Foreground="White" BorderBrush="#D4AF37" BorderThickness="2"
-                                 Margin="0,0,0,10" Text="Nouveau menu"/>
-
-                        <DatePicker x:Name="dpDateMenu"
-                                    Height="40" FontSize="14" VerticalContentAlignment="Center"
-                                    BorderBrush="#D4AF37" BorderThickness="2" Background="#2a2a2a" Foreground="White"
-                                    Margin="0,0,0,10">
-                            <DatePicker.Resources>
-                                <Style TargetType="DatePickerTextBox">
-                                    <Setter Property="Background" Value="#2a2a2a"/>
-                                    <Setter Property="Foreground" Value="White"/>
-                                    <Setter Property="BorderThickness" Value="0"/>
-                                    <Setter Property="Padding" Value="10,0,0,0"/>
-                                    <Setter Property="VerticalContentAlignment" Value="Center"/>
-                                    <Setter Property="Template">
-                                        <Setter.Value>
-                                            <ControlTemplate TargetType="{x:Type DatePickerTextBox}">
-                                                <Grid>
-                                                    <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}"/>
-                                                    <ScrollViewer x:Name="PART_ContentHost" Margin="0" VerticalContentAlignment="Center"/>
-                                                    <TextBlock x:Name="Message" Text="Date de service" Foreground="#AAAAAA" FontStyle="Italic" IsHitTestVisible="False" VerticalAlignment="Center" Margin="10,0,0,0" Visibility="Collapsed"/>
-                                                </Grid>
-                                                <ControlTemplate.Triggers>
-                                                    <DataTrigger Binding="{Binding Text, RelativeSource={RelativeSource Self}}" Value="">
-                                                        <Setter TargetName="Message" Property="Visibility" Value="Visible"/>
-                                                    </DataTrigger>
-                                                </ControlTemplate.Triggers>
-                                            </ControlTemplate>
-                                        </Setter.Value>
-                                    </Setter>
-                                </Style>
-                            </DatePicker.Resources>
-                        </DatePicker>
-                    </StackPanel>
+                    <TextBox Grid.Row="0" Grid.Column="1" x:Name="txtNomMenu"
+                             Height="40" FontSize="14" Padding="10,0,0,0" VerticalContentAlignment="Center"
+                             Background="#2a2a2a" Foreground="White" BorderBrush="#D4AF37" BorderThickness="2"
+                             Margin="0,0,0,10" Text="Nouveau menu"/>
 
                     <TextBlock Grid.Row="1" Grid.ColumnSpan="2" Text="Apéritif" FontSize="16" FontWeight="Bold" Foreground="#8B1538" Margin="0,15,0,5" TextAlignment="Center"/>
 

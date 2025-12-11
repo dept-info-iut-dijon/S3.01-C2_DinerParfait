@@ -23,10 +23,6 @@ namespace EpicurAPP_Partage.Models
         /// Description de l'allergène
         /// </summary>
         public string Description { get; set; }
-        /// <summary>
-        /// Statut de sélection de l'allergène
-        /// </summary>
-        public bool IsSelected { get; set; }
 
         /// <summary>
         /// Affichage de l'allergène

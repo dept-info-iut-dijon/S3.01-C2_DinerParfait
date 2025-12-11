@@ -65,6 +65,9 @@
                                         <DataTemplate>
                                             <CheckBox Content="{Binding Nom}"
                                                       Tag="{Binding Id}"
+                                                      Loaded="CheckBoxAllergene_Loaded"
+                                                      Checked="CheckBoxAllergene_Checked"
+                                                      Unchecked="CheckBoxAllergene_Unchecked"
                                                       Foreground="White"
                                                       Margin="5,3"/>
                                         </DataTemplate>

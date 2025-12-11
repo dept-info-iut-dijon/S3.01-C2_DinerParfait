@@ -440,11 +440,11 @@ namespace EpicurApp_API.DAO
                 }
 
                 // Charger l'historique des menus
-                const string historyQuery = @"SELECT m.Id, m.Nom, m.Date, m.Statut 
-                    FROM Menus m 
-                    JOIN ClientMenu cm ON m.Id = cm.MenuId 
-                    WHERE cm.ClientId = @ClientId 
-                    ORDER BY m.Date DESC";
+                const string historyQuery = @"SELECT m.Id, m.Nom, m.Statut
+                    FROM Menus m
+                    JOIN ClientMenu cm ON m.Id = cm.MenuId
+                    WHERE cm.ClientId = @ClientId
+                    ORDER BY m.Id DESC";
 
                 using (var cmdHistory = new SqliteCommand(historyQuery, connection))
                 {
@@ -457,8 +457,7 @@ namespace EpicurApp_API.DAO
                             {
                                 Id = reader.GetInt32(0),
                                 Nom = reader.GetString(1),
-                                Date = DateTime.Parse(reader.GetString(2)),
-                                Statut = reader.GetString(3)
+                                Statut = reader.GetString(2)
                             });
                         }
                     }
@@ -546,6 +545,149 @@ namespace EpicurApp_API.DAO
             }
 
             return plats;
+        }
+
+        /// <summary>
+        /// Récupère les clients réguliers (3 visites ou plus sur l'année).
+        /// </summary>
+        /// <returns>Liste des clients réguliers.</returns>
+        public List<Client> GetClientsReguliers()
+        {
+            List<   Client> clientsReguliers = new List<Client>();
+
+            using (SqliteConnection connection = new SqliteConnection(_connectionString))
+            {
+                connection.Open();
+
+                // Clients avec 3+ visites dans l'année
+                string query = @"
+                     SELECT c.Id, c.Nom, c.Prenom, c.Email, c.Telephone, c.PlatsNonApprecies, c.Preferences, COUNT(r.Id) as NbVisites
+            FROM Clients c
+            INNER JOIN Repas r ON c.Id = r.ClientId
+            WHERE r.Date >= date('now', '-2 year')
+            GROUP BY c.Id
+            HAVING COUNT(r.Id) >= 3
+            ORDER BY NbVisites DESC";
+
+                using (SqliteCommand command = new SqliteCommand(query, connection))
+                using (SqliteDataReader reader = command.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        string platsNonAppreciesIds = reader.IsDBNull(5) ? "" : reader.GetString(5);
+
+                        Client client = new Client
+                        {
+                            Id = reader.GetInt32(0),
+                            Nom = reader.GetString(1),
+                            Prenom = reader.GetString(2),
+                            Email = reader.IsDBNull(3) ? "" : reader.GetString(3),
+                            Telephone = reader.IsDBNull(4) ? "" : reader.GetString(4),
+                            PlatsNonApprecies = ConvertirIdsEnPlats(platsNonAppreciesIds),
+                            Preferences = reader.IsDBNull(6) ? "" : reader.GetString(6)
+                        };
+
+                        clientsReguliers.Add(client);
+                    }
+                }
+            }
+
+            return clientsReguliers;
+        }
+
+        /// <summary>
+        /// Récupère les clients inactifs (pas de visite depuis plus de 60 jours).
+        /// </summary>
+        /// <returns>Liste des clients inactifs.</returns>
+        public List<Client> GetClientsInactifs()
+        {
+            List<Client> clientsInactifs = new List<Client>();
+
+            using (SqliteConnection connection = new SqliteConnection(_connectionString))
+            {
+                connection.Open();
+
+                // Clients sans visite depuis 60 jours OU jamais de visite
+                string query = @"
+            SELECT c.Id, c.Nom, c.Prenom, c.Email, c.Telephone, c.PlatsNonApprecies, c.Preferences
+            FROM Clients c
+            WHERE c.Id NOT IN (
+                SELECT DISTINCT r.ClientId
+                FROM Repas r
+                WHERE r.Date >= date('now', '-60 days')
+            )
+            ORDER BY c.Nom, c.Prenom";
+
+                using (SqliteCommand command = new SqliteCommand(query, connection))
+                using (SqliteDataReader reader = command.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        string platsNonAppreciesIds = reader.IsDBNull(5) ? "" : reader.GetString(5);
+
+                        Client client = new Client
+                        {
+                            Id = reader.GetInt32(0),
+                            Nom = reader.GetString(1),
+                            Prenom = reader.GetString(2),
+                            Email = reader.IsDBNull(3) ? "" : reader.GetString(3),
+                            Telephone = reader.IsDBNull(4) ? "" : reader.GetString(4),
+                            PlatsNonApprecies = ConvertirIdsEnPlats(platsNonAppreciesIds),
+                            Preferences = reader.IsDBNull(6) ? "" : reader.GetString(6)
+                        };
+
+                        clientsInactifs.Add(client);
+                    }
+                }
+            }
+
+            return clientsInactifs;
+        }
+
+        /// <summary>
+        /// Récupère les clients VIP (7+ visites sur l'année écoulée)
+        /// </summary>
+        public List<Client> GetClientsVIP()
+        {
+            List<Client> clientsVIP = new List<Client>();
+
+            using (SqliteConnection connection = new SqliteConnection(_connectionString))
+            {
+                connection.Open();
+
+                string query = @"
+            SELECT c.Id, c.Nom, c.Prenom, c.Email, c.Telephone, c.PlatsNonApprecies, c.Preferences, COUNT(r.Id) as NbVisites
+            FROM Clients c
+            INNER JOIN Repas r ON c.Id = r.ClientId
+            WHERE r.Date >= date('now', '-1 year')
+            GROUP BY c.Id
+            HAVING COUNT(r.Id) >= 7
+            ORDER BY NbVisites DESC";
+
+                using (SqliteCommand command = new SqliteCommand(query, connection))
+                using (SqliteDataReader reader = command.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        string platsNonAppreciesIds = reader.IsDBNull(5) ? "" : reader.GetString(5);
+
+                        Client client = new Client
+                        {
+                            Id = reader.GetInt32(0),
+                            Nom = reader.GetString(1),
+                            Prenom = reader.GetString(2),
+                            Email = reader.IsDBNull(3) ? "" : reader.GetString(3),
+                            Telephone = reader.IsDBNull(4) ? "" : reader.GetString(4),
+                            PlatsNonApprecies = ConvertirIdsEnPlats(platsNonAppreciesIds),
+                            Preferences = reader.IsDBNull(6) ? "" : reader.GetString(6)
+                        };
+
+                        clientsVIP.Add(client);
+                    }
+                }
+            }
+
+            return clientsVIP;
         }
     }
 }

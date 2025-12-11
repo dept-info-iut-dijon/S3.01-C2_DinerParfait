@@ -3,74 +3,90 @@ using System.Windows.Controls;
 
 namespace EpicurAppIHM.Views
 {
-    /// <summary>
-    /// Fenêtre principale de l'application
-    /// </summary>
     public partial class MainView : UserControl
     {
-        /// <summary>
-        /// Construit la fenêtre principale
-        /// </summary>
         public MainView()
         {
             InitializeComponent();
         }
 
         /// <summary>
-        /// Affiche la vue des clients
+        /// Cache toutes les vues
+        /// </summary>
+        private void CacherToutesLesVues()
+        {
+            DashboardViewControl.Visibility = Visibility.Collapsed;
+            ClientsViewControl.Visibility = Visibility.Collapsed;
+            MenusViewControl.Visibility = Visibility.Collapsed;
+            BoiteIdeesViewControl.Visibility = Visibility.Collapsed;
+            ReservationsViewControl.Visibility = Visibility.Collapsed;
+        }
+
+        /// <summary>
+        /// Affiche la vue client
         /// </summary>
         private void AfficherClients(object sender, RoutedEventArgs e)
         {
-            ClientsViewControl.Visibility = Visibility.Visible;
-            MenusViewControl.Visibility = Visibility.Collapsed;
-            BoiteIdeesViewControl.Visibility = Visibility.Collapsed;
-            ReservationsViewControl.Visibility = Visibility.Collapsed;
+            CacherToutesLesVues(); 
+            ClientsViewControl.Visibility = Visibility.Visible; 
         }
 
+
         /// <summary>
-        /// Affiche la vue des menus
+        /// Affiche la vue menu
         /// </summary>
         private void AfficherMenus(object sender, RoutedEventArgs e)
         {
-            ClientsViewControl.Visibility = Visibility.Collapsed;
+            CacherToutesLesVues();
             MenusViewControl.Visibility = Visibility.Visible;
-            BoiteIdeesViewControl.Visibility = Visibility.Collapsed;
-            ReservationsViewControl.Visibility = Visibility.Collapsed;
-
             MenusViewControl.ChargerMenus();
         }
 
+
         /// <summary>
-        /// Affiche la vue  boite a idees
+        /// affiche la vue boite a idee
         /// </summary>
         private void AfficherBoiteIdees(object sender, RoutedEventArgs e)
         {
-            ClientsViewControl.Visibility = Visibility.Collapsed;
-            MenusViewControl.Visibility = Visibility.Collapsed;
+            CacherToutesLesVues();
             BoiteIdeesViewControl.Visibility = Visibility.Visible;
-            ReservationsViewControl.Visibility = Visibility.Collapsed;
-
             BoiteIdeesViewControl.ChargerIdees();
         }
 
         /// <summary>
-        /// Affiche la vue des réservations
+        /// Affiche la vue reservation
         /// </summary>
         private void AfficherReservations(object sender, RoutedEventArgs e)
         {
-            ClientsViewControl.Visibility = Visibility.Collapsed;
-            MenusViewControl.Visibility = Visibility.Collapsed;
-            BoiteIdeesViewControl.Visibility = Visibility.Collapsed;
+            CacherToutesLesVues();
             ReservationsViewControl.Visibility = Visibility.Visible;
         }
 
         /// <summary>
-        /// Ouvre la fenêtre des étiquettes
+        /// Affiche la vue dashboard
+        /// </summary>
+        public void AfficherDashboard()
+        {
+            CacherToutesLesVues(); 
+            DashboardViewControl.Visibility = Visibility.Visible;
+            DashboardViewControl.Rafraichir();
+        }
+
+        /// <summary>
+        /// Affiche la vue etiquette
         /// </summary>
         private void OuvrirEtiquettes_Click(object sender, RoutedEventArgs e)
         {
             EtiquettesView etiquettesView = new EtiquettesView();
             etiquettesView.Show();
+        }
+
+        /// <summary>
+        /// Affiche la vue acceuil
+        /// </summary>
+        private void OuvrirAcceuilClick(object sender, RoutedEventArgs e)
+        {
+            AfficherDashboard();
         }
     }
 }

@@ -14,24 +14,39 @@ namespace EpicurApp_API.DAO
         /// <summary>
         /// Initialise une nouvelle instance de ServiceDAO.
         /// </summary>
-        /// <param name="databaseConfiguration">Configuration de la base de donn�es.</param>
+        /// <param name="databaseConfiguration">Configuration de la base de données.</param>
         public ServiceDAO(DatabaseConfiguration databaseConfiguration)
         {
             _connectionString = databaseConfiguration.GetConnectionString();
         }
 
         /// <summary>
-        /// Ajoute un nouveau service dans la base de donn�es.
+        /// Ajoute un nouveau service dans la base de données.
         /// </summary>
-        /// <param name="service">Le service � ajouter.</param>
-        public void AjouterService(Service service)
+        /// <param name="service">Le service à ajouter.</param>
+        /// <param name="restaurantId">Identifiant du restaurant pour valider que le menu appartient bien à ce restaurant.</param>
+        public void AjouterService(Service service, int restaurantId)
         {
             using (SqliteConnection connection = new SqliteConnection(_connectionString))
             {
                 connection.Open();
 
-                string query = @"INSERT INTO Services 
-                    (Date, MidiSoir, MenuId, Statut) 
+                // V�rifier que le menu existe et appartient au restaurant
+                string checkQuery = @"SELECT COUNT(*) FROM Menus WHERE Id = @MenuId AND RestaurantId = @RestaurantId";
+                using (SqliteCommand checkCommand = new SqliteCommand(checkQuery, connection))
+                {
+                    checkCommand.Parameters.AddWithValue("@MenuId", service.MenuId);
+                    checkCommand.Parameters.AddWithValue("@RestaurantId", restaurantId);
+
+                    long count = (long)(checkCommand.ExecuteScalar() ?? 0);
+                    if (count == 0)
+                    {
+                        throw new InvalidOperationException($"Le menu avec l'ID {service.MenuId} n'existe pas ou n'appartient pas au restaurant {restaurantId}.");
+                    }
+                }
+
+                string query = @"INSERT INTO Services
+                    (Date, MidiSoir, MenuId, Statut)
                     VALUES (@Date, @MidiSoir, @MenuId, @Statut);
                     SELECT last_insert_rowid();";
 
@@ -52,11 +67,11 @@ namespace EpicurApp_API.DAO
         }
 
         /// <summary>
-        /// R�cup�re tous les services pour une date donn�e et un restaurant donn�.
+        /// Récupère tous les services pour une date donnée et un restaurant donné.
         /// </summary>
-        /// <param name="date">Date pour laquelle r�cup�rer les services.</param>
+        /// <param name="date">Date pour laquelle récupérer les services.</param>
         /// <param name="restaurantId">Identifiant du restaurant.</param>
-        /// <returns>Liste des services trouv�s.</returns>
+        /// <returns>Liste des services trouvés.</returns>
         public List<Service> GetServicesParDate(DateTime date, int restaurantId)
         {
             List<Service> services = new List<Service>();
@@ -100,7 +115,7 @@ namespace EpicurApp_API.DAO
         }
 
         /// <summary>
-        /// R�cup�re tous les services futurs (� partir d'aujourd'hui) pour un restaurant donn�.
+        /// Récupère tous les services futurs (à partir d'aujourd'hui) pour un restaurant donné.
         /// </summary>
         /// <param name="restaurantId">Identifiant du restaurant.</param>
         /// <returns>Liste de tous les services futurs du restaurant.</returns>

@@ -116,11 +116,11 @@ namespace EpicurApp_API.Data
                     CREATE TABLE IF NOT EXISTS Menus (
                         Id INTEGER PRIMARY KEY AUTOINCREMENT,
                         Nom TEXT NOT NULL,
-                        Date DATETIME NOT NULL,
                         Statut TEXT NOT NULL,
                         Note INTEGER CHECK (Note IS NULL OR (Note >= 0 AND Note <= 5)),
                         Retours TEXT,
                         RestaurantId INTEGER NOT NULL DEFAULT 1,
+                        DateCreation TEXT NOT NULL DEFAULT (datetime('now')),
                         FOREIGN KEY (RestaurantId) REFERENCES Restaurants(Id) ON DELETE CASCADE
                     );";
 
@@ -693,28 +693,27 @@ namespace EpicurApp_API.Data
                 }
 
                 // Insertion des menus
-                var menus = new (string Nom, string Date, string Statut, int RestaurantId, int? Note, string? Retours)[]
+                var menus = new (string Nom, string Statut, int RestaurantId, int? Note, string? Retours)[]
                 {
                     // Menus Restaurant 1 (Le Gourmet Dijonnais)
-                    ("Menu Découverte", "2024-11-15", "Validé", 1,5,"Parfait, je reviendrais"),
-                    ("Menu Végétarien", "2024-11-16", "Validé", 1,4,"Très bon mais l'entrée était un peu trop salée"),
-                    ("Menu du Jour", "2024-11-18", "Validé", 1,null,null),
+                    ("Menu Découverte", "Validé", 1,5,"Parfait, je reviendrais"),
+                    ("Menu Végétarien", "Validé", 1,4,"Très bon mais l'entrée était un peu trop salée"),
+                    ("Menu du Jour", "Validé", 1,null,null),
 
                     // Menus Restaurant 2 (La Table de Lyon)
-                    ("Menu Lyonnais Tradition", "2024-11-15", "Validé", 2,5,"Menu que je conseille à tout les pelos de Lyon"),
-                    ("Menu du Terroir", "2024-11-17", "Validé", 2,1,"Menu du tiroir peut etre mais pas terroir"),
+                    ("Menu Lyonnais Tradition", "Validé", 2,5,"Menu que je conseille à tout les pelos de Lyon"),
+                    ("Menu du Terroir", "Validé", 2,1,"Menu du tiroir peut etre mais pas terroir"),
 
                     // Menus Restaurant 3 (Le Bistrot Parisien)
-                    ("Menu Bistrot Classique", "2024-11-16", "Validé", 3,3,"Menu bistrot classique un peu trop classique"),
-                    ("Menu Parisien", "2024-11-19", "Validé", 3,5,"Le menu était précipité, un vrai parisien"),
+                    ("Menu Bistrot Classique", "Validé", 3,3,"Menu bistrot classique un peu trop classique"),
+                    ("Menu Parisien", "Validé", 3,5,"Le menu était précipité, un vrai parisien"),
                 };
 
                 using (var insertMenuCommand = new SqliteCommand(
-                    "INSERT INTO Menus (Nom, Date, Statut, RestaurantId, Note, Retours) VALUES (@Nom, @Date, @Statut, @RestaurantId, @Note, @Retours);",
+                    "INSERT INTO Menus (Nom, Statut, RestaurantId, Note, Retours) VALUES (@Nom, @Statut, @RestaurantId, @Note, @Retours);",
                     connection, transaction))
                 {
                     insertMenuCommand.Parameters.Add(new SqliteParameter("@Nom", SqliteType.Text));
-                    insertMenuCommand.Parameters.Add(new SqliteParameter("@Date", SqliteType.Text));
                     insertMenuCommand.Parameters.Add(new SqliteParameter("@Statut", SqliteType.Text));
                     insertMenuCommand.Parameters.Add(new SqliteParameter("@Note", SqliteType.Integer));
                     insertMenuCommand.Parameters.Add(new SqliteParameter("@Retours", SqliteType.Text));
@@ -723,7 +722,6 @@ namespace EpicurApp_API.Data
                     foreach (var menu in menus)
                     {
                         insertMenuCommand.Parameters["@Nom"].Value = menu.Nom;
-                        insertMenuCommand.Parameters["@Date"].Value = menu.Date;
                         insertMenuCommand.Parameters["@Statut"].Value = menu.Statut;
                         insertMenuCommand.Parameters["@RestaurantId"].Value = menu.RestaurantId;
                         insertMenuCommand.Parameters["@Note"].Value = menu.Note ?? (object)DBNull.Value;

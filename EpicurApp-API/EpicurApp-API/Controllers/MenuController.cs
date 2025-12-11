@@ -112,22 +112,55 @@ namespace EpicurApp_API.Controllers
         }
 
         /// <summary>
-        /// Méthode GET pour récupérer le dernier brouillon de menu.
+        /// Méthode GET pour récupérer le dernier brouillon de menu du restaurant.
         /// </summary>
-        /// <returns>Le dernier menu en statut Brouillon ou NotFound</returns>
+        /// <returns>Le dernier menu en statut Brouillon du restaurant ou NotFound</returns>
         [HttpGet("brouillon")]
         public ActionResult<Menu> GetBrouillon()
         {
             try
             {
-                List<Menu> menus = _menuService.GetAll();
-                Menu? brouillon = menus.FirstOrDefault(m => m.Statut == "Brouillon");
-                if (brouillon == null) return NotFound();
+                // Récupération du RestaurantId depuis le header
+                int? restaurantId = GetRestaurantIdFromHeader();
+
+                if (!restaurantId.HasValue)
+                {
+                    return BadRequest("Header X-Restaurant-Id requis.");
+                }
+
+                Menu? brouillon = _menuDAO.GetDernierBrouillon(restaurantId.Value);
+                if (brouillon == null) return NotFound("Aucun menu brouillon trouvé pour ce restaurant.");
                 return Ok(brouillon);
             }
             catch (Exception ex)
             {
                 return BadRequest($"Erreur lors de la récupération du brouillon: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Méthode GET pour récupérer tous les menus validés du restaurant.
+        /// </summary>
+        /// <returns>Liste des menus validés du restaurant</returns>
+        [HttpGet("valides")]
+        public ActionResult<List<Menu>> GetMenusValides()
+        {
+            try
+            {
+                // Récupération du RestaurantId depuis le header
+                int? restaurantId = GetRestaurantIdFromHeader();
+
+                if (!restaurantId.HasValue)
+                {
+                    return BadRequest("Header X-Restaurant-Id requis.");
+                }
+
+                List<Menu> menusValides = _menuDAO.GetMenusValides(restaurantId.Value);
+                return Ok(menusValides);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Erreur lors de la récupération des menus validés: {ex.Message}");
             }
         }
 
@@ -182,6 +215,10 @@ namespace EpicurApp_API.Controllers
             {
                 return BadRequest(ex.Message);
             }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
             catch (Exception ex)
             {
                 return StatusCode(500, $"Erreur lors de l'ajout du menu : {ex.Message}");
@@ -222,6 +259,10 @@ namespace EpicurApp_API.Controllers
                 return NoContent();
             }
             catch (ValidationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (InvalidOperationException ex)
             {
                 return BadRequest(ex.Message);
             }

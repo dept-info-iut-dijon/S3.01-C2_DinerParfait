@@ -42,7 +42,6 @@ namespace EpicurAppIHM.Views
             btnSupprimer.Click += SupprimerMenu;
             btnEnregistrerBrouillon.Click += EnregistrerBrouillon;
             btnValider.Click += ValiderMenu;
-            dpDateMenu.SelectedDateChanged += (s, e) => VerifierVerrouillageDate();
         }
 
         /// <summary>
@@ -198,7 +197,7 @@ namespace EpicurAppIHM.Views
 
                 MenuModel? menu = await App.MenuRepository.GetByIdAsync(menuId);
 
-                if (menu == null)
+                if (menu != null)
                 {
                     _menuBrouillonId = menu.Id;
                     txtNomMenu.Text = menu.Nom;
@@ -230,9 +229,7 @@ namespace EpicurAppIHM.Views
                 {
                     MessageBox.Show("Menu introuvable", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
                     _menuBrouillonId = null;
-                    dpDateMenu.SelectedDate = DateTime.Today;
                     btnSupprimer.Visibility = Visibility.Collapsed;
-                    AppliquerVerrouillageUI(false);
                     return;
                 }
 
@@ -297,7 +294,6 @@ namespace EpicurAppIHM.Views
                 // Erreur silencieuse pour le brouillon
                 _menuBrouillonId = null;
                 btnSupprimer.Visibility = Visibility.Collapsed;
-                AppliquerVerrouillageUI(false);
             }
         }
 
@@ -309,7 +305,6 @@ namespace EpicurAppIHM.Views
         {
             _menuBrouillonId = menu.Id;
             txtNomMenu.Text = menu.Nom;
-            dpDateMenu.SelectedDate = menu.Date;
 
             cmbAmuseGueule.SelectedValue = menu.Elements.FirstOrDefault(e => e.Categorie == CategoriePlat.AmuseBouche)?.PlatId;
             cmbBoissonAperitif.SelectedValue = menu.Elements.FirstOrDefault(e => e.Categorie == CategoriePlat.BoissonAperitif)?.PlatId;
@@ -320,9 +315,6 @@ namespace EpicurAppIHM.Views
             cmbDessert.SelectedValue = menu.Elements.FirstOrDefault(e => e.Categorie == CategoriePlat.Dessert)?.PlatId;
 
             btnSupprimer.Visibility = Visibility.Visible;
-
-            // Application du verrouillage 48h
-            AppliquerVerrouillageUI(menu.EstVerrouille);
         }
 
         /// <summary>
@@ -417,7 +409,6 @@ namespace EpicurAppIHM.Views
         {
             MenuModel menu = new MenuModel();
             menu.Nom = string.IsNullOrWhiteSpace(txtNomMenu.Text) ? "Nouveau menu" : txtNomMenu.Text.Trim();
-            menu.Date = DateTime.Now;
             menu.Statut = statut;
             menu.Elements.Clear();
 
@@ -524,36 +515,6 @@ namespace EpicurAppIHM.Views
                     btnSupprimer.Content = "Supprimer";
                 }
             }
-        }
-
-        private void VerifierVerrouillageDate()
-        {
-            if (dpDateMenu.SelectedDate.HasValue && _menuBrouillonId.HasValue)
-            {
-                // Vérification dynamique locale pour feedback immédiat
-                bool verrouille = (dpDateMenu.SelectedDate.Value - DateTime.Now).TotalHours < 48;
-                AppliquerVerrouillageUI(verrouille);
-            }
-        }
-
-        private void AppliquerVerrouillageUI(bool verrouille)
-        {
-            // Affiche le bandeau rouge
-            bdAlerteVerrouillage.Visibility = verrouille ? Visibility.Visible : Visibility.Collapsed;
-
-            // Grise les champs d'édition
-            txtNomMenu.IsEnabled = !verrouille;
-            cmbAmuseGueule.IsEnabled = !verrouille;
-            cmbBoissonAperitif.IsEnabled = !verrouille;
-            cmbEntree.IsEnabled = !verrouille;
-            cmbPlat.IsEnabled = !verrouille;
-            cmbVin.IsEnabled = !verrouille;
-            cmbFromage.IsEnabled = !verrouille;
-            cmbDessert.IsEnabled = !verrouille;
-
-            // Cache les boutons de sauvegarde
-            btnValider.Visibility = verrouille ? Visibility.Collapsed : Visibility.Visible;
-            btnEnregistrerBrouillon.Visibility = verrouille ? Visibility.Collapsed : Visibility.Visible;
         }
     }
 }
