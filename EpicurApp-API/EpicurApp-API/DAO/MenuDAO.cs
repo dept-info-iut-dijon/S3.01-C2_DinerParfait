@@ -63,6 +63,23 @@ namespace EpicurApp_API.DAO
                         // Insert elements into ElementMenus table
                         if (menu.Elements != null && menu.Elements.Count > 0)
                         {
+                            // Valider que tous les plats existent et appartiennent au restaurant
+                            foreach (ElementMenu element in menu.Elements)
+                            {
+                                string checkPlatQuery = @"SELECT COUNT(*) FROM Plats WHERE Id = @PlatId AND RestaurantId = @RestaurantId";
+                                using (SqliteCommand checkCommand = new SqliteCommand(checkPlatQuery, connection, transaction))
+                                {
+                                    checkCommand.Parameters.AddWithValue("@PlatId", element.PlatId);
+                                    checkCommand.Parameters.AddWithValue("@RestaurantId", menu.RestaurantId);
+
+                                    long count = (long)(checkCommand.ExecuteScalar() ?? 0);
+                                    if (count == 0)
+                                    {
+                                        throw new InvalidOperationException($"Le plat avec l'ID {element.PlatId} n'existe pas ou n'appartient pas au restaurant {menu.RestaurantId}.");
+                                    }
+                                }
+                            }
+
                             string elementQuery = @"INSERT INTO ElementMenus (MenuId, PlatId, Categorie, Ordre)
                                                   VALUES (@MenuId, @PlatId, @Categorie, @Ordre)";
 
@@ -177,10 +194,11 @@ namespace EpicurApp_API.DAO
         }
 
         /// <summary>
-        /// Récupère le dernier menu en statut "Brouillon".
+        /// Récupère le dernier menu en statut "Brouillon" pour un restaurant donné.
         /// </summary>
-        /// <returns>Le dernier menu brouillon ou null.</returns>
-        public Menu? GetDernierBrouillon()
+        /// <param name="restaurantId">Identifiant du restaurant.</param>
+        /// <returns>Le dernier menu brouillon du restaurant ou null.</returns>
+        public Menu? GetDernierBrouillon(int restaurantId)
         {
             using (SqliteConnection connection = new SqliteConnection(_connectionString))
             {
@@ -188,13 +206,14 @@ namespace EpicurApp_API.DAO
 
                 string query = @"SELECT Id, Nom, Statut, RestaurantId, Note, Retours, DateCreation
                     FROM Menus
-                    WHERE Statut = @Statut
+                    WHERE Statut = @Statut AND RestaurantId = @RestaurantId
                     ORDER BY Id DESC
                     LIMIT 1";
 
                 using (SqliteCommand command = new SqliteCommand(query, connection))
                 {
                     command.Parameters.AddWithValue("@Statut", "Brouillon");
+                    command.Parameters.AddWithValue("@RestaurantId", restaurantId);
 
                     using (SqliteDataReader reader = command.ExecuteReader())
                     {
@@ -207,6 +226,40 @@ namespace EpicurApp_API.DAO
             }
 
             return null;
+        }
+
+        /// <summary>
+        /// Récupère tous les menus validés d'un restaurant.
+        /// </summary>
+        /// <param name="restaurantId">Identifiant du restaurant.</param>
+        /// <returns>Liste des menus validés du restaurant.</returns>
+        public List<Menu> GetMenusValides(int restaurantId)
+        {
+            List<Menu> menus = new List<Menu>();
+            using (SqliteConnection connection = new SqliteConnection(_connectionString))
+            {
+                connection.Open();
+
+                string query = @"SELECT Id, Nom, Statut, RestaurantId, Note, Retours, DateCreation
+                                FROM Menus
+                                WHERE RestaurantId = @RestaurantId AND Statut = @Statut
+                                ORDER BY DateCreation DESC";
+
+                using (SqliteCommand command = new SqliteCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@RestaurantId", restaurantId);
+                    command.Parameters.AddWithValue("@Statut", "Validé");
+
+                    using (SqliteDataReader reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            menus.Add(AvoirMenu(reader, connection));
+                        }
+                    }
+                }
+            }
+            return menus;
         }
 
         /// <summary>
@@ -254,6 +307,23 @@ namespace EpicurApp_API.DAO
                         // Insert new elements
                         if (menu.Elements != null && menu.Elements.Count > 0)
                         {
+                            // Valider que tous les plats existent et appartiennent au restaurant
+                            foreach (ElementMenu element in menu.Elements)
+                            {
+                                string checkPlatQuery = @"SELECT COUNT(*) FROM Plats WHERE Id = @PlatId AND RestaurantId = @RestaurantId";
+                                using (SqliteCommand checkCommand = new SqliteCommand(checkPlatQuery, connection, transaction))
+                                {
+                                    checkCommand.Parameters.AddWithValue("@PlatId", element.PlatId);
+                                    checkCommand.Parameters.AddWithValue("@RestaurantId", menu.RestaurantId);
+
+                                    long count = (long)(checkCommand.ExecuteScalar() ?? 0);
+                                    if (count == 0)
+                                    {
+                                        throw new InvalidOperationException($"Le plat avec l'ID {element.PlatId} n'existe pas ou n'appartient pas au restaurant {menu.RestaurantId}.");
+                                    }
+                                }
+                            }
+
                             string insertElementQuery = @"INSERT INTO ElementMenus (MenuId, PlatId, Categorie, Ordre)
                                                         VALUES (@MenuId, @PlatId, @Categorie, @Ordre)";
 

@@ -100,6 +100,33 @@ namespace EpicurApp_API.DAO
             {
                 connection.Open();
 
+                // Vérifier que le client existe
+                string checkClientQuery = @"SELECT COUNT(*) FROM Clients WHERE Id = @ClientId";
+                using (var checkClientCommand = new SqliteCommand(checkClientQuery, connection))
+                {
+                    checkClientCommand.Parameters.AddWithValue("@ClientId", repas.ClientId);
+
+                    long clientCount = (long)(checkClientCommand.ExecuteScalar() ?? 0);
+                    if (clientCount == 0)
+                    {
+                        throw new InvalidOperationException($"Le client avec l'ID {repas.ClientId} n'existe pas.");
+                    }
+                }
+
+                // Vérifier que le menu existe et appartient au restaurant
+                string checkMenuQuery = @"SELECT COUNT(*) FROM Menus WHERE Id = @MenuId AND RestaurantId = @RestaurantId";
+                using (var checkMenuCommand = new SqliteCommand(checkMenuQuery, connection))
+                {
+                    checkMenuCommand.Parameters.AddWithValue("@MenuId", repas.MenuId);
+                    checkMenuCommand.Parameters.AddWithValue("@RestaurantId", repas.RestaurantId);
+
+                    long menuCount = (long)(checkMenuCommand.ExecuteScalar() ?? 0);
+                    if (menuCount == 0)
+                    {
+                        throw new InvalidOperationException($"Le menu avec l'ID {repas.MenuId} n'existe pas ou n'appartient pas au restaurant {repas.RestaurantId}.");
+                    }
+                }
+
                 string query = @"
                     INSERT INTO Repas (ClientId, MenuId, Date, Retours, RestaurantId)
                     VALUES (@ClientId, @MenuId, @Date, @Retours, @RestaurantId);

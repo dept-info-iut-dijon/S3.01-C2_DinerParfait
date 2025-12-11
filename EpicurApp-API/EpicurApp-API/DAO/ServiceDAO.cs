@@ -24,14 +24,29 @@ namespace EpicurApp_API.DAO
         /// Ajoute un nouveau service dans la base de donn�es.
         /// </summary>
         /// <param name="service">Le service � ajouter.</param>
-        public void AjouterService(Service service)
+        /// <param name="restaurantId">Identifiant du restaurant pour valider que le menu appartient bien � ce restaurant.</param>
+        public void AjouterService(Service service, int restaurantId)
         {
             using (SqliteConnection connection = new SqliteConnection(_connectionString))
             {
                 connection.Open();
 
-                string query = @"INSERT INTO Services 
-                    (Date, MidiSoir, MenuId, Statut) 
+                // V�rifier que le menu existe et appartient au restaurant
+                string checkQuery = @"SELECT COUNT(*) FROM Menus WHERE Id = @MenuId AND RestaurantId = @RestaurantId";
+                using (SqliteCommand checkCommand = new SqliteCommand(checkQuery, connection))
+                {
+                    checkCommand.Parameters.AddWithValue("@MenuId", service.MenuId);
+                    checkCommand.Parameters.AddWithValue("@RestaurantId", restaurantId);
+
+                    long count = (long)(checkCommand.ExecuteScalar() ?? 0);
+                    if (count == 0)
+                    {
+                        throw new InvalidOperationException($"Le menu avec l'ID {service.MenuId} n'existe pas ou n'appartient pas au restaurant {restaurantId}.");
+                    }
+                }
+
+                string query = @"INSERT INTO Services
+                    (Date, MidiSoir, MenuId, Statut)
                     VALUES (@Date, @MidiSoir, @MenuId, @Statut);
                     SELECT last_insert_rowid();";
 

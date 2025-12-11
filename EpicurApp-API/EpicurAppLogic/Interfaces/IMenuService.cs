@@ -28,12 +28,6 @@ namespace EpicurAppLogic.Interfaces
         List<Menu> GetAll();
 
         /// <summary>
-        /// Récupère le dernier menu en statut brouillon.
-        /// </summary>
-        /// <returns>Menu en brouillon ou null.</returns>
-        Menu? GetDernierBrouillon();
-
-        /// <summary>
         /// Met à jour un menu existant.
         /// </summary>
         /// <param name="menu">Menu à mettre à jour.</param>

@@ -64,22 +64,6 @@ namespace EpicurAppLogic.Services
             }
         }
 
-        /// <summary>
-        /// Donne le dernier menu brouillon
-        /// </summary>
-        /// <returns>Le dernier menu en statut brouillon</returns>
-        /// <exception cref="ApplicationException">Impossible de récupérer le brouillon</exception>
-        public Menu? GetDernierBrouillon()
-        {
-            try
-            {
-                return _menuDAO.GetDernierBrouillon();
-            }
-            catch (Exception ex)
-            {
-                throw new ApplicationException("Erreur lors de la récupération du brouillon de menu.", ex);
-            }
-        }
 
         /// <summary>
         /// Ajoute un nouveau menu

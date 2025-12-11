@@ -5,7 +5,7 @@ using EpicurApp_API.Configuration;
 namespace EpicurApp_API.DAO
 {
     /// <summary>
-    /// DAO pour la gestion des réservations.
+    /// DAO pour la gestion des rï¿½servations.
     /// </summary>
     public class ReservationDAO
     {
@@ -14,24 +14,50 @@ namespace EpicurApp_API.DAO
         /// <summary>
         /// Initialise une nouvelle instance de ReservationDAO.
         /// </summary>
-        /// <param name="databaseConfiguration">Configuration de la base de données.</param>
+        /// <param name="databaseConfiguration">Configuration de la base de donnï¿½es.</param>
         public ReservationDAO(DatabaseConfiguration databaseConfiguration)
         {
             _connectionString = databaseConfiguration.GetConnectionString();
         }
 
         /// <summary>
-        /// Ajoute une nouvelle réservation dans la base de données.
+        /// Ajoute une nouvelle rï¿½servation dans la base de donnï¿½es.
         /// </summary>
-        /// <param name="reservation">La réservation à ajouter.</param>
+        /// <param name="reservation">La rï¿½servation ï¿½ ajouter.</param>
         public void AjouterReservation(Reservation reservation)
         {
             using (SqliteConnection connection = new SqliteConnection(_connectionString))
             {
                 connection.Open();
 
-                string query = @"INSERT INTO Reservations 
-                    (ServiceId, ClientId, NbCouverts) 
+                // Vï¿½rifier que le service existe
+                string checkServiceQuery = @"SELECT COUNT(*) FROM Services WHERE Id = @ServiceId";
+                using (SqliteCommand checkServiceCommand = new SqliteCommand(checkServiceQuery, connection))
+                {
+                    checkServiceCommand.Parameters.AddWithValue("@ServiceId", reservation.ServiceId);
+
+                    long serviceCount = (long)(checkServiceCommand.ExecuteScalar() ?? 0);
+                    if (serviceCount == 0)
+                    {
+                        throw new InvalidOperationException($"Le service avec l'ID {reservation.ServiceId} n'existe pas.");
+                    }
+                }
+
+                // Vï¿½rifier que le client existe
+                string checkClientQuery = @"SELECT COUNT(*) FROM Clients WHERE Id = @ClientId";
+                using (SqliteCommand checkClientCommand = new SqliteCommand(checkClientQuery, connection))
+                {
+                    checkClientCommand.Parameters.AddWithValue("@ClientId", reservation.ClientId);
+
+                    long clientCount = (long)(checkClientCommand.ExecuteScalar() ?? 0);
+                    if (clientCount == 0)
+                    {
+                        throw new InvalidOperationException($"Le client avec l'ID {reservation.ClientId} n'existe pas.");
+                    }
+                }
+
+                string query = @"INSERT INTO Reservations
+                    (ServiceId, ClientId, NbCouverts)
                     VALUES (@ServiceId, @ClientId, @NbCouverts);
                     SELECT last_insert_rowid();";
 
@@ -51,10 +77,10 @@ namespace EpicurApp_API.DAO
         }
 
         /// <summary>
-        /// Récupère toutes les réservations pour un service donné avec les informations du client.
+        /// Rï¿½cupï¿½re toutes les rï¿½servations pour un service donnï¿½ avec les informations du client.
         /// </summary>
         /// <param name="serviceId">Identifiant du service.</param>
-        /// <returns>Liste des réservations avec nom et prénom du client.</returns>
+        /// <returns>Liste des rï¿½servations avec nom et prï¿½nom du client.</returns>
         public List<Reservation> GetReservationsParService(int serviceId)
         {
             List<Reservation> reservations = new List<Reservation>();

@@ -112,8 +112,19 @@ namespace EpicurApp_API.Controllers
                     return BadRequest("Le service ne peut pas �tre null.");
                 }
 
-                _serviceDAO.AjouterService(service);
+                int? restaurantId = GetRestaurantIdFromHeader();
+
+                if (!restaurantId.HasValue)
+                {
+                    return BadRequest("Header X-Restaurant-Id requis.");
+                }
+
+                _serviceDAO.AjouterService(service, restaurantId.Value);
                 return CreatedAtAction(nameof(GetAllServices), new { id = service.Id }, service);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
             }
             catch (Exception ex)
             {
@@ -138,6 +149,10 @@ namespace EpicurApp_API.Controllers
 
                 _reservationDAO.AjouterReservation(reservation);
                 return CreatedAtAction(nameof(GetReservationsParService), new { serviceId = reservation.ServiceId }, reservation);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
             }
             catch (Exception ex)
             {

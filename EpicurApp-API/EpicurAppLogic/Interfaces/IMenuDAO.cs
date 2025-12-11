@@ -35,10 +35,18 @@ namespace EpicurAppLogic.Interfaces
         List<Menu> GetAllByRestaurantId(int restaurantId);
 
         /// <summary>
-        /// Récupère le dernier menu en statut brouillon.
+        /// Récupère le dernier menu en statut brouillon pour un restaurant donné.
         /// </summary>
+        /// <param name="restaurantId">Identifiant du restaurant.</param>
         /// <returns>Menu en brouillon ou null.</returns>
-        Menu? GetDernierBrouillon();
+        Menu? GetDernierBrouillon(int restaurantId);
+
+        /// <summary>
+        /// Récupère tous les menus validés d'un restaurant.
+        /// </summary>
+        /// <param name="restaurantId">Identifiant du restaurant.</param>
+        /// <returns>Liste des menus validés du restaurant.</returns>
+        List<Menu> GetMenusValides(int restaurantId);
 
         /// <summary>
         /// Met à jour un menu existant.
