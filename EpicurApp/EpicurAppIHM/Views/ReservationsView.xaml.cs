@@ -8,6 +8,7 @@ using System.Net.Http.Json;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Text.Json.Nodes;
 
 namespace EpicurAppIHM.Views
 {
@@ -181,50 +182,64 @@ namespace EpicurAppIHM.Views
 
             // Vérification des conflits d'allergènes
             var detectionService = new AllergeneDetectionService(App.ApiClient.HttpClient);
-            var conflit = await detectionService.DetecterConflitAsync(client.Id, _serviceSelectionne.MenuId);
+            var resultat = await detectionService.DetecterConflitAsync(client.Id, _serviceSelectionne.MenuId);
 
             bool forceOverride = false;
             string? noteOverride = null;
 
-            if (conflit != null && conflit.AllergenesEnConflit != null && conflit.AllergenesEnConflit.Count > 0)
-            {
-                // Afficher la popup d'alerte
-                var dialog = new AlerteAllergeneDialog(conflit);
-                dialog.Owner = Window.GetWindow(this);
-                
-                if (dialog.ShowDialog() != true)
-                {
-                    // L'utilisateur a annulé
-                    return;
-                }
 
-                forceOverride = dialog.ReservationForcee;
-                noteOverride = dialog.NoteOverride;
-            }
-
-            // Créer la réservation via l'endpoint existant
-            var nouvelleResa = new Reservation
+            // Créer la réservation
+            var request = new ReservationRequest
             {
-                Id = 0,
-                ServiceId = _serviceSelectionne.Id,
                 ClientId = client.Id,
-                NbCouverts = nbCouverts
+                MenuId = _serviceSelectionne.MenuId,
+                ServiceId = _serviceSelectionne.Id,
+                NbCouverts = nbCouverts,
+                ForceReservation = forceOverride,
+                NoteOverride = noteOverride
             };
 
             try
             {
-                // Appel API : POST /Services/Reservation (endpoint existant)
-                var response = await App.ApiClient.HttpClient.PostAsJsonAsync("Services/Reservation", nouvelleResa);
+                // Utiliser le bon endpoint qui gère le forçage
+                var response = await App.ApiClient.HttpClient.PostAsJsonAsync(
+                    "AllergeneDetection/valider-reservation", request);
 
                 if (response.IsSuccessStatusCode)
                 {
-                    string message = forceOverride 
-                        ? $"Réservation créée avec override allergène.\nNote : {noteOverride}" 
+                    string message = forceOverride
+                        ? $"Réservation créée avec override allergène.\nNote : {noteOverride}"
                         : "Réservation créée avec succès !";
                     MessageBox.Show(message, "Succès", MessageBoxButton.OK, MessageBoxImage.Information);
-                    
+
                     await ChargerReservations(_serviceSelectionne.Id);
                     txtCouverts.Text = "2";
+                }
+                else if (response.StatusCode == System.Net.HttpStatusCode.Conflict)
+                {
+                    string jsonString = await response.Content.ReadAsStringAsync();
+                    var jsonNode = JsonNode.Parse(jsonString);
+                    string messageAlerte = jsonNode["Conflits"]?[0]?["Message"]?.ToString() ?? "Conflit d'allergie détecté.";
+                    var choix = MessageBox.Show(
+                        $"{messageAlerte}\n\nVoulez-vous forcer la réservation malgré le risque ?",
+                        "Alerte Sécurité Alimentaire",
+                        MessageBoxButton.YesNo,
+                        MessageBoxImage.Warning);
+
+                    if (choix == MessageBoxResult.Yes)
+                    {
+                        var responseForce = await App.ApiClient.HttpClient.PostAsJsonAsync("Services/Reservation?force=true", request);
+
+                        if (responseForce.IsSuccessStatusCode)
+                        {
+                            await ChargerReservations(_serviceSelectionne.Id);
+                            MessageBox.Show("Réservation forcée avec succès.", "Info", MessageBoxButton.OK, MessageBoxImage.Information);
+                        }
+                        else
+                        {
+                            MessageBox.Show("Impossible de forcer la réservation.");
+                        }
+                    }
                 }
                 else
                 {

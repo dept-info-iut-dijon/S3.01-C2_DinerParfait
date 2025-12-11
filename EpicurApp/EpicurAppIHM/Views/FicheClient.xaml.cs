@@ -72,8 +72,6 @@ namespace EpicurAppIHM.Views
         {
             try
             {
-                List<Allergene> listeAllergenes = await App.AllergeneRepository.GetAllAsync();
-                allergenes = listeAllergenes;
                 lstAllergenes.ItemsSource = allergenes;
             }
             catch (Exception ex)

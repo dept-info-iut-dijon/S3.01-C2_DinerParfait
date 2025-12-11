@@ -128,7 +128,7 @@ namespace EpicurApp_API.Controllers
         /// <param name="request">La requête de réservation.</param>
         /// <returns>La réservation créée ou les conflits détectés.</returns>
         [HttpPost("Reservation")]
-        public IActionResult AjouterReservation([FromBody] ReservationRequest request)
+        public IActionResult AjouterReservation([FromBody] ReservationRequest request,[FromQuery] bool force = false)
         {
             try
             {
@@ -137,6 +137,7 @@ namespace EpicurApp_API.Controllers
                     return BadRequest("La requête de réservation ne peut pas être null.");
                 }
 
+                bool estForce = force || request.ForceReservation;
                 // Récupérer le service pour obtenir le MenuId
                 var services = _serviceDAO.GetAllServices(GetRestaurantIdFromHeader() ?? 0);
                 var service = services.FirstOrDefault(s => s.Id == request.ServiceId);
@@ -147,10 +148,9 @@ namespace EpicurApp_API.Controllers
                 }
 
                 // Détecter les conflits d'allergènes
-                List<ConflitAllergene> conflits = _allergeneDetectionService
-                    .DetecterConflits(request.ClientId, service.MenuId);
+                List<ConflitAllergene> conflits = _allergeneDetectionService.DetecterConflits(request.ClientId, service.MenuId);
 
-                if (conflits.Count > 0 && !request.ForceReservation)
+                if (conflits.Count > 0 && !estForce)
                 {
                     // Retourner les conflits avec code 409
                     var response = new ValidationReservationResponse
@@ -163,10 +163,10 @@ namespace EpicurApp_API.Controllers
                     return Conflict(response);
                 }
 
-                // Si forcé sans note, refuser
-                if (conflits.Count > 0 && request.ForceReservation && string.IsNullOrWhiteSpace(request.NoteOverride))
+                string noteFinale = request.NoteOverride;
+                if (conflits.Count > 0 && estForce && string.IsNullOrWhiteSpace(noteFinale))
                 {
-                    return BadRequest("Une note explicative est requise pour forcer la réservation.");
+                    noteFinale = "Forcé par le restaurateur (Alerte allergie ignorée)";
                 }
 
                 // Créer la réservation
@@ -185,12 +185,10 @@ namespace EpicurApp_API.Controllers
                     EstValide = true,
                     ADesConflits = conflits.Count > 0,
                     Conflits = conflits,
-                    EstForcee = conflits.Count > 0 && request.ForceReservation,
-                    NoteOverride = request.NoteOverride,
+                    EstForcee = estForce,
+                    NoteOverride = noteFinale,
                     ReservationId = reservation.Id,
-                    Message = conflits.Count > 0 
-                        ? $"Réservation créée avec avertissement : {request.NoteOverride}"
-                        : "Réservation créée avec succès."
+                    Message = conflits.Count > 0 ? $"Réservation créée avec avertissement : {noteFinale}" : "Réservation créée avec succès."
                 };
 
                 return CreatedAtAction(nameof(GetReservationsParService), 
