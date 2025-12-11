@@ -551,43 +551,61 @@ namespace EpicurApp_API.DAO
         /// Récupère les clients réguliers (3 visites ou plus sur l'année).
         /// </summary>
         /// <returns>Liste des clients réguliers.</returns>
-        public List<Client> GetClientsReguliers()
+        /// <summary>
+        /// Récupère les clients réguliers (3 visites ou plus sur l'année).
+        /// </summary>
+        /// <param name="restaurantId">Filtre par restaurant (optionnel)</param>
+        /// <returns>Liste des clients réguliers.</returns>
+        public List<Client> GetClientsReguliers(int? restaurantId = null)
         {
-            List<   Client> clientsReguliers = new List<Client>();
+            List<Client> clientsReguliers = new List<Client>();
 
             using (SqliteConnection connection = new SqliteConnection(_connectionString))
             {
                 connection.Open();
 
-                // Clients avec 3+ visites dans l'année
                 string query = @"
-                     SELECT c.Id, c.Nom, c.Prenom, c.Email, c.Telephone, c.PlatsNonApprecies, c.Preferences, COUNT(r.Id) as NbVisites
+            SELECT c.Id, c.Nom, c.Prenom, c.Email, c.Telephone, c.PlatsNonApprecies, c.Preferences, COUNT(r.Id) as NbVisites
             FROM Clients c
             INNER JOIN Repas r ON c.Id = r.ClientId
-            WHERE r.Date >= date('now', '-2 year')
+            WHERE r.Date >= date('now', '-1 year')";
+
+                if (restaurantId.HasValue)
+                {
+                    query += " AND c.RestaurantId = @RestaurantId";
+                }
+
+                query += @"
             GROUP BY c.Id
             HAVING COUNT(r.Id) >= 3
             ORDER BY NbVisites DESC";
 
                 using (SqliteCommand command = new SqliteCommand(query, connection))
-                using (SqliteDataReader reader = command.ExecuteReader())
                 {
-                    while (reader.Read())
+                    if (restaurantId.HasValue)
                     {
-                        string platsNonAppreciesIds = reader.IsDBNull(5) ? "" : reader.GetString(5);
+                        command.Parameters.AddWithValue("@RestaurantId", restaurantId.Value);
+                    }
 
-                        Client client = new Client
+                    using (SqliteDataReader reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
                         {
-                            Id = reader.GetInt32(0),
-                            Nom = reader.GetString(1),
-                            Prenom = reader.GetString(2),
-                            Email = reader.IsDBNull(3) ? "" : reader.GetString(3),
-                            Telephone = reader.IsDBNull(4) ? "" : reader.GetString(4),
-                            PlatsNonApprecies = ConvertirIdsEnPlats(platsNonAppreciesIds),
-                            Preferences = reader.IsDBNull(6) ? "" : reader.GetString(6)
-                        };
+                            string platsNonAppreciesIds = reader.IsDBNull(5) ? "" : reader.GetString(5);
 
-                        clientsReguliers.Add(client);
+                            Client client = new Client
+                            {
+                                Id = reader.GetInt32(0),
+                                Nom = reader.GetString(1),
+                                Prenom = reader.GetString(2),
+                                Email = reader.IsDBNull(3) ? "" : reader.GetString(3),
+                                Telephone = reader.IsDBNull(4) ? "" : reader.GetString(4),
+                                PlatsNonApprecies = ConvertirIdsEnPlats(platsNonAppreciesIds),
+                                Preferences = reader.IsDBNull(6) ? "" : reader.GetString(6)
+                            };
+
+                            clientsReguliers.Add(client);
+                        }
                     }
                 }
             }
@@ -599,7 +617,12 @@ namespace EpicurApp_API.DAO
         /// Récupère les clients inactifs (pas de visite depuis plus de 60 jours).
         /// </summary>
         /// <returns>Liste des clients inactifs.</returns>
-        public List<Client> GetClientsInactifs()
+        /// <summary>
+        /// Récupère les clients inactifs (pas de visite depuis plus de 60 jours).
+        /// </summary>
+        /// <param name="restaurantId">Filtre par restaurant (optionnel)</param>
+        /// <returns>Liste des clients inactifs.</returns>
+        public List<Client> GetClientsInactifs(int? restaurantId = null)
         {
             List<Client> clientsInactifs = new List<Client>();
 
@@ -607,7 +630,6 @@ namespace EpicurApp_API.DAO
             {
                 connection.Open();
 
-                // Clients sans visite depuis 60 jours OU jamais de visite
                 string query = @"
             SELECT c.Id, c.Nom, c.Prenom, c.Email, c.Telephone, c.PlatsNonApprecies, c.Preferences
             FROM Clients c
@@ -615,28 +637,41 @@ namespace EpicurApp_API.DAO
                 SELECT DISTINCT r.ClientId
                 FROM Repas r
                 WHERE r.Date >= date('now', '-60 days')
-            )
-            ORDER BY c.Nom, c.Prenom";
+            )";
+
+                if (restaurantId.HasValue)
+                {
+                    query += " AND c.RestaurantId = @RestaurantId";
+                }
+
+                query += " ORDER BY c.Nom, c.Prenom";
 
                 using (SqliteCommand command = new SqliteCommand(query, connection))
-                using (SqliteDataReader reader = command.ExecuteReader())
                 {
-                    while (reader.Read())
+                    if (restaurantId.HasValue)
                     {
-                        string platsNonAppreciesIds = reader.IsDBNull(5) ? "" : reader.GetString(5);
+                        command.Parameters.AddWithValue("@RestaurantId", restaurantId.Value);
+                    }
 
-                        Client client = new Client
+                    using (SqliteDataReader reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
                         {
-                            Id = reader.GetInt32(0),
-                            Nom = reader.GetString(1),
-                            Prenom = reader.GetString(2),
-                            Email = reader.IsDBNull(3) ? "" : reader.GetString(3),
-                            Telephone = reader.IsDBNull(4) ? "" : reader.GetString(4),
-                            PlatsNonApprecies = ConvertirIdsEnPlats(platsNonAppreciesIds),
-                            Preferences = reader.IsDBNull(6) ? "" : reader.GetString(6)
-                        };
+                            string platsNonAppreciesIds = reader.IsDBNull(5) ? "" : reader.GetString(5);
 
-                        clientsInactifs.Add(client);
+                            Client client = new Client
+                            {
+                                Id = reader.GetInt32(0),
+                                Nom = reader.GetString(1),
+                                Prenom = reader.GetString(2),
+                                Email = reader.IsDBNull(3) ? "" : reader.GetString(3),
+                                Telephone = reader.IsDBNull(4) ? "" : reader.GetString(4),
+                                PlatsNonApprecies = ConvertirIdsEnPlats(platsNonAppreciesIds),
+                                Preferences = reader.IsDBNull(6) ? "" : reader.GetString(6)
+                            };
+
+                            clientsInactifs.Add(client);
+                        }
                     }
                 }
             }
@@ -647,7 +682,11 @@ namespace EpicurApp_API.DAO
         /// <summary>
         /// Récupère les clients VIP (7+ visites sur l'année écoulée)
         /// </summary>
-        public List<Client> GetClientsVIP()
+        /// <summary>
+        /// Récupère les clients VIP (7+ visites sur l'année écoulée)
+        /// </summary>
+        /// <param name="restaurantId">Filtre par restaurant (optionnel)</param>
+        public List<Client> GetClientsVIP(int? restaurantId = null)
         {
             List<Client> clientsVIP = new List<Client>();
 
@@ -659,30 +698,44 @@ namespace EpicurApp_API.DAO
             SELECT c.Id, c.Nom, c.Prenom, c.Email, c.Telephone, c.PlatsNonApprecies, c.Preferences, COUNT(r.Id) as NbVisites
             FROM Clients c
             INNER JOIN Repas r ON c.Id = r.ClientId
-            WHERE r.Date >= date('now', '-1 year')
+            WHERE r.Date >= date('now', '-1 year')";
+
+                if (restaurantId.HasValue)
+                {
+                    query += " AND c.RestaurantId = @RestaurantId";
+                }
+
+                query += @"
             GROUP BY c.Id
             HAVING COUNT(r.Id) >= 7
             ORDER BY NbVisites DESC";
 
                 using (SqliteCommand command = new SqliteCommand(query, connection))
-                using (SqliteDataReader reader = command.ExecuteReader())
                 {
-                    while (reader.Read())
+                    if (restaurantId.HasValue)
                     {
-                        string platsNonAppreciesIds = reader.IsDBNull(5) ? "" : reader.GetString(5);
+                        command.Parameters.AddWithValue("@RestaurantId", restaurantId.Value);
+                    }
 
-                        Client client = new Client
+                    using (SqliteDataReader reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
                         {
-                            Id = reader.GetInt32(0),
-                            Nom = reader.GetString(1),
-                            Prenom = reader.GetString(2),
-                            Email = reader.IsDBNull(3) ? "" : reader.GetString(3),
-                            Telephone = reader.IsDBNull(4) ? "" : reader.GetString(4),
-                            PlatsNonApprecies = ConvertirIdsEnPlats(platsNonAppreciesIds),
-                            Preferences = reader.IsDBNull(6) ? "" : reader.GetString(6)
-                        };
+                            string platsNonAppreciesIds = reader.IsDBNull(5) ? "" : reader.GetString(5);
 
-                        clientsVIP.Add(client);
+                            Client client = new Client
+                            {
+                                Id = reader.GetInt32(0),
+                                Nom = reader.GetString(1),
+                                Prenom = reader.GetString(2),
+                                Email = reader.IsDBNull(3) ? "" : reader.GetString(3),
+                                Telephone = reader.IsDBNull(4) ? "" : reader.GetString(4),
+                                PlatsNonApprecies = ConvertirIdsEnPlats(platsNonAppreciesIds),
+                                Preferences = reader.IsDBNull(6) ? "" : reader.GetString(6)
+                            };
+
+                            clientsVIP.Add(client);
+                        }
                     }
                 }
             }

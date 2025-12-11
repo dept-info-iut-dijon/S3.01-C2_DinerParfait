@@ -235,6 +235,9 @@ namespace EpicurAppIHM.Views
             catch { }
         }
 
+        /// <summary>
+        /// Ferme la fenêtre
+        /// </summary>
         private void Fermer_Click(object sender, RoutedEventArgs e)
         {
             Close();

@@ -38,7 +38,7 @@ namespace EpicurAppIHM.Views
         private List<Client> clientsInactifs;
 
         /// <summary>
-        /// Constructeur - initialise la page
+        /// Constructeur
         /// </summary>
         public DashboardView()
         {
@@ -105,7 +105,7 @@ namespace EpicurAppIHM.Views
             // Carte 1 : Total de clients
             TxtTotalClients.Text = tousLesClients.Count.ToString();
 
-            // Carte 2 : Réservations du mois (on doit encore compter)
+            // Carte 2 : Réservations du mois
             int repasDuMois = 0;
             DateTime debutMois = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
 
@@ -170,10 +170,10 @@ namespace EpicurAppIHM.Views
                 {
                     dateDebut = DateTime.Now.AddDays(-90);
                 }
-                // Si "Tout", dateDebut reste null = pas de filtre
+                
             }
 
-            // Utiliser TOUS les clients
+            
             foreach (Client client in tousLesClients)
             {
                 try
@@ -215,7 +215,7 @@ namespace EpicurAppIHM.Views
                 }
             }
 
-            // Trier pour garder les 10 meilleurs (tri à bulles simple)
+            // Trier pour garder les 10 meilleurs
             for (int i = 0; i < nombreRepas.Count - 1; i++)
             {
                 for (int j = 0; j < nombreRepas.Count - 1 - i; j++)
@@ -263,9 +263,6 @@ namespace EpicurAppIHM.Views
             ChartPrincipal.AxisX[0].Labels = nomsClients.ToArray();
         }
 
-        /// <summary>
-        /// Affiche la liste des clients inactifs (utilise le nouvel endpoint !)
-        /// </summary>
         /// <summary>
         /// Affiche la liste des clients inactifs avec leurs stats
         /// </summary>

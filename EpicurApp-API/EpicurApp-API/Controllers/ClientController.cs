@@ -93,7 +93,8 @@ namespace EpicurApp_API.Controllers
         {
             try
             {
-                List<Client> clients = _clientService.ObtenirClientsReguliers();
+                int? restaurantId = GetRestaurantIdFromHeader();
+                List<Client> clients = _clientDAO.GetClientsReguliers(restaurantId);
                 return Ok(clients);
             }
             catch (Exception ex)
@@ -111,7 +112,8 @@ namespace EpicurApp_API.Controllers
         {
             try
             {
-                List<Client> clients = _clientService.ObtenirClientsInactifs();
+                int? restaurantId = GetRestaurantIdFromHeader();
+                List<Client> clients = _clientDAO.GetClientsInactifs(restaurantId);
                 return Ok(clients);
             }
             catch (Exception ex)
@@ -119,6 +121,7 @@ namespace EpicurApp_API.Controllers
                 return StatusCode(500, "Erreur lors de la récupération des clients inactifs : " + ex.Message);
             }
         }
+        
 
         /// <summary>
         /// Récupère les clients VIP (7+ visites/an)
@@ -126,8 +129,16 @@ namespace EpicurApp_API.Controllers
         [HttpGet("VIP")]
         public IActionResult GetClientsVIP()
         {
-            var clients = _clientService.ObtenirClientsVIP();
-            return Ok(clients);
+            try
+            {
+                int? restaurantId = GetRestaurantIdFromHeader();
+                List<Client> clients = _clientDAO.GetClientsVIP(restaurantId);
+                return Ok(clients);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, "Erreur lors de la récupération des clients VIP : " + ex.Message);
+            }
         }
 
         /// <summary>

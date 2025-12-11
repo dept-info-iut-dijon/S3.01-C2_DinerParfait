@@ -120,7 +120,7 @@ namespace EpicurAppIHM.Views
                             Preferences = client.Preferences,
                             Allergenes = client.Allergenes,
                             EstInactif = idsClientsInactifs.Contains(client.Id),
-                            EstVIP = idsClientsVIP.Contains(client.Id)  // ← AJOUT ICI
+                            EstVIP = idsClientsVIP.Contains(client.Id)
                         };
                         tousLesClientsAffichage.Add(ca);
                     }
@@ -164,7 +164,7 @@ namespace EpicurAppIHM.Views
         }
 
         /// <summary>
-        /// Événement quand on coche/décoche la checkbox
+        /// coche/décoche la checkbox
         /// </summary>
         private void ChkVoirInactifs_Changed(object sender, RoutedEventArgs e)
         {
@@ -203,7 +203,7 @@ namespace EpicurAppIHM.Views
         }
 
         /// <summary>
-        /// Gère la suppression du client sélectionné
+        /// Gère la supp du client sélectionné
         /// </summary>
         private async void SupprimerClient_Click(object sender, RoutedEventArgs e)
         {
