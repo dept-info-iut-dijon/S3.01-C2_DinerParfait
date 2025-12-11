@@ -199,7 +199,7 @@ namespace EpicurAppLogic.Services
             string listeAllergenes = string.Join(", ", allergenes.Select(a => $"'{a.Nom}'"));
             string listeIngredients = string.Join(", ", ingredients.Select(i => $"'{i.Nom}'"));
 
-            return $"⚠️ Attention : Le menu contient {listeIngredients}. " +
+            return $"Attention : Le menu contient {listeIngredients}. " +
                    $"{client.Prenom} {client.Nom} est allergique à {listeAllergenes}.";
         }
     }
