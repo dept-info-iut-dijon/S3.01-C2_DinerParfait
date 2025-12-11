@@ -1,4 +1,5 @@
 ﻿using EpicurAPP_Partage.Models;
+using EpicurAppIHM.ViewModels;
 using LiveCharts;
 using LiveCharts.Wpf;
 using System;
@@ -13,17 +14,6 @@ using System.Windows.Media;
 
 namespace EpicurAppIHM.Views
 {
-
-    /// <summary>
-    /// Classe simple pour afficher un client avec ses stats
-    /// </summary>
-    public class ClientAvecStats
-    {
-        public string Prenom { get; set; }
-        public string Nom { get; set; }
-        public string Email { get; set; }
-        public string InfoVisites { get; set; }
-    }
     /// <summary>
     /// Page d'accueil avec tableau de bord et statistiques
     /// </summary>
@@ -302,9 +292,7 @@ namespace EpicurAppIHM.Views
 
                 ClientAvecStats clientStats = new ClientAvecStats
                 {
-                    Prenom = client.Prenom,
-                    Nom = client.Nom,
-                    Email = client.Email,
+                    Client = client,
                     InfoVisites = nbVisites + " visite(s) - Dernière : " + derniereVisite
                 };
 

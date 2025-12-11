@@ -166,7 +166,7 @@ public class MenuServiceTests
         }
 
         Assert.NotNull(exceptionVoulue);
-        Assert.Equal("L'identifiant du menu est obligatoire pour la mise à jour.", exceptionVoulue.Message);
+        Assert.Equal("L'identifiant du menu est obligatoire.", exceptionVoulue.Message);
     }
 
     [Fact]

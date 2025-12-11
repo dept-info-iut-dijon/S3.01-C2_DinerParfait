@@ -164,6 +164,15 @@ namespace EpicurAppIHM.Views
             ErrorMessage.Text = message;
             ErrorBorder.Visibility = Visibility.Visible;
         }
+
+        /// <summary>
+        /// Gère le clic sur le lien d'inscription.
+        /// </summary>
+        private void RegisterLink_Click(object sender, RoutedEventArgs e)
+        {
+            new RegisterView().Show();
+            this.Close();
+        }
     }
 
     #region Modèles de réponse

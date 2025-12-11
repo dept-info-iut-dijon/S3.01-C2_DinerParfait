@@ -11,12 +11,14 @@ namespace ClientServicesTest
     public class AuthServiceTest
     {
         private readonly Mock<IUtilisateurDAO> _mockUtilisateurDAO;
+        private readonly Mock<IRestaurantDAO> _mockRestaurantDAO;
         private readonly AuthService _authService;
 
         public AuthServiceTest()
         {
             _mockUtilisateurDAO = new Mock<IUtilisateurDAO>();
-            _authService = new AuthService(_mockUtilisateurDAO.Object);
+            _mockRestaurantDAO = new Mock<IRestaurantDAO>();
+            _authService = new AuthService(_mockUtilisateurDAO.Object, _mockRestaurantDAO.Object);
         }
 
 
@@ -323,6 +325,182 @@ namespace ClientServicesTest
             Assert.NotNull(result.Restaurant);
             Assert.Equal("Le Grand Restaurant", result.Restaurant.Nom);
         }
+
+        #region Tests ValidatePasswordStrength
+
+        [Fact]
+        public void ValidatePasswordStrength_AvecMotDePasseValide_RetourneTrue()
+        {
+            string password = "Password123!";
+
+            bool result = _authService.ValidatePasswordStrength(password);
+
+            Assert.True(result);
+        }
+
+        [Fact]
+        public void ValidatePasswordStrength_SansMinuscule_RetourneFalse()
+        {
+            string password = "PASSWORD123!";
+
+            bool result = _authService.ValidatePasswordStrength(password);
+
+            Assert.False(result);
+        }
+
+        [Fact]
+        public void ValidatePasswordStrength_SansMajuscule_RetourneFalse()
+        {
+            string password = "password123!";
+
+            bool result = _authService.ValidatePasswordStrength(password);
+
+            Assert.False(result);
+        }
+
+        [Fact]
+        public void ValidatePasswordStrength_SansChiffre_RetourneFalse()
+        {
+            string password = "Password!";
+
+            bool result = _authService.ValidatePasswordStrength(password);
+
+            Assert.False(result);
+        }
+
+        [Fact]
+        public void ValidatePasswordStrength_SansCaractereSpecial_RetourneFalse()
+        {
+            string password = "Password123";
+
+            bool result = _authService.ValidatePasswordStrength(password);
+
+            Assert.False(result);
+        }
+
+        [Fact]
+        public void ValidatePasswordStrength_MoinsDe8Caracteres_RetourneFalse()
+        {
+            string password = "Pass1!";
+
+            bool result = _authService.ValidatePasswordStrength(password);
+
+            Assert.False(result);
+        }
+
+        [Fact]
+        public void ValidatePasswordStrength_AvecMotDePasseVide_RetourneFalse()
+        {
+            string password = "";
+
+            bool result = _authService.ValidatePasswordStrength(password);
+
+            Assert.False(result);
+        }
+
+        [Fact]
+        public void ValidatePasswordStrength_AvecMotDePasseNull_RetourneFalse()
+        {
+            string password = null!;
+
+            bool result = _authService.ValidatePasswordStrength(password);
+
+            Assert.False(result);
+        }
+
+        #endregion
+
+        #region Tests Register
+
+        [Fact]
+        public void Register_AvecDonneesValides_CreeRestaurantEtUtilisateur()
+        {
+            string email = "nouveau@restaurant.com";
+            string password = "Password123!";
+            string restaurantNom = "Nouveau Restaurant";
+            string restaurantVille = "Paris";
+
+            _mockUtilisateurDAO
+                .Setup(dao => dao.GetByEmail(email))
+                .Returns((Utilisateur?)null);
+
+            var (utilisateur, restaurant) = _authService.Register(email, password, restaurantNom, restaurantVille);
+
+            Assert.NotNull(utilisateur);
+            Assert.NotNull(restaurant);
+            Assert.Equal(email, utilisateur.Email);
+            Assert.Equal(restaurantNom, restaurant.Nom);
+            Assert.Equal(restaurantVille, restaurant.Ville);
+            _mockRestaurantDAO.Verify(dao => dao.AjouterRestaurant(It.IsAny<Restaurant>()), Times.Once);
+            _mockUtilisateurDAO.Verify(dao => dao.AjouterUtilisateur(It.IsAny<Utilisateur>()), Times.Once);
+        }
+
+        [Fact]
+        public void Register_AvecMotDePasseFaible_LanceArgumentException()
+        {
+            string email = "nouveau@restaurant.com";
+            string password = "faible";
+            string restaurantNom = "Nouveau Restaurant";
+            string restaurantVille = "Paris";
+
+            _mockUtilisateurDAO
+                .Setup(dao => dao.GetByEmail(email))
+                .Returns((Utilisateur?)null);
+
+            Assert.Throws<ArgumentException>(() =>
+                _authService.Register(email, password, restaurantNom, restaurantVille));
+
+            _mockRestaurantDAO.Verify(dao => dao.AjouterRestaurant(It.IsAny<Restaurant>()), Times.Never);
+            _mockUtilisateurDAO.Verify(dao => dao.AjouterUtilisateur(It.IsAny<Utilisateur>()), Times.Never);
+        }
+
+        [Fact]
+        public void Register_AvecEmailExistant_LanceInvalidOperationException()
+        {
+            string email = "existant@restaurant.com";
+            string password = "Password123!";
+            string restaurantNom = "Nouveau Restaurant";
+            string restaurantVille = "Paris";
+
+            Utilisateur utilisateurExistant = new Utilisateur
+            {
+                Id = 1,
+                Email = email,
+                PasswordHash = "hash",
+                RestaurantId = 1
+            };
+
+            _mockUtilisateurDAO
+                .Setup(dao => dao.GetByEmail(email))
+                .Returns(utilisateurExistant);
+
+            Assert.Throws<InvalidOperationException>(() =>
+                _authService.Register(email, password, restaurantNom, restaurantVille));
+
+            _mockRestaurantDAO.Verify(dao => dao.AjouterRestaurant(It.IsAny<Restaurant>()), Times.Never);
+            _mockUtilisateurDAO.Verify(dao => dao.AjouterUtilisateur(It.IsAny<Utilisateur>()), Times.Never);
+        }
+
+        [Fact]
+        public void Register_HasheLeMotDePasse()
+        {
+            string email = "nouveau@restaurant.com";
+            string password = "Password123!";
+            string restaurantNom = "Nouveau Restaurant";
+            string restaurantVille = "Paris";
+
+            _mockUtilisateurDAO
+                .Setup(dao => dao.GetByEmail(email))
+                .Returns((Utilisateur?)null);
+
+            var (utilisateur, restaurant) = _authService.Register(email, password, restaurantNom, restaurantVille);
+
+            Assert.NotNull(utilisateur.PasswordHash);
+            Assert.NotEqual(password, utilisateur.PasswordHash);
+            Assert.True(_authService.VerifyPassword(password, utilisateur.PasswordHash));
+        }
+
+        #endregion
 
     }
 }
