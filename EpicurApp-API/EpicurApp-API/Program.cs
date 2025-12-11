@@ -29,6 +29,7 @@ builder.Services.AddScoped<IMenuService, MenuService>();
 builder.Services.AddScoped<IAllergeneService, AllergeneService>();
 builder.Services.AddScoped<IIdeePlatService, IdeePlatService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<IAllergeneDetectionService, AllergeneDetectionService>();
 
 builder.Services.AddControllers().AddJsonOptions(options =>
 {

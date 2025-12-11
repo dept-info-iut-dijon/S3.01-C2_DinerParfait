@@ -1,11 +1,12 @@
 using EpicurAPP_Partage.Models;
+using EpicurAppLogic.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 using EpicurApp_API.DAO;
 
 namespace EpicurApp_API.Controllers
 {
     /// <summary>
-    /// Controller pour g�rer les services et les r�servations.
+    /// Controller pour gérer les services et les réservations.
     /// </summary>
     [ApiController]
     [Route("[controller]")]
@@ -13,22 +14,21 @@ namespace EpicurApp_API.Controllers
     {
         private readonly ServiceDAO _serviceDAO;
         private readonly ReservationDAO _reservationDAO;
+        private readonly IAllergeneDetectionService _allergeneDetectionService;
 
         /// <summary>
-        /// Constructeur : injection des DAO.
+        /// Constructeur : injection des DAO et services.
         /// </summary>
-        /// <param name="serviceDAO">DAO pour les services.</param>
-        /// <param name="reservationDAO">DAO pour les r�servations.</param>
-        public ServicesController(ServiceDAO serviceDAO, ReservationDAO reservationDAO)
+        public ServicesController(
+            ServiceDAO serviceDAO, 
+            ReservationDAO reservationDAO,
+            IAllergeneDetectionService allergeneDetectionService)
         {
             _serviceDAO = serviceDAO;
             _reservationDAO = reservationDAO;
+            _allergeneDetectionService = allergeneDetectionService;
         }
 
-        /// <summary>
-        /// R�cup�re l'ID du restaurant depuis le header X-Restaurant-Id.
-        /// </summary>
-        /// <returns>L'ID du restaurant ou null si non trouv�.</returns>
         private int? GetRestaurantIdFromHeader()
         {
             if (Request.Headers.TryGetValue("X-Restaurant-Id", out var restaurantIdValue))
@@ -62,7 +62,7 @@ namespace EpicurApp_API.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Erreur lors de la r�cup�ration des services: {ex.Message}");
+                return StatusCode(500, $"Erreur lors de la récupération des services: {ex.Message}");
             }
         }
 
@@ -93,7 +93,7 @@ namespace EpicurApp_API.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Erreur lors de la r�cup�ration des services: {ex.Message}");
+                return StatusCode(500, $"Erreur lors de la récupération des services: {ex.Message}");
             }
         }
 
@@ -109,7 +109,7 @@ namespace EpicurApp_API.Controllers
             {
                 if (service == null)
                 {
-                    return BadRequest("Le service ne peut pas �tre null.");
+                    return BadRequest("Le service ne peut pas être null.");
                 }
 
                 int? restaurantId = GetRestaurantIdFromHeader();
@@ -133,22 +133,77 @@ namespace EpicurApp_API.Controllers
         }
 
         /// <summary>
-        /// Ajoute une nouvelle r�servation.
+        /// Ajoute une nouvelle réservation avec vérification des allergènes.
+        /// Retourne un conflit 409 si des allergènes sont détectés (sauf si forcé).
         /// </summary>
-        /// <param name="reservation">La r�servation � ajouter.</param>
-        /// <returns>La r�servation cr��e avec son ID.</returns>
+        /// <param name="request">La requête de réservation.</param>
+        /// <returns>La réservation créée ou les conflits détectés.</returns>
         [HttpPost("Reservation")]
-        public IActionResult AjouterReservation([FromBody] Reservation reservation)
+        public IActionResult AjouterReservation([FromBody] ReservationRequest request,[FromQuery] bool force = false)
         {
             try
             {
-                if (reservation == null)
+                if (request == null)
                 {
-                    return BadRequest("La r�servation ne peut pas �tre null.");
+                    return BadRequest("La requête de réservation ne peut pas être null.");
                 }
 
+                bool estForce = force || request.ForceReservation;
+                // Récupérer le service pour obtenir le MenuId
+                var services = _serviceDAO.GetAllServices(GetRestaurantIdFromHeader() ?? 0);
+                var service = services.FirstOrDefault(s => s.Id == request.ServiceId);
+                
+                if (service == null)
+                {
+                    return NotFound($"Service avec l'ID {request.ServiceId} introuvable.");
+                }
+
+                // Détecter les conflits d'allergènes
+                List<ConflitAllergene> conflits = _allergeneDetectionService.DetecterConflits(request.ClientId, service.MenuId);
+
+                if (conflits.Count > 0 && !estForce)
+                {
+                    // Retourner les conflits avec code 409
+                    var response = new ValidationReservationResponse
+                    {
+                        EstValide = false,
+                        ADesConflits = true,
+                        Conflits = conflits,
+                        Message = "Des conflits d'allergènes ont été détectés."
+                    };
+                    return Conflict(response);
+                }
+
+                string noteFinale = request.NoteOverride;
+                if (conflits.Count > 0 && estForce && string.IsNullOrWhiteSpace(noteFinale))
+                {
+                    noteFinale = "Forcé par le restaurateur (Alerte allergie ignorée)";
+                }
+
+                // Créer la réservation
+                var reservation = new Reservation
+                {
+                    ServiceId = request.ServiceId,
+                    ClientId = request.ClientId,
+                    NbCouverts = request.NbCouverts
+                };
+
                 _reservationDAO.AjouterReservation(reservation);
-                return CreatedAtAction(nameof(GetReservationsParService), new { serviceId = reservation.ServiceId }, reservation);
+
+                // Retourner la réponse avec les infos de forçage si applicable
+                var successResponse = new ValidationReservationResponse
+                {
+                    EstValide = true,
+                    ADesConflits = conflits.Count > 0,
+                    Conflits = conflits,
+                    EstForcee = estForce,
+                    NoteOverride = noteFinale,
+                    ReservationId = reservation.Id,
+                    Message = conflits.Count > 0 ? $"Réservation créée avec avertissement : {noteFinale}" : "Réservation créée avec succès."
+                };
+
+                return CreatedAtAction(nameof(GetReservationsParService), 
+                    new { serviceId = reservation.ServiceId }, successResponse);
             }
             catch (InvalidOperationException ex)
             {
@@ -156,15 +211,10 @@ namespace EpicurApp_API.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Erreur lors de l'ajout de la r�servation: {ex.Message}");
+                return StatusCode(500, $"Erreur lors de l'ajout de la réservation: {ex.Message}");
             }
         }
 
-        /// <summary>
-        /// R�cup�re toutes les r�servations pour un service donn�.
-        /// </summary>
-        /// <param name="serviceId">Identifiant du service.</param>
-        /// <returns>Liste des r�servations avec nom et pr�nom des clients.</returns>
         [HttpGet("{serviceId}/Reservations")]
         public IActionResult GetReservationsParService(int serviceId)
         {
@@ -175,7 +225,7 @@ namespace EpicurApp_API.Controllers
             }
             catch (Exception ex)
             {
-                return StatusCode(500, $"Erreur lors de la r�cup�ration des r�servations: {ex.Message}");
+                return StatusCode(500, $"Erreur lors de la récupération des réservations: {ex.Message}");
             }
         }
     }

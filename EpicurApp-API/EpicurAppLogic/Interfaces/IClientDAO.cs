@@ -72,18 +72,18 @@ namespace EpicurAppLogic.Interfaces
         /// Récupère les clients réguliers
         /// </summary>
         /// <returns>Liste des clients réguliers avec leur nombre de visites.</returns>
-        List<Client> GetClientsReguliers();
+        List<Client> GetClientsReguliers(int? restaurantId = null);
 
         /// <summary>
         /// clients inactifs
         /// </summary>
         /// <returns>Liste des clients inactifs.</returns>
-        List<Client> GetClientsInactifs();
+        List<Client> GetClientsInactifs(int? restaurantId = null);
 
         /// <summary>
         /// clients vip
         /// </summary>
-        List<Client> GetClientsVIP(); 
+        List<Client> GetClientsVIP(int? restaurantId = null);
     }
 }
 
