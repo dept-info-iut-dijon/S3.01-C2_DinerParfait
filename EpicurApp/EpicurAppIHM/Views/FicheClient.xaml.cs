@@ -98,6 +98,7 @@ namespace EpicurAppIHM.Views
             }
             catch (Exception ex)
             {
+
                 MessageBox.Show("Impossible de charger les allergènes : " + ex.Message,
                                 "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
             }
