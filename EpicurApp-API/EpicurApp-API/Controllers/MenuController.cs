@@ -10,7 +10,7 @@ namespace EpicurApp_API.Controllers
     /// Controller pour gérer les menus.
     /// </summary>
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/menu")]
     public class MenuController : ControllerBase
     {
         /// <summary>

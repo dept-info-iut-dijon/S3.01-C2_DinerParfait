@@ -139,8 +139,16 @@ public class MenuServiceTests
         Assert.Equal("Erreur lors de la récupération des menus.", exceptionVoulue.Message);
     }
 
-    // Test supprimé car GetDernierBrouillon n'est plus dans MenuService
-    // Le contrôleur utilise maintenant directement MenuDAO.GetDernierBrouillon(restaurantId)
+    [Fact]
+    public void GetDernierBrouillon_DoitRetournerMenu()
+    {
+        Menu brouillon = new Menu { Id = 2, Nom = "Brouillon" };
+        _mockMenuDAO.Setup(dao => dao.GetDernierBrouillon(It.IsAny<int>())).Returns(brouillon);
+
+        Menu? resultat = _menuService.GetDernierBrouillon(1);
+
+        Assert.Equal(brouillon, resultat);
+    }
 
     [Fact]
     public void MettreAJourMenu_SansId_DoitLeverException()

@@ -8,7 +8,7 @@ namespace EpicurApp_API.Controllers
     /// Controller pour gérer les plats.
     /// </summary>
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/plats")]
     public class PlatsController : Controller
     {
         /// <summary>

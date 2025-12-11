@@ -1,6 +1,7 @@
+using EpicurApp_API.Configuration;
 using EpicurAPP_Partage.Models;
 using Microsoft.Data.Sqlite;
-using EpicurApp_API.Configuration;
+using System.Diagnostics;
 
 namespace EpicurApp_API.DAO
 {
@@ -24,44 +25,126 @@ namespace EpicurApp_API.DAO
         /// Ajoute un nouveau service dans la base de données.
         /// </summary>
         /// <param name="service">Le service à ajouter.</param>
-        /// <param name="restaurantId">Identifiant du restaurant pour valider que le menu appartient bien à ce restaurant.</param>
+        /// <param name="restaurantId">Identifiant du restaurant pour valider que le menu appartient bien � ce restaurant.</param>
         public void AjouterService(Service service, int restaurantId)
+        {
+            
+            if (service.Date.HasValue)
+            {
+                double heuresDifference = (service.Date.Value - DateTime.Now).TotalHours;
+
+                if (service.Date.Value.Date < DateTime.Now.Date)
+                {
+                    throw new Exception($"Tentative de création dans le passé : {service.Date.Value}");
+                }
+            }
+
+
+            using (SqliteConnection connection = new SqliteConnection(_connectionString))
+            {
+                connection.Open();
+
+                using (var transaction = connection.BeginTransaction())
+                {
+                    try
+                    {
+                        if (service.Date.HasValue)
+                        {
+                            string checkQuery = @"SELECT COUNT(*) FROM Services 
+                                          WHERE date(Date) = date(@Date) 
+                                          AND MidiSoir = @MidiSoir";
+
+                            using (SqliteCommand cmdCheck = new SqliteCommand(checkQuery, connection, transaction))
+                            {
+                                string dateParam = service.Date.Value.ToString("yyyy-MM-dd HH:mm:ss");
+                                cmdCheck.Parameters.AddWithValue("@Date", dateParam);
+                                cmdCheck.Parameters.AddWithValue("@MidiSoir", service.MidiSoir);
+
+                                Debug.WriteLine($"[DEBUG] Check Doublon SQL avec Date='{dateParam}' et MidiSoir='{service.MidiSoir}'");
+
+                                long existe = (long)(cmdCheck.ExecuteScalar() ?? 0);
+                                Debug.WriteLine($"[DEBUG] Résultat Check Doublon : {existe}");
+
+                                if (existe > 0)
+                                {
+                                    throw new Exception($"[DEBUG BLOCK] Doublon détecté en base pour {dateParam} - {service.MidiSoir}");
+                                }
+                            }
+                        }
+
+                        string insertQuery = @"INSERT INTO Services (Date, MidiSoir, MenuId, Statut)
+                                       VALUES (@Date, @MidiSoir, @MenuId, @Statut);
+                                       SELECT last_insert_rowid();";
+
+                        using (SqliteCommand command = new SqliteCommand(insertQuery, connection, transaction))
+                        {
+                            object dateValue = service.Date.HasValue ? service.Date.Value.ToString("yyyy-MM-dd HH:mm:ss") : DBNull.Value;
+
+
+                            command.Parameters.AddWithValue("@Date", dateValue);
+                            command.Parameters.AddWithValue("@MidiSoir", service.MidiSoir);
+                            command.Parameters.AddWithValue("@MenuId", service.MenuId);
+                            command.Parameters.AddWithValue("@Statut", service.Statut);
+
+                            var result = command.ExecuteScalar();
+
+                            if (result != null) service.Id = Convert.ToInt32(result);
+                        }
+
+                        if (service.Date.HasValue)
+                        {
+                            string updateMenu = "UPDATE Menus SET Date = @Date WHERE Id = @MenuId";
+
+                            using (SqliteCommand cmdMenu = new SqliteCommand(updateMenu, connection, transaction))
+                            {
+                                cmdMenu.Parameters.AddWithValue("@Date", service.Date.Value.ToString("yyyy-MM-dd HH:mm:ss"));
+                                cmdMenu.Parameters.AddWithValue("@MenuId", service.MenuId);
+                                int rows = cmdMenu.ExecuteNonQuery();
+                            }
+                        }
+
+                        transaction.Commit();
+                    }
+                    catch (Exception ex)
+                    {
+                        transaction.Rollback();
+                        throw; 
+                    }
+                }
+            }
+        }
+
+        public void UpdateMenuService(int serviceId, int nouveauMenuId)
         {
             using (SqliteConnection connection = new SqliteConnection(_connectionString))
             {
                 connection.Open();
 
-                // V�rifier que le menu existe et appartient au restaurant
-                string checkQuery = @"SELECT COUNT(*) FROM Menus WHERE Id = @MenuId AND RestaurantId = @RestaurantId";
-                using (SqliteCommand checkCommand = new SqliteCommand(checkQuery, connection))
-                {
-                    checkCommand.Parameters.AddWithValue("@MenuId", service.MenuId);
-                    checkCommand.Parameters.AddWithValue("@RestaurantId", restaurantId);
+                string selectQuery = "SELECT Date FROM Services WHERE Id = @Id";
+                DateTime? dateReelle = null;
 
-                    long count = (long)(checkCommand.ExecuteScalar() ?? 0);
-                    if (count == 0)
-                    {
-                        throw new InvalidOperationException($"Le menu avec l'ID {service.MenuId} n'existe pas ou n'appartient pas au restaurant {restaurantId}.");
-                    }
+                using (SqliteCommand selectCmd = new SqliteCommand(selectQuery, connection))
+                {
+                    selectCmd.Parameters.AddWithValue("@Id", serviceId);
+                    var result = selectCmd.ExecuteScalar();
+
+                    if (result == null) throw new KeyNotFoundException($"Service {serviceId} introuvable.");
+                    if (result != DBNull.Value) dateReelle = DateTime.Parse(result.ToString());
                 }
 
-                string query = @"INSERT INTO Services
-                    (Date, MidiSoir, MenuId, Statut)
-                    VALUES (@Date, @MidiSoir, @MenuId, @Statut);
-                    SELECT last_insert_rowid();";
+                Service serviceActuel = new Service { Date = dateReelle };
 
-                using (SqliteCommand command = new SqliteCommand(query, connection))
+                if (serviceActuel.EstVerrouille)
                 {
-                    command.Parameters.AddWithValue("@Date", service.Date.ToString("yyyy-MM-dd HH:mm:ss"));
-                    command.Parameters.AddWithValue("@MidiSoir", service.MidiSoir);
-                    command.Parameters.AddWithValue("@MenuId", service.MenuId);
-                    command.Parameters.AddWithValue("@Statut", service.Statut);
+                    throw new InvalidOperationException($"INTERDIT : Ce service est verrouillé (Reste moins de 48h ou passé).");
+                }
 
-                    var result = command.ExecuteScalar();
-                    if (result != null)
-                    {
-                        service.Id = Convert.ToInt32(result);
-                    }
+                string updateQuery = "UPDATE Services SET MenuId = @MenuId WHERE Id = @Id";
+                using (SqliteCommand updateCmd = new SqliteCommand(updateQuery, connection))
+                {
+                    updateCmd.Parameters.AddWithValue("@MenuId", nouveauMenuId);
+                    updateCmd.Parameters.AddWithValue("@Id", serviceId);
+                    updateCmd.ExecuteNonQuery();
                 }
             }
         }

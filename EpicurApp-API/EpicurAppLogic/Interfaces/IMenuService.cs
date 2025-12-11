@@ -48,6 +48,13 @@ namespace EpicurAppLogic.Interfaces
         List<ElementListeCourse> GenererListeCourses(int menuId);
 
         /// <summary>
+        /// Récupère le dernier menu en statut brouillon pour un restaurant donné.
+        /// </summary>
+        /// <param name="restaurantId">Identifiant du restaurant.</param>
+        /// <returns>Menu en brouillon ou null.</returns>
+        Menu? GetDernierBrouillon(int restaurantId);
+
+        /// <summary>
         /// Supprime un menu par son Id.
         /// </summary>
         /// <param name="id">Id du menu à supprimer.</param>
