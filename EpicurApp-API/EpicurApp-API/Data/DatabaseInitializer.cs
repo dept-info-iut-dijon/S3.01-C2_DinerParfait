@@ -111,6 +111,7 @@ namespace EpicurApp_API.Data
                         Retours TEXT,
                         RestaurantId INTEGER NOT NULL DEFAULT 1,
                         DateCreation TEXT NOT NULL DEFAULT (datetime('now')),
+                        Date DATETIME,
                         FOREIGN KEY (RestaurantId) REFERENCES Restaurants(Id) ON DELETE CASCADE
                     );";
 
@@ -179,7 +180,7 @@ namespace EpicurApp_API.Data
                 var createServicesTable = @"
                     CREATE TABLE IF NOT EXISTS Services (
                         Id INTEGER PRIMARY KEY AUTOINCREMENT,
-                        Date DATETIME NOT NULL,
+                        Date DATETIME,
                         MidiSoir TEXT NOT NULL,
                         MenuId INTEGER NOT NULL,
                         Statut TEXT NOT NULL DEFAULT 'Ouvert',

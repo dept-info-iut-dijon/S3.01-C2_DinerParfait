@@ -33,10 +33,6 @@ namespace EpicurAppIHM.Views
             {
                 ChargerMenu(menuId.Value);
             }
-            else
-            {
-                ChargerBrouillon();
-            }
 
             btnAnnuler.Click += Annuler;
             btnSupprimer.Click += SupprimerMenu;
@@ -379,7 +375,10 @@ namespace EpicurAppIHM.Views
                         MessageBox.Show("Brouillon enregistré avec succès !", "Succès", MessageBoxButton.OK, MessageBoxImage.Information);
                     }
 
-                    ChargerBrouillon();
+                    if (_menuBrouillonId.HasValue)
+                    {
+                        ChargerMenu(_menuBrouillonId.Value);
+                    }
                 }
                 else
                 {

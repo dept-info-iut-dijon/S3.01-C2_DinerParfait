@@ -10,7 +10,7 @@ namespace EpicurAppIHM.Repositories
     public class MenuRepository : IMenuRepository
     {
         private readonly HttpClient _httpClient;
-        private const string BaseEndpoint = "menu";
+        private const string BaseEndpoint = "api/menu";
 
         public MenuRepository(HttpClient httpClient)
         {
@@ -62,13 +62,13 @@ namespace EpicurAppIHM.Repositories
         public async Task<Menu?> GetBrouillonAsync()
         {
             // Récupérer le menu brouillon directement depuis l'API
-            return await _httpClient.GetFromJsonAsync<Menu>("menu/brouillon");
+            return await _httpClient.GetFromJsonAsync<Menu>("api/menu/brouillon");
         }
 
         public async Task<List<Menu>> GetMenusValidesAsync()
         {
             // Récupérer uniquement les menus validés (disponibles pour les services)
-            List<Menu>? menus = await _httpClient.GetFromJsonAsync<List<Menu>>("menu/valides");
+            List<Menu>? menus = await _httpClient.GetFromJsonAsync<List<Menu>>("api/menu/valides");
             return menus ?? new List<Menu>();
         }
 

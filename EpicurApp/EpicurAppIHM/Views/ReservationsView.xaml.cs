@@ -80,7 +80,6 @@ namespace EpicurAppIHM.Views
         {
             try
             {
-                // S'assurer que le header X-Restaurant-Id est défini
                 if (App.CurrentRestaurant != null)
                 {
                     App.ApiClient.SetRestaurantId(App.CurrentRestaurant.Id);
@@ -89,24 +88,19 @@ namespace EpicurAppIHM.Views
                 var menuSelectionne = cmbMenus.SelectedItem as EpicurAPP_Partage.Models.Menu;
                 int? menuSelectionneId = menuSelectionne?.Id;
 
-                var menus = await App.ApiClient.HttpClient.GetFromJsonAsync<List<EpicurAPP_Partage.Models.Menu>>("menu/valides");
+                var menus = await App.ApiClient.HttpClient.GetFromJsonAsync<List<EpicurAPP_Partage.Models.Menu>>("api/menu");
+
                 if (menus != null)
                 {
                     ListeMenus = menus;
                     cmbMenus.ItemsSource = ListeMenus;
 
-                    // Essayer de réappliquer la sélection précédente si elle existe toujours
+                    // Essayer de réappliquer la sélection précédente
                     if (menuSelectionneId.HasValue)
                     {
                         var menuToReselect = ListeMenus.Find(m => m.Id == menuSelectionneId.Value);
-                        if (menuToReselect != null)
-                        {
-                            cmbMenus.SelectedItem = menuToReselect;
-                        }
-                        else
-                        {
-                            cmbMenus.SelectedIndex = ListeMenus.Count > 0 ? 0 : -1;
-                        }
+                        if (menuToReselect != null) cmbMenus.SelectedItem = menuToReselect;
+                        else cmbMenus.SelectedIndex = ListeMenus.Count > 0 ? 0 : -1;
                     }
                     else
                     {
@@ -197,12 +191,25 @@ namespace EpicurAppIHM.Views
             {
                 _serviceSelectionne = service;
 
-                // Active le panneau de droite
                 PanelReservations.IsEnabled = true;
                 PanelReservations.Opacity = 1;
-                txtServiceSelectionne.Text = $"Service du {service.Date:dd/MM} ({service.MidiSoir})";
 
-                // Charge les réservations de ce service
+                if (service.EstVerrouille)
+                {
+                    // Cas verrouillé 
+                    txtServiceSelectionne.Text = $"Service du {service.Date:dd/MM} ({service.MidiSoir}) - VERROUILLÉ 🔒";
+                    txtServiceSelectionne.Foreground = System.Windows.Media.Brushes.Red;
+                    cmbMenus.IsEnabled = false;
+                }
+                else
+                {
+                    // Cas normal 
+                    txtServiceSelectionne.Text = $"Service du {service.Date:dd/MM} ({service.MidiSoir})";
+                    txtServiceSelectionne.Foreground = System.Windows.Media.Brushes.Black;
+                    cmbMenus.IsEnabled = true;
+                }
+                // ---------------------------------------------------
+
                 await ChargerReservations(service.Id);
             }
             else
@@ -213,7 +220,7 @@ namespace EpicurAppIHM.Views
             }
         }
 
-        // --- GESTION RÉSERVATIONS ---
+        // GESTION RÉSERVATION
 
         private async Task ChargerReservations(int serviceId)
         {

@@ -105,9 +105,9 @@ namespace EpicurAppLogic.Services
 
             ValiderStatut(menu.Statut);
 
-            // Vérifier si le menu est associé à un service dans les 24 heures
-            if (_menuDAO.AServiceDansLes24Heures(menu.Id))
-                throw new InvalidOperationException("Le menu ne peut pas être modifié car il est associé à un service prévu dans les 24 prochaines heures.");
+            // Vérifier si le menu est associé à un service (passé ou futur)
+            if (_menuDAO.EstUtilise(menu.Id))
+                throw new InvalidOperationException("Le menu ne peut pas être modifié car il est utilisé dans un service.");
 
             try
             {
@@ -180,6 +180,23 @@ namespace EpicurAppLogic.Services
                 .OrderBy(e => e.Ingredient.Categorie)
                 .ThenBy(e => e.Ingredient.Nom)
                 .ToList();
+        }
+
+        /// <summary>
+        /// Récupère le dernier menu en statut brouillon pour un restaurant donné.
+        /// </summary>
+        /// <param name="restaurantId">Identifiant du restaurant.</param>
+        /// <returns>Menu en brouillon ou null.</returns>
+        public Menu? GetDernierBrouillon(int restaurantId)
+        {
+            try
+            {
+                return _menuDAO.GetDernierBrouillon(restaurantId);
+            }
+            catch (Exception ex)
+            {
+                throw new ApplicationException("Erreur lors de la récupération du dernier brouillon.", ex);
+            }
         }
 
         /// <summary>

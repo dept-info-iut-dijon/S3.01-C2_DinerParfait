@@ -73,6 +73,13 @@ namespace EpicurAppLogic.Interfaces
         /// <param name="menuId">Id du menu à vérifier.</param>
         /// <returns>True si le menu a un service dans les 24h, False sinon.</returns>
         bool AServiceDansLes24Heures(int menuId);
+        
+        /// <summary>
+        /// Vérifie si un menu est utilisé dans un service.
+        /// </summary>
+        /// <param name="menuId">Id du menu.</param>
+        /// <returns>True si le menu est assigné à au moins un service.</returns>
+        bool EstUtilise(int menuId);
     }
 }
 

@@ -58,6 +58,7 @@ namespace EpicurApp_API.DAO
                             command.Parameters.AddWithValue("@DateCreation", menu.DateCreation.ToString("yyyy-MM-dd HH:mm:ss"));
 
                             menuId = Convert.ToInt32(command.ExecuteScalar());
+                            menu.Id = menuId;
                         }
 
                         // Insert elements into ElementMenus table
@@ -119,7 +120,9 @@ namespace EpicurApp_API.DAO
             {
                 connection.Open();
 
-                string query = @"SELECT Id, Nom, Statut, RestaurantId, Note, Retours, DateCreation FROM Menus WHERE Id=@Id";
+                string query = @"SELECT Id, Nom, Statut, RestaurantId, Note, Retours, DateCreation,
+                                (SELECT COUNT(*) FROM Services WHERE MenuId = Menus.Id) > 0 AS EstUtilise
+                                FROM Menus WHERE Id=@Id";
 
                 using (SqliteCommand command = new SqliteCommand(query, connection))
                 {
@@ -147,7 +150,9 @@ namespace EpicurApp_API.DAO
             {
                 connection.Open();
 
-                string query = @"SELECT Id, Nom, Statut, RestaurantId, Note, Retours, DateCreation FROM Menus";
+                string query = @"SELECT Id, Nom, Statut, RestaurantId, Note, Retours, DateCreation,
+                                (SELECT COUNT(*) FROM Services WHERE MenuId = Menus.Id) > 0 AS EstUtilise
+                                FROM Menus";
 
                 using (SqliteCommand command = new SqliteCommand(query, connection))
                 using (SqliteDataReader reader = command.ExecuteReader())
@@ -173,7 +178,8 @@ namespace EpicurApp_API.DAO
             {
                 connection.Open();
 
-                string query = @"SELECT Id, Nom, Statut, RestaurantId, Note, Retours, DateCreation
+                string query = @"SELECT Id, Nom, Statut, RestaurantId, Note, Retours, DateCreation,
+                                (SELECT COUNT(*) FROM Services WHERE MenuId = Menus.Id) > 0 AS EstUtilise
                                 FROM Menus
                                 WHERE RestaurantId = @RestaurantId";
 
@@ -204,7 +210,8 @@ namespace EpicurApp_API.DAO
             {
                 connection.Open();
 
-                string query = @"SELECT Id, Nom, Statut, RestaurantId, Note, Retours, DateCreation
+                string query = @"SELECT Id, Nom, Statut, RestaurantId, Note, Retours, DateCreation,
+                    (SELECT COUNT(*) FROM Services WHERE MenuId = Menus.Id) > 0 AS EstUtilise
                     FROM Menus
                     WHERE Statut = @Statut AND RestaurantId = @RestaurantId
                     ORDER BY Id DESC
@@ -240,7 +247,8 @@ namespace EpicurApp_API.DAO
             {
                 connection.Open();
 
-                string query = @"SELECT Id, Nom, Statut, RestaurantId, Note, Retours, DateCreation
+                string query = @"SELECT Id, Nom, Statut, RestaurantId, Note, Retours, DateCreation,
+                                (SELECT COUNT(*) FROM Services WHERE MenuId = Menus.Id) > 0 AS EstUtilise
                                 FROM Menus
                                 WHERE RestaurantId = @RestaurantId AND Statut = @Statut
                                 ORDER BY DateCreation DESC";
@@ -401,6 +409,7 @@ namespace EpicurApp_API.DAO
             menu.Note = reader.IsDBNull(4) ? null : reader.GetInt32(4);
             menu.Retours = reader.IsDBNull(5) ? null : reader.GetString(5);
             menu.DateCreation = reader.IsDBNull(6) ? DateTime.Now : DateTime.Parse(reader.GetString(6));
+            menu.EstUtilise = reader.GetBoolean(7);
 
             // Load elements from ElementMenus table
             menu.Elements = new List<ElementMenu>();
@@ -483,6 +492,28 @@ namespace EpicurApp_API.DAO
                                 WHERE MenuId = @MenuId
                                 AND datetime(Date) >= datetime('now')
                                 AND datetime(Date) <= datetime('now', '+24 hours')";
+
+                using (SqliteCommand command = new SqliteCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@MenuId", menuId);
+                    long count = (long)(command.ExecuteScalar() ?? 0);
+                    return count > 0;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Vérifie si un menu est utilisé dans un service.
+        /// </summary>
+        /// <param name="menuId">Id du menu à vérifier.</param>
+        /// <returns>True si le menu est assigné à au moins un service.</returns>
+        public bool EstUtilise(int menuId)
+        {
+            using (SqliteConnection connection = new SqliteConnection(_connectionString))
+            {
+                connection.Open();
+
+                string query = "SELECT COUNT(*) FROM Services WHERE MenuId = @MenuId";
 
                 using (SqliteCommand command = new SqliteCommand(query, connection))
                 {

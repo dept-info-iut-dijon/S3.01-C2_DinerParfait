@@ -51,10 +51,24 @@ namespace EpicurAppIHM.Views
                 txtStatut.Text = menu.Statut;
                 _menuStatut = menu.Statut;
 
-                // Afficher le bouton "Modifier" uniquement pour les brouillons
+                // Afficher le bouton modifier pour les brouillons
                 if (menu.Statut == "Brouillon")
                 {
                     btnModifier.Visibility = Visibility.Visible;
+
+                    // Désactiver si le menu est utilisé dans un service
+                    if (menu.EstUtilise)
+                    {
+                        btnModifier.IsEnabled = false;
+                        btnModifier.ToolTip = "Ce menu est utilisé dans un service et ne peut pas être modifié.";
+                        btnModifier.Opacity = 0.5;
+                    }
+                    else
+                    {
+                        btnModifier.IsEnabled = true;
+                        btnModifier.ToolTip = "Modifier ce menu brouillon.";
+                        btnModifier.Opacity = 1.0;
+                    }
                 }
 
                 // Récupérer le premier plat de chaque catégorie et afficher son nom
