@@ -1,12 +1,12 @@
 
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
 WORKDIR /app
-EXPOSE 8080
 EXPOSE 8081
 
 # variables d'environnement pour les ports et l'environnement
 ENV ASPNETCORE_ENVIRONMENT=Production
-ENV ASPNETCORE_URLS="https://+:8081;http://+:8080"
+ENV ASPNETCORE_HTTP_PORTS=8081
+ENV ASPNETCORE_URLS="http://*:8081"
 
 RUN chown app:app /app
 USER app
@@ -14,7 +14,6 @@ USER app
 # Image pour la compilation
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 ARG BUILD_CONFIGURATION=Release
-RUN dotnet dev-certs https --trust
 WORKDIR /src
 
 # Copier les fichiers .csproj avec l'arborescence d'origine
@@ -46,8 +45,6 @@ FROM base AS final
 WORKDIR /app
 COPY --from=publish --chown=app:app /app/publish .
 
-ENV ASPNETCORE_Kestrel__Certificates__Default__Path="/https/thecertif.pfx"
-COPY --from=publish --chmod=555 /root/.dotnet/corefx/cryptography/x509stores/my/* /https/thecertif.pfx
 
 RUN chmod 664 /app/epicurapp.db || true
 
