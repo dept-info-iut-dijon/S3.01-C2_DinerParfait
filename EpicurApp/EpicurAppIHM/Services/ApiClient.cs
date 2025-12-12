@@ -21,7 +21,7 @@ namespace EpicurAppIHM.Services
                 {
                     // Détermination de l'URL de base
                     string baseUrl = Environment.GetEnvironmentVariable("EPICURAPP_API_BASEURL")
-                        ?? "https://10.128.207.45:8081/";
+                        ?? "http://10.128.207.45:8081/";
 
                     // Configuration du handler pour accepter tous les certificats SSL
                     HttpClientHandler handler = new HttpClientHandler
