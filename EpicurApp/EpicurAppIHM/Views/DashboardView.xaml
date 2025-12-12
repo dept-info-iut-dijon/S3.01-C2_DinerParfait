@@ -80,7 +80,11 @@
                             <lvc:Axis Labels="{Binding}" FontSize="9" LabelsRotation="45"/>
                         </lvc:CartesianChart.AxisX>
                         <lvc:CartesianChart.AxisY>
-                            <lvc:Axis Title="Nombre" FontSize="9" MinValue="0"/>
+                            <lvc:Axis Title="Nombre" FontSize="9" MinValue="0">
+                                <lvc:Axis.Separator>
+                                    <lvc:Separator Step="1"/>
+                                </lvc:Axis.Separator>
+                            </lvc:Axis>
                         </lvc:CartesianChart.AxisY>
                     </lvc:CartesianChart>
                 </StackPanel>

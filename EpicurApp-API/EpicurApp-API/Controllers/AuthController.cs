@@ -10,7 +10,7 @@ namespace EpicurApp_API.Controllers
     /// Controller pour gérer l'authentification des utilisateurs.
     /// </summary>
     [ApiController]
-    [Route("[controller]")]
+    [Route("auth")]
     public class AuthController : ControllerBase
     {
         private readonly IAuthService _authService;
@@ -106,11 +106,13 @@ namespace EpicurApp_API.Controllers
         [HttpPost("register")]
         public IActionResult Register([FromBody] RegisterRequest request)
         {
+            Console.WriteLine($"[AuthController] Reçu demande inscription pour : {request.Email}");
             try
             {
                 // Validation du modèle
                 if (!ModelState.IsValid)
                 {
+                    Console.WriteLine("[AuthController] Modèle invalide");
                     return BadRequest(new
                     {
                         success = false,
@@ -121,6 +123,7 @@ namespace EpicurApp_API.Controllers
                 // Validation de la confirmation du mot de passe
                 if (request.Password != request.ConfirmPassword)
                 {
+                    Console.WriteLine("[AuthController] Mots de passe ne correspondent pas");
                     return BadRequest(new
                     {
                         success = false,
@@ -128,6 +131,7 @@ namespace EpicurApp_API.Controllers
                     });
                 }
 
+                Console.WriteLine("[AuthController] Appel du service Register...");
                 // Création du compte
                 var (utilisateur, restaurant) = _authService.Register(
                     request.Email,
@@ -135,6 +139,7 @@ namespace EpicurApp_API.Controllers
                     request.RestaurantNom,
                     request.RestaurantVille
                 );
+                Console.WriteLine($"[AuthController] Succès ! User ID: {utilisateur.Id}, Resto ID: {restaurant.Id}");
 
                 // Retourner les informations (même format que le login)
                 return Ok(new
@@ -157,6 +162,7 @@ namespace EpicurApp_API.Controllers
             }
             catch (ArgumentException ex)
             {
+                Console.WriteLine($"[AuthController] Erreur Argument: {ex.Message}");
                 return BadRequest(new
                 {
                     success = false,
@@ -165,6 +171,7 @@ namespace EpicurApp_API.Controllers
             }
             catch (InvalidOperationException ex)
             {
+                Console.WriteLine($"[AuthController] Erreur InvalidOperation: {ex.Message}");
                 return Conflict(new
                 {
                     success = false,
@@ -173,6 +180,7 @@ namespace EpicurApp_API.Controllers
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"[AuthController] Erreur CRITIQUE: {ex}");
                 return StatusCode(500, new
                 {
                     success = false,

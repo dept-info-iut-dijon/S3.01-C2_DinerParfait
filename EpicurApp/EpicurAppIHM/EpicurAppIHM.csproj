@@ -39,22 +39,15 @@
     <Content Include="Police\arial.ttf">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-    <Resource Include="Logo\logoappli.ico">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Resource>
+    <Resource Include="Logo\logoappli.ico" />
     <Resource Include="Police\PlayfairDisplay-Bold.ttf" />
     <Resource Include="Police\PlayfairDisplay-Italic.ttf" />
     <Resource Include="Police\PlayfairDisplay-Regular.ttf" />
+    <Resource Include="Logo\logosae1-bgremove.png" />
   </ItemGroup>
 
   <ItemGroup>
     <Page Include="App.xaml" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Content Include="Logo\logosae1-bgremove.png">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
   </ItemGroup>
 
 </Project>

@@ -20,6 +20,7 @@
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto"/>
                     <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
                 <StackPanel Grid.Column="0" Orientation="Horizontal">
@@ -60,16 +61,15 @@
                 <TextBlock Grid.Column="1" Text="Epicur'app"
                    FontSize="32" FontWeight="Bold"
                    Foreground="#D4AF37"
-                   HorizontalAlignment="Left" 
+                   HorizontalAlignment="Center" 
                    VerticalAlignment="Center"
                    FontFamily="./Police/#Playfair Display"
-                   Height="45" Width="320" Margin="305,0,0,0"/>
+                   Margin="10,0"/>
 
-                <StackPanel Grid.Column="1"
+                <StackPanel Grid.Column="2"
                             Orientation="Horizontal"
                             HorizontalAlignment="Right"
-                            VerticalAlignment="Center"
-                            Margin="0,0,10,0">
+                            VerticalAlignment="Center">
                     <Button x:Name="btnHome"
                             Content="🏠"
                             Width="100" Height="45"

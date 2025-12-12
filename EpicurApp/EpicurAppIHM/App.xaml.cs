@@ -32,6 +32,37 @@ namespace EpicurAppIHM
         public static IIdeePlatRepository IdeePlatRepository { get; } = new IdeePlatRepository(ApiClient.HttpClient);
         public static IAllergeneRepository AllergeneRepository { get; } = new AllergeneRepository(ApiClient.HttpClient);
         public static IAllergeneDetectionRepository AllergeneDetectionRepository { get; } = new AllergeneDetectionRepository(ApiClient.HttpClient);
+
+        protected override void OnStartup(StartupEventArgs e)
+        {
+            base.OnStartup(e);
+
+            // Gestion globale des exceptions non gérées
+            AppDomain.CurrentDomain.UnhandledException += (s, args) =>
+            {
+                Exception ex = (Exception)args.ExceptionObject;
+                MessageBox.Show($"Une erreur critique est survenue (Unhandled) :\n{ex.Message}\n\n{ex.StackTrace}", 
+                                "Erreur Critique EpicurApp", 
+                                MessageBoxButton.OK, 
+                                MessageBoxImage.Error);
+            };
+
+            try
+            {
+                // Tente d'instancier et d'afficher la vue de connexion
+                var loginView = new Views.LoginView();
+                loginView.Show();
+            }
+            catch (Exception ex)
+            {
+                // Affiche l'erreur si le lancement échoue (ex: ressource introuvable)
+                MessageBox.Show($"Impossible de démarrer l'application :\n{ex.Message}\n\n{ex.InnerException?.Message}", 
+                                "Erreur de Démarrage EpicurApp", 
+                                MessageBoxButton.OK, 
+                                MessageBoxImage.Error);
+                Shutdown();
+            }
+        }
     }
 
 }
