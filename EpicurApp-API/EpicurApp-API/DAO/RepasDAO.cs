@@ -32,6 +32,7 @@ namespace EpicurApp_API.DAO
 
         /// <summary>
         /// Récupère tous les repas d'un client spécifique avec leurs menus, triés par date décroissante.
+        /// Basé sur les réservations passées (services passés).
         /// </summary>
         /// <param name="clientId">Identifiant du client.</param>
         /// <returns>Liste des repas du client avec leurs menus associés.</returns>
@@ -43,14 +44,25 @@ namespace EpicurApp_API.DAO
             {
                 connection.Open();
 
+                // Nouvelle requête basée sur Reservations + Services + Menus
+                // On récupère uniquement les services passés (Date < maintenant)
                 string query = @"
                     SELECT
-                        r.Id, r.ClientId, r.MenuId, r.Date, r.Retours, r.RestaurantId,
-                        m.Id AS Menu_Id, m.Nom AS Menu_Nom, m.Note AS Menu_Note
-                    FROM Repas r
-                    JOIN Menus m ON r.MenuId = m.Id
-                    WHERE r.ClientId = @ClientId
-                    ORDER BY r.Date DESC";
+                        res.Id AS Reservation_Id,
+                        res.ClientId,
+                        s.MenuId,
+                        s.Date,
+                        m.Id AS Menu_Id,
+                        m.Nom AS Menu_Nom,
+                        m.Note AS Menu_Note,
+                        m.RestaurantId,
+                        res.NbCouverts
+                    FROM Reservations res
+                    INNER JOIN Services s ON res.ServiceId = s.Id
+                    INNER JOIN Menus m ON s.MenuId = m.Id
+                    WHERE res.ClientId = @ClientId
+                    AND s.Date < datetime('now')
+                    ORDER BY s.Date DESC";
 
                 using (var command = new SqliteCommand(query, connection))
                 {
@@ -71,12 +83,13 @@ namespace EpicurApp_API.DAO
 
                             var nouveauRepas = new Repas
                             {
-                                Id = reader.GetInt32(0),
-                                ClientId = reader.GetInt32(1),
-                                MenuId = reader.GetInt32(2),
-                                Date = DateTime.Parse(reader.GetString(3)),
-                                Retours = reader.IsDBNull(4) ? null : reader.GetString(4),
-                                RestaurantId = reader.GetInt32(5),
+                                // Utiliser l'ID de la réservation comme ID du repas
+                                Id = reader.GetInt32(reader.GetOrdinal("Reservation_Id")),
+                                ClientId = reader.GetInt32(reader.GetOrdinal("ClientId")),
+                                MenuId = reader.GetInt32(reader.GetOrdinal("MenuId")),
+                                Date = DateTime.Parse(reader.GetString(reader.GetOrdinal("Date"))),
+                                Retours = null, // Les retours ne sont pas encore implémentés via réservations
+                                RestaurantId = reader.GetInt32(reader.GetOrdinal("RestaurantId")),
                                 Menu = menu,
                                 Note = menu.Note
                             };

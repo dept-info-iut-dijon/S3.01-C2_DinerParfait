@@ -341,7 +341,7 @@ namespace EpicurApp_API.Data
                     }
                 }
 
-                // Hash simple pour le développement - sera remplacé par BCrypt dans AuthService
+                // Hash
                 // Mot de passe de test: "Password123!"
                 string testPasswordHash = HashPassword("Password123!");
 
@@ -372,7 +372,7 @@ namespace EpicurApp_API.Data
         }
 
         /// <summary>
-        /// Hash d'un mot de passe (SHA256) .
+        /// Hash d'un mot de passe.
         /// </summary>
         private static string HashPassword(string password)
         {
