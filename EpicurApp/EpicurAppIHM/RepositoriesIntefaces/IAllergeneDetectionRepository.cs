@@ -1,5 +1,4 @@
 using EpicurAPP_Partage.Models;
-using System.Threading.Tasks;
 
 namespace EpicurAppIHM.RepositoriesIntefaces
 {

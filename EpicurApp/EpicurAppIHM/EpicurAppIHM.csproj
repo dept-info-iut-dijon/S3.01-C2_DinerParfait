@@ -6,9 +6,19 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UseWPF>true</UseWPF>
+	<ApplicationIcon>Logo/logoappli.ico</ApplicationIcon>	  
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Images\**" />
+    <EmbeddedResource Remove="Images\**" />
+    <None Remove="Images\**" />
+    <Page Remove="Images\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="Logo\logoappli.ico" />
+    <None Remove="Logo\logosae1.ico" />
     <None Remove="Police\arial.ttf" />
     <None Remove="Police\PlayfairDisplay-Bold.ttf" />
     <None Remove="Police\PlayfairDisplay-Italic.ttf" />
@@ -29,6 +39,9 @@
     <Content Include="Police\arial.ttf">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Resource Include="Logo\logoappli.ico">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Resource>
     <Resource Include="Police\PlayfairDisplay-Bold.ttf" />
     <Resource Include="Police\PlayfairDisplay-Italic.ttf" />
     <Resource Include="Police\PlayfairDisplay-Regular.ttf" />
@@ -42,10 +55,6 @@
     <Content Include="Logo\logosae1-bgremove.png">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Resource Include="Images\logo.ico" />
   </ItemGroup>
 
 </Project>

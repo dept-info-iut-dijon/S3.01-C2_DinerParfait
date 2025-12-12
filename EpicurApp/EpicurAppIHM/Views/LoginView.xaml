@@ -11,7 +11,7 @@
         WindowState="Maximized"
         Background="#FDF6E3"
         FontFamily="./Police/#Playfair Display"
-        Icon="/Images/logo.ico">
+        Icon="/Logo/logoappli.ico">
 
     <Window.Resources>
         <!-- Style pour les TextBox -->
@@ -196,45 +196,6 @@
                                   FontSize="13"
                                   FontStyle="Italic"/>
                     </StackPanel>
-
-                    <!-- Ligne de séparation -->
-                    <Rectangle Height="2"
-                              Fill="#D4AF37"
-                              Margin="0,30,0,20"
-                              Opacity="0.3"/>
-
-                    <!-- Comptes de test -->
-                    <Border Background="#F8FAFC"
-                            BorderBrush="#D4AF37"
-                            BorderThickness="1"
-                            CornerRadius="8"
-                            Padding="15">
-                        <StackPanel>
-                            <TextBlock Text="Comptes de test :"
-                                      Foreground="#8B1538"
-                                      FontWeight="Bold"
-                                      FontSize="13"
-                                      Margin="0,0,0,10"/>
-
-                            <TextBlock Foreground="#475569" FontSize="11" Margin="0,0,0,8">
-                                <Run Text="Le Gourmet Dijonnais (Dijon)" FontWeight="SemiBold"/><LineBreak/>
-                                <Run Text="Email: admin@legourmet.fr"/><LineBreak/>
-                                <Run Text="Mot de passe: Password123!"/>
-                            </TextBlock>
-
-                            <TextBlock Foreground="#475569" FontSize="11" Margin="0,0,0,8">
-                                <Run Text="La Table de Lyon (Lyon)" FontWeight="SemiBold"/><LineBreak/>
-                                <Run Text="Email: chef@letable.fr"/><LineBreak/>
-                                <Run Text="Mot de passe: Password123!"/>
-                            </TextBlock>
-
-                            <TextBlock Foreground="#475569" FontSize="11">
-                                <Run Text="Le Bistrot Parisien (Paris)" FontWeight="SemiBold"/><LineBreak/>
-                                <Run Text="Email: manager@lebistrot.fr"/><LineBreak/>
-                                <Run Text="Mot de passe: Password123!"/>
-                            </TextBlock>
-                        </StackPanel>
-                    </Border>
                 </StackPanel>
             </ScrollViewer>
         </Border>

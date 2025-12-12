@@ -1,11 +1,9 @@
 ﻿using System.Collections.ObjectModel;
-using System.Net.Http.Json;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
 using MenuModel = EpicurAPP_Partage.Models.Menu;
-using System.Windows.Media;
 
 namespace EpicurAppIHM.Views
 {

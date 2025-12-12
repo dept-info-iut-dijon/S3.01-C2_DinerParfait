@@ -245,21 +245,5 @@ namespace EpicurAppIHM.Views
             }
         }
 
-        /// <summary>
-        /// Retour à la page d'accueil (Dashboard)
-        /// </summary>
-        private void RetourAccueil_Click(object sender, RoutedEventArgs e)
-        {
-            DependencyObject parent = VisualTreeHelper.GetParent(this);
-            while (parent != null && !(parent is MainView))
-            {
-                parent = VisualTreeHelper.GetParent(parent);
-            }
-
-            if (parent is MainView mainView)
-            {
-                mainView.AfficherDashboard();
-            }
-        }
     }
 }
