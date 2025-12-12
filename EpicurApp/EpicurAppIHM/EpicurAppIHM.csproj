@@ -44,4 +44,8 @@
     </Content>
   </ItemGroup>
 
+  <ItemGroup>
+    <Resource Include="Images\logo.ico" />
+  </ItemGroup>
+
 </Project>

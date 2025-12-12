@@ -24,7 +24,7 @@ namespace EpicurAPP_Partage.Models
         /// <summary>
         /// Plat associé à cet élément.
         /// </summary>
-        public Plat Plat { get; set; }
+        public Plat Plat { get; set; } = null!;
 
         /// <summary>
         /// Catégorie du plat dans le menu (Entrée, Plat Principal, Dessert, etc.).

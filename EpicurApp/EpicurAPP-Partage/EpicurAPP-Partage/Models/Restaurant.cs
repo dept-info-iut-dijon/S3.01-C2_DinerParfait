@@ -17,13 +17,13 @@ namespace EpicurAPP_Partage.Models
         /// Nom du restaurant
         /// </summary>
         [Required(ErrorMessage = "Le nom du restaurant est obligatoire.")]
-        public string Nom { get; set; }
+        public string Nom { get; set; } = string.Empty;
 
         /// <summary>
         /// Ville où se situe le restaurant
         /// </summary>
         [Required(ErrorMessage = "La ville est obligatoire.")]
-        public string Ville { get; set; }
+        public string Ville { get; set; } = string.Empty;
 
         /// <summary>
         /// Liste des utilisateurs associés à ce restaurant

@@ -4,13 +4,14 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         mc:Ignorable="d"
-        Title="EpicurApp - Connexion"
+        Title="EpicurApp"
         Height="700"
         Width="550"
         WindowStartupLocation="CenterScreen"
         WindowState="Maximized"
         Background="#FDF6E3"
-        FontFamily="./Police/#Playfair Display">
+        FontFamily="./Police/#Playfair Display"
+        Icon="/Images/logo.ico">
 
     <Window.Resources>
         <!-- Style pour les TextBox -->

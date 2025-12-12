@@ -13,7 +13,7 @@ namespace EpicurAppIHM.Repositories
     public class AllergeneRepository : IAllergeneRepository
     {
         private readonly HttpClient _httpClient;
-        private const string BaseEndpoint = "Allergene";
+        private const string BaseEndpoint = "Allergenes";
 
         public AllergeneRepository(HttpClient httpClient)
         {

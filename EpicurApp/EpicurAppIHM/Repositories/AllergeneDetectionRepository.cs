@@ -1,41 +1,44 @@
 using EpicurAPP_Partage.Models;
+using EpicurAppIHM.RepositoriesIntefaces;
+using System;
 using System.Net.Http;
-using System.Net.Http.Json;
+using System.Threading.Tasks;
 
-namespace EpicurAppIHM.Services
+namespace EpicurAppIHM.Repositories
 {
     /// <summary>
-    /// Service pour la détection des conflits d'allergènes
+    /// Repository pour la dÃ©tection des conflits d'allergÃ¨nes
     /// </summary>
-    public class AllergeneDetectionService
+    public class AllergeneDetectionRepository : IAllergeneDetectionRepository
     {
         private readonly HttpClient _httpClient;
+        private const string BaseEndpoint = "AllergeneDetection";
 
-        public AllergeneDetectionService(HttpClient httpClient)
+        public AllergeneDetectionRepository(HttpClient httpClient)
         {
-            _httpClient = httpClient;
+            _httpClient = httpClient ?? throw new ArgumentNullException(nameof(httpClient));
         }
 
         /// <summary>
-        /// Détecte les conflits pour un client et un menu
+        /// DÃ©tecte les conflits pour un client et un menu
         /// </summary>
         public async Task<ValidationReservationResponse?> DetecterConflitAsync(int clientId, int menuId)
         {
             try
             {
-                // Utiliser GetAsync pour récupérer la réponse même en cas d'erreur HTTP
-                var response = await _httpClient.GetAsync($"AllergeneDetection/detecter/{clientId}/{menuId}");
-                
+                // Utiliser GetAsync pour rÃ©cupÃ©rer la rÃ©ponse mÃªme en cas d'erreur HTTP
+                var response = await _httpClient.GetAsync($"{BaseEndpoint}/detecter/{clientId}/{menuId}");
+
                 // Parser le JSON quelle que soit le code HTTP (200, 400, 409...)
                 var content = await response.Content.ReadAsStringAsync();
-                
+
                 if (!string.IsNullOrEmpty(content))
                 {
                     return System.Text.Json.JsonSerializer.Deserialize<ValidationReservationResponse>(
-                        content, 
+                        content,
                         new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
                 }
-                
+
                 return null;
             }
             catch (Exception)

@@ -1,5 +1,4 @@
 ﻿using EpicurAPP_Partage.Models;
-using EpicurAppIHM.Services;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -255,8 +254,7 @@ namespace EpicurAppIHM.Views
             if (client == null) return;
 
             // Vérification des conflits d'allergènes
-            var detectionService = new AllergeneDetectionService(App.ApiClient.HttpClient);
-            var resultat = await detectionService.DetecterConflitAsync(client.Id, _serviceSelectionne.MenuId);
+            var resultat = await App.AllergeneDetectionRepository.DetecterConflitAsync(client.Id, _serviceSelectionne.MenuId);
 
             bool forceOverride = false;
             string? noteOverride = null;

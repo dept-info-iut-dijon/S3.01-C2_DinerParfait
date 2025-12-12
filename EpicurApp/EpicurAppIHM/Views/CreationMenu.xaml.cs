@@ -27,12 +27,8 @@ namespace EpicurAppIHM.Views
         {
             InitializeComponent();
 
+            _menuBrouillonId = menuId;
             ChargerPlats();
-
-            if (menuId.HasValue)
-            {
-                ChargerMenu(menuId.Value);
-            }
 
             btnAnnuler.Click += Annuler;
             btnSupprimer.Click += SupprimerMenu;
@@ -59,6 +55,12 @@ namespace EpicurAppIHM.Views
                 if (tousLesPlats != null && tousLesPlats.Count > 0)
                 {
                     RemplirComboBox();
+
+                    // Charger le menu après avoir rempli les ComboBox
+                    if (_menuBrouillonId.HasValue)
+                    {
+                        ChargerMenu(_menuBrouillonId.Value);
+                    }
                 }
                 else
                 {

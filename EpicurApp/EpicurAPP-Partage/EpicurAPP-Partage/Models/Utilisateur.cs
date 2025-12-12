@@ -18,13 +18,13 @@ namespace EpicurAPP_Partage.Models
         /// </summary>
         [Required(ErrorMessage = "L'email est obligatoire.")]
         [EmailAddress(ErrorMessage = "L'email n'est pas valide.")]
-        public string Email { get; set; }
+        public string Email { get; set; } = string.Empty;
 
         /// <summary>
         /// Hash du mot de passe de l'utilisateur (jamais stocké en clair)
         /// </summary>
         [Required(ErrorMessage = "Le mot de passe est obligatoire.")]
-        public string PasswordHash { get; set; }
+        public string PasswordHash { get; set; } = string.Empty;
 
         /// <summary>
         /// Identifiant du restaurant associé à cet utilisateur
@@ -35,6 +35,6 @@ namespace EpicurAPP_Partage.Models
         /// <summary>
         /// Restaurant associé à cet utilisateur (navigation property)
         /// </summary>
-        public Restaurant Restaurant { get; set; }
+        public Restaurant Restaurant { get; set; } = null!;
     }
 }
