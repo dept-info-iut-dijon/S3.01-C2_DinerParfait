@@ -109,7 +109,7 @@ namespace EpicurAppIHM.Views
                     CategorieIngredientConverter convertisseur = new CategorieIngredientConverter();
                     foreach (IGrouping<CategorieIngredient, ElementListeCourse> groupe in parCategorie)
                     {
-                        string nomCategorie = (string)convertisseur.Convert(groupe.Key, null, null, null);
+                        string nomCategorie = (string)convertisseur.Convert(groupe.Key, typeof(string), null!, System.Globalization.CultureInfo.InvariantCulture);
                         Paragraph titreCategorie = new Paragraph(nomCategorie)
                             .SetFontSize(14)
                             .SetBackgroundColor(iText.Kernel.Colors.ColorConstants.LIGHT_GRAY)

@@ -18,7 +18,7 @@
         /// <summary>
         /// Nom du plat.
         /// </summary>
-        public string Nom { get; set; }
+        public string Nom { get; set; } = string.Empty;
 
         /// <summary>
         /// Catégorie du plat (Entrée, Plat principal, Dessert, etc.).

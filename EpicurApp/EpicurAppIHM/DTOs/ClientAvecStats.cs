@@ -10,11 +10,11 @@ namespace EpicurAppIHM.DTOs
         /// <summary>
         /// Le client associé
         /// </summary>
-        public Client Client { get; set; }
+        public Client Client { get; set; } = new Client();
 
         /// <summary>
         /// Informations formatées sur les visites (ex: "5 visite(s) - Dernière : 15/01/2024")
         /// </summary>
-        public string InfoVisites { get; set; }
+        public string InfoVisites { get; set; } = string.Empty;
     }
 }

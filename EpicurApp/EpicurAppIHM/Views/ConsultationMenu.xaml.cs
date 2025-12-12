@@ -34,7 +34,7 @@ namespace EpicurAppIHM.Views
                 }
 
                 // Récupérer le menu depuis l'API
-                Menu menu = await App.MenuRepository.GetByIdAsync(_menuId);
+                Menu? menu = await App.MenuRepository.GetByIdAsync(_menuId);
 
                 if (menu == null)
                 {
@@ -119,7 +119,7 @@ namespace EpicurAppIHM.Views
             if (platId == null || plats == null)
                 return "-";
 
-            Plat plat = plats.Find(p => p.Id == platId.Value);
+            Plat? plat = plats.Find(p => p.Id == platId.Value);
             return plat?.Nom ?? "-";
         }
 

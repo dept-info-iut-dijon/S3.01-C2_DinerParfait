@@ -141,7 +141,7 @@ namespace EpicurAppIHM.Views
                             tableContenu.SetBorder(iText.Layout.Borders.Border.NO_BORDER); 
 
                             // Prénom
-                            tableContenu.AddCell(new Cell().Add(new Paragraph(invite.Client.Prenom))
+                            tableContenu.AddCell(new Cell().Add(new Paragraph(invite.Client?.Prenom ?? string.Empty))
                                 .SetFont(font)
                                 .SetFontSize(14)
                                 .SetFontColor(iText.Kernel.Colors.ColorConstants.GRAY)
@@ -150,7 +150,7 @@ namespace EpicurAppIHM.Views
                                 .SetPaddingBottom(0)); 
 
                             // NOM
-                            tableContenu.AddCell(new Cell().Add(new Paragraph(invite.Client.Nom.ToUpper())
+                            tableContenu.AddCell(new Cell().Add(new Paragraph((invite.Client?.Nom ?? string.Empty).ToUpper())
                                 .SetFont(font)
                                 .SetFontSize(22)
                                 .SetFontColor(new iText.Kernel.Colors.DeviceRgb(139, 21, 56))

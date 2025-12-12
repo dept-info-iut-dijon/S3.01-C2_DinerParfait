@@ -13,7 +13,7 @@ namespace EpicurAPP_Partage.Models
         /// <summary>
         /// Nom de l'ingrédient.
         /// </summary>
-        public string Nom { get; set; }
+        public string Nom { get; set; } = string.Empty;
 
         /// <summary>
         /// Description de l'ingrédient.

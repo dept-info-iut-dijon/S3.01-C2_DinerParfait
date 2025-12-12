@@ -59,16 +59,13 @@ namespace EpicurAppIHM.Views
             try
             {
                 // Récupérer tous les clients
-                tousLesClients = await _httpClient.GetFromJsonAsync<List<Client>>("Client");
-                if (tousLesClients == null) tousLesClients = new List<Client>();
+                tousLesClients = await _httpClient.GetFromJsonAsync<List<Client>>("Client") ?? new List<Client>();
 
                 // Récupérer les clients réguliers (3+ visites)
-                clientsReguliers = await _httpClient.GetFromJsonAsync<List<Client>>("Client/Reguliers");
-                if (clientsReguliers == null) clientsReguliers = new List<Client>();
+                clientsReguliers = await _httpClient.GetFromJsonAsync<List<Client>>("Client/Reguliers") ?? new List<Client>();
 
                 // Récupérer les clients inactifs (60+ jours sans visite)
-                clientsInactifs = await _httpClient.GetFromJsonAsync<List<Client>>("Client/Inactifs");
-                if (clientsInactifs == null) clientsInactifs = new List<Client>();
+                clientsInactifs = await _httpClient.GetFromJsonAsync<List<Client>>("Client/Inactifs") ?? new List<Client>();
 
                 // Afficher les statistiques
                 AfficherStatistiques();
@@ -103,7 +100,7 @@ namespace EpicurAppIHM.Views
             {
                 try
                 {
-                    List<Repas> repasClient = await _httpClient.GetFromJsonAsync<List<Repas>>($"Client/{client.Id}/repas");
+                    List<Repas>? repasClient = await _httpClient.GetFromJsonAsync<List<Repas>>($"Client/{client.Id}/repas");
 
                     if (repasClient != null)
                     {
@@ -142,7 +139,7 @@ namespace EpicurAppIHM.Views
             if (CbFiltrePeriode != null && CbFiltrePeriode.SelectedItem != null)
             {
                 ComboBoxItem itemSelectionne = (ComboBoxItem)CbFiltrePeriode.SelectedItem;
-                string filtre = itemSelectionne.Content.ToString();
+                string? filtre = itemSelectionne.Content.ToString();
 
                 if (filtre == "Ce mois-ci")
                 {
@@ -168,7 +165,7 @@ namespace EpicurAppIHM.Views
             {
                 try
                 {
-                    List<Repas> repasClient = await _httpClient.GetFromJsonAsync<List<Repas>>($"Client/{client.Id}/repas");
+                    List<Repas>? repasClient = await _httpClient.GetFromJsonAsync<List<Repas>>($"Client/{client.Id}/repas");
 
                     if (repasClient != null && repasClient.Count > 0)
                     {
@@ -267,7 +264,7 @@ namespace EpicurAppIHM.Views
 
                 try
                 {
-                    List<Repas> repasClient = await _httpClient.GetFromJsonAsync<List<Repas>>($"Client/{client.Id}/repas");
+                    List<Repas>? repasClient = await _httpClient.GetFromJsonAsync<List<Repas>>($"Client/{client.Id}/repas");
 
                     if (repasClient != null && repasClient.Count > 0)
                     {

@@ -10,7 +10,7 @@ namespace EpicurAppIHM.DTOs
         /// <summary>
         /// Le client associé
         /// </summary>
-        public Client Client { get; set; }
+        public Client Client { get; set; } = new Client();
 
         /// <summary>
         /// Indique si le client est inactif (60+ jours sans visite)

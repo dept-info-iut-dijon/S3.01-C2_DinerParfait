@@ -46,7 +46,7 @@ namespace EpicurAppIHM.Views
 
             try
             {
-                IdeePlat idee = await App.IdeePlatRepository.GetByIdAsync(_ideeId.Value);
+                IdeePlat? idee = await App.IdeePlatRepository.GetByIdAsync(_ideeId.Value);
 
                 if (idee == null)
                 {

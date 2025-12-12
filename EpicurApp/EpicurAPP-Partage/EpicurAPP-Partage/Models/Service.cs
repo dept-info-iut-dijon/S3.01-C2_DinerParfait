@@ -1,7 +1,7 @@
 namespace EpicurAPP_Partage.Models
 {
     /// <summary>
-    /// Représente un service de restauration.
+    /// Reprï¿½sente un service de restauration.
     /// </summary>
     public class Service
     {
@@ -19,34 +19,34 @@ namespace EpicurAPP_Partage.Models
         /// Indique si le service est le midi ou le soir.
         /// Valeurs attendues : "Midi" ou "Soir".
         /// </summary>
-        public string MidiSoir { get; set; }
+        public string MidiSoir { get; set; } = string.Empty;
 
         /// <summary>
-        /// Identifiant du menu associé au service.
+        /// Identifiant du menu associï¿½ au service.
         /// </summary>
         public int MenuId { get; set; }
 
         /// <summary>
-        /// Statut du service (ex: "Ouvert", "Fermé", "Complet").
-        /// Par défaut "Ouvert".
+        /// Statut du service (ex: "Ouvert", "Fermï¿½", "Complet").
+        /// Par dï¿½faut "Ouvert".
         /// </summary>
         public string Statut { get; set; } = "Ouvert";
 
         /// <summary>
-        /// Menu associé au service (propriété de navigation).
-        /// Non mappée en base de données pour le moment.
+        /// Menu associï¿½ au service (propriï¿½tï¿½ de navigation).
+        /// Non mappï¿½e en base de donnï¿½es pour le moment.
         /// </summary>
         public Menu? MenuAssocie { get; set; }
 
         /// <summary>
-        /// Met à jour la date du menu associé pour qu'elle corresponde à la date de ce service.
+        /// Met ï¿½ jour la date du menu associï¿½ pour qu'elle corresponde ï¿½ la date de ce service.
         /// </summary>
-        /// <exception cref="InvalidOperationException">Levée si aucun menu n'est associé.</exception>
+        /// <exception cref="InvalidOperationException">Levï¿½e si aucun menu n'est associï¿½.</exception>
         public void MettreDateMenu()
         {
             if (MenuAssocie == null)
             {
-                throw new InvalidOperationException("Impossible d'aligner la date : aucun menu n'est associé à ce service.");
+                throw new InvalidOperationException("Impossible d'aligner la date : aucun menu n'est associï¿½ ï¿½ ce service.");
             }
 
             // On applique la date du service au menu

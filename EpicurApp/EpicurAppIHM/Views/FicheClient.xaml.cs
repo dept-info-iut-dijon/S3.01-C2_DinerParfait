@@ -14,7 +14,7 @@ namespace EpicurAppIHM.Views
         /// <summary>
         /// Liste des allergènes disponibles
         /// </summary>
-        private List<Allergene> allergenes;
+        private List<Allergene> allergenes = new List<Allergene>();
         /// <summary>
         /// Dictionnaire pour tracker les allergènes sélectionnés (ID -> IsSelected)
         /// </summary>
@@ -124,7 +124,7 @@ namespace EpicurAppIHM.Views
 
             try
             {
-                Client client = await App.ClientRepository.GetByIdAsync(_clientId.Value);
+                Client? client = await App.ClientRepository.GetByIdAsync(_clientId.Value);
 
                 if (client == null)
                 {
@@ -464,6 +464,8 @@ namespace EpicurAppIHM.Views
             // MODE MODIFICATION
             if (_modeModification)
             {
+                if (!_clientId.HasValue) return;
+
                 MessageBoxResult confirmation = MessageBox.Show("Voulez-vous enregistrer les modifications ?",
                                                  "Confirmation", MessageBoxButton.YesNo, MessageBoxImage.Question);
 

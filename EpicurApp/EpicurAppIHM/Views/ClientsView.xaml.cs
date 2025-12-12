@@ -55,11 +55,11 @@ namespace EpicurAppIHM.Views
             try
             {
                 // Récupérer tous les clients
-                List<Client> clients = await _httpClient.GetFromJsonAsync<List<Client>>("Client");
+                List<Client> clients = await _httpClient.GetFromJsonAsync<List<Client>>("Client") ?? new List<Client>();
                 // Récupérer les clients inactifs
-                List<Client> clientsInactifs = await _httpClient.GetFromJsonAsync<List<Client>>("Client/Inactifs");
+                List<Client> clientsInactifs = await _httpClient.GetFromJsonAsync<List<Client>>("Client/Inactifs") ?? new List<Client>();
                 // Récupérer les clients VIP
-                List<Client> clientsVIP = await _httpClient.GetFromJsonAsync<List<Client>>("Client/VIP");
+                List<Client> clientsVIP = await _httpClient.GetFromJsonAsync<List<Client>>("Client/VIP") ?? new List<Client>();
 
                 // Créer la liste des IDs inactifs
                 idsClientsInactifs = new List<int>();

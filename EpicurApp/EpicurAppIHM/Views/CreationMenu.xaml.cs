@@ -13,7 +13,7 @@ namespace EpicurAppIHM.Views
         /// <summary>
         /// Liste des plats
         /// </summary>
-        private List<Plat> tousLesPlats;
+        private List<Plat> tousLesPlats = new List<Plat>();
         /// <summary>
         /// Id du brouillon du menu
         /// </summary>

@@ -18,11 +18,11 @@ namespace EpicurAPP_Partage.Models
         /// <summary>
         /// Nom de l'allergène
         /// </summary>
-        public string Nom { get; set; }
+        public string Nom { get; set; } = string.Empty;
         /// <summary>
         /// Description de l'allergène
         /// </summary>
-        public string Description { get; set; }
+        public string Description { get; set; } = string.Empty;
 
         /// <summary>
         /// Affichage de l'allergène

@@ -18,7 +18,7 @@
         /// <summary>
         /// Nom du menu.
         /// </summary>
-        public string Nom { get; set; }
+        public string Nom { get; set; } = string.Empty;
 
         /// <summary>
         /// Date de création du menu.

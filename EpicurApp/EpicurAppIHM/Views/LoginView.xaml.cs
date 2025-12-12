@@ -33,7 +33,7 @@ namespace EpicurAppIHM.Views
         /// <summary>
         /// Permet de se connecter en appuyant sur Entrée dans le champ email.
         /// </summary>
-        private async void EmailTextBox_KeyDown(object sender, KeyEventArgs e)
+        private void EmailTextBox_KeyDown(object sender, KeyEventArgs e)
         {
             if (e.Key == Key.Enter)
             {

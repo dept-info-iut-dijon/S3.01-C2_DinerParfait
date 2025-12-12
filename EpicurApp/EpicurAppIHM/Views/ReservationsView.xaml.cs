@@ -21,7 +21,7 @@ namespace EpicurAppIHM.Views
         public List<EpicurAPP_Partage.Models.Menu> ListeMenus { get; set; } = new List<EpicurAPP_Partage.Models.Menu>();
         public List<Client> ListeClients { get; set; } = new List<Client>();
 
-        private Service _serviceSelectionne;
+        private Service? _serviceSelectionne;
 
         public ReservationsView()
         {
@@ -124,7 +124,7 @@ namespace EpicurAppIHM.Views
             }
         }
 
-        private async void CmbMenus_DropDownOpened(object sender, EventArgs e)
+        private async void CmbMenus_DropDownOpened(object? sender, EventArgs e)
         {
             // Recharger les menus quand l'utilisateur ouvre la liste
             await ChargerMenusValides();
@@ -161,8 +161,8 @@ namespace EpicurAppIHM.Views
             {
                 Id = 0,
                 Date = datePickerService.SelectedDate.Value,
-                MidiSoir = (cmbMidiSoir.SelectedItem as ComboBoxItem)?.Content.ToString(),
-                MenuId = (cmbMenus.SelectedItem as EpicurAPP_Partage.Models.Menu).Id,
+                MidiSoir = (cmbMidiSoir.SelectedItem as ComboBoxItem)?.Content.ToString() ?? string.Empty,
+                MenuId = (cmbMenus.SelectedItem as EpicurAPP_Partage.Models.Menu)?.Id ?? 0,
                 Statut = "Ouvert"
             };
 
@@ -291,7 +291,7 @@ namespace EpicurAppIHM.Views
                 {
                     string jsonString = await response.Content.ReadAsStringAsync();
                     var jsonNode = JsonNode.Parse(jsonString);
-                    string messageAlerte = jsonNode["Conflits"]?[0]?["Message"]?.ToString() ?? "Conflit d'allergie détecté.";
+                    string messageAlerte = jsonNode?["Conflits"]?[0]?["Message"]?.ToString() ?? "Conflit d'allergie détecté.";
                     var choix = MessageBox.Show(
                         $"{messageAlerte}\n\nVoulez-vous forcer la réservation malgré le risque ?",
                         "Alerte Sécurité Alimentaire",
