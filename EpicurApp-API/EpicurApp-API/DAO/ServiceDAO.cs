@@ -105,10 +105,10 @@ namespace EpicurApp_API.DAO
 
                         transaction.Commit();
                     }
-                    catch (Exception ex)
+                    catch (Exception)
                     {
                         transaction.Rollback();
-                        throw; 
+                        throw;
                     }
                 }
             }
@@ -129,7 +129,7 @@ namespace EpicurApp_API.DAO
                     var result = selectCmd.ExecuteScalar();
 
                     if (result == null) throw new KeyNotFoundException($"Service {serviceId} introuvable.");
-                    if (result != DBNull.Value) dateReelle = DateTime.Parse(result.ToString());
+                    if (result != DBNull.Value && result.ToString() != null) dateReelle = DateTime.Parse(result.ToString()!);
                 }
 
                 Service serviceActuel = new Service { Date = dateReelle };

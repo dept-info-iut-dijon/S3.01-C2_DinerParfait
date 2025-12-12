@@ -46,7 +46,7 @@ namespace EpicurApp_API.Controllers
                 }
 
                 // Tentative d'authentification
-                EpicurAPP_Partage.Models.Utilisateur utilisateur = _authService.Login(request.Email, request.Password);
+                EpicurAPP_Partage.Models.Utilisateur? utilisateur = _authService.Login(request.Email, request.Password);
 
                 if (utilisateur == null)
                 {
@@ -58,7 +58,7 @@ namespace EpicurApp_API.Controllers
                 }
 
                 // Récupérer les informations du restaurant
-                EpicurAPP_Partage.Models.Restaurant restaurant = _restaurantDAO.GetById(utilisateur.RestaurantId);
+                EpicurAPP_Partage.Models.Restaurant? restaurant = _restaurantDAO.GetById(utilisateur.RestaurantId);
 
                 if (restaurant == null)
                 {

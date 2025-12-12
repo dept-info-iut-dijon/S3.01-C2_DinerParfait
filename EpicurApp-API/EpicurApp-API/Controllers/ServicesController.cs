@@ -174,7 +174,7 @@ namespace EpicurApp_API.Controllers
                     return Conflict(response);
                 }
 
-                string noteFinale = request.NoteOverride;
+                string? noteFinale = request.NoteOverride;
                 if (conflits.Count > 0 && estForce && string.IsNullOrWhiteSpace(noteFinale))
                 {
                     noteFinale = "Forcé par le restaurateur (Alerte allergie ignorée)";

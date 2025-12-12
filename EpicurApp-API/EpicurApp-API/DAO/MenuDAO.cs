@@ -120,7 +120,7 @@ namespace EpicurApp_API.DAO
             {
                 connection.Open();
 
-                string query = @"SELECT Id, Nom, Statut, RestaurantId, Note, Retours, DateCreation,
+                string query = @"SELECT Id, Nom, Statut, RestaurantId, Note, DateCreation,
                                 (SELECT COUNT(*) FROM Services WHERE MenuId = Menus.Id) > 0 AS EstUtilise
                                 FROM Menus WHERE Id=@Id";
 
@@ -150,7 +150,7 @@ namespace EpicurApp_API.DAO
             {
                 connection.Open();
 
-                string query = @"SELECT Id, Nom, Statut, RestaurantId, Note, Retours, DateCreation,
+                string query = @"SELECT Id, Nom, Statut, RestaurantId, Note, DateCreation,
                                 (SELECT COUNT(*) FROM Services WHERE MenuId = Menus.Id) > 0 AS EstUtilise
                                 FROM Menus";
 
@@ -178,7 +178,7 @@ namespace EpicurApp_API.DAO
             {
                 connection.Open();
 
-                string query = @"SELECT Id, Nom, Statut, RestaurantId, Note, Retours, DateCreation,
+                string query = @"SELECT Id, Nom, Statut, RestaurantId, Note, DateCreation,
                                 (SELECT COUNT(*) FROM Services WHERE MenuId = Menus.Id) > 0 AS EstUtilise
                                 FROM Menus
                                 WHERE RestaurantId = @RestaurantId";
@@ -210,7 +210,7 @@ namespace EpicurApp_API.DAO
             {
                 connection.Open();
 
-                string query = @"SELECT Id, Nom, Statut, RestaurantId, Note, Retours, DateCreation,
+                string query = @"SELECT Id, Nom, Statut, RestaurantId, Note, DateCreation,
                     (SELECT COUNT(*) FROM Services WHERE MenuId = Menus.Id) > 0 AS EstUtilise
                     FROM Menus
                     WHERE Statut = @Statut AND RestaurantId = @RestaurantId
@@ -247,7 +247,7 @@ namespace EpicurApp_API.DAO
             {
                 connection.Open();
 
-                string query = @"SELECT Id, Nom, Statut, RestaurantId, Note, Retours, DateCreation,
+                string query = @"SELECT Id, Nom, Statut, RestaurantId, Note, DateCreation,
                                 (SELECT COUNT(*) FROM Services WHERE MenuId = Menus.Id) > 0 AS EstUtilise
                                 FROM Menus
                                 WHERE RestaurantId = @RestaurantId AND Statut = @Statut
@@ -287,8 +287,7 @@ namespace EpicurApp_API.DAO
                         string updateMenuQuery = @"UPDATE Menus SET
                             Nom = @Nom,
                             Statut = @Statut,
-                            Note = @Note,
-                            Retours = @Retours
+                            Note = @Note
                             WHERE Id = @Id";
 
                         using (SqliteCommand command = new SqliteCommand(updateMenuQuery, connection, transaction))
@@ -298,8 +297,6 @@ namespace EpicurApp_API.DAO
                             command.Parameters.AddWithValue("@Id", menu.Id);
                             command.Parameters.AddWithValue("@Note",
                                 menu.Note.HasValue ? (object)menu.Note.Value : DBNull.Value);
-                            command.Parameters.AddWithValue("@Retours",
-                                menu.Retours ?? (object)DBNull.Value);
 
                             command.ExecuteNonQuery();
                         }
@@ -407,9 +404,8 @@ namespace EpicurApp_API.DAO
             menu.Statut = reader.GetString(2);
             menu.RestaurantId = reader.GetInt32(3);
             menu.Note = reader.IsDBNull(4) ? null : reader.GetInt32(4);
-            menu.Retours = reader.IsDBNull(5) ? null : reader.GetString(5);
-            menu.DateCreation = reader.IsDBNull(6) ? DateTime.Now : DateTime.Parse(reader.GetString(6));
-            menu.EstUtilise = reader.GetBoolean(7);
+            menu.DateCreation = reader.IsDBNull(5) ? DateTime.Now : DateTime.Parse(reader.GetString(5));
+            menu.EstUtilise = reader.GetBoolean(6);
 
             // Load elements from ElementMenus table
             menu.Elements = new List<ElementMenu>();
