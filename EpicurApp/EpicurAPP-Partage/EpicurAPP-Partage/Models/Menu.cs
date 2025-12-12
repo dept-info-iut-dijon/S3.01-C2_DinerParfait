@@ -43,11 +43,6 @@
         /// </summary>
         public int? Note { get; set; }
 
-        /// <summary>
-        /// Retours clients sur le menu
-        /// </summary>
-        public string? Retours { get; set; }
-
         public DateTime? Date { get; set; }
 
         public bool EstVerrouille
@@ -67,7 +62,6 @@
                 return res;
             }
         }
-
 
         /// <summary>
         /// Indique si le menu est utilisé dans au moins un service.

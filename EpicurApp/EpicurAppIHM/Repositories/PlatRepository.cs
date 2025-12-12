@@ -68,21 +68,5 @@ namespace EpicurAppIHM.Repositories
             HttpResponseMessage response = await _httpClient.DeleteAsync($"{BaseEndpoint}/{id}");
             return response.IsSuccessStatusCode;
         }
-
-        /// <summary>
-        /// Récupère tous les plats avec leurs ingrédients associés
-        /// </summary>
-        public async Task<List<Plat>> GetAllWithIngredientsAsync()
-        {
-            return await GetAllAsync();
-        }
-
-        /// <summary>
-        /// Récupère un plat par son identifiant avec ses ingrédients associés
-        /// </summary>
-        public async Task<Plat?> GetByIdWithIngredientsAsync(int id)
-        {
-            return await GetByIdAsync(id);
-        }
     }
 }

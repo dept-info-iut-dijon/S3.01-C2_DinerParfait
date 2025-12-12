@@ -72,21 +72,6 @@ namespace EpicurAppIHM.Repositories
         }
 
         /// <summary>
-        /// Récupère tous les clients avec leurs allergènes associé
-        /// </summary>
-        public async Task<List<Client>> GetAllWithAllergenesAsync()
-        {
-            return await GetAllAsync();
-        }
-
-        /// <summary>
-        /// Récupère un client par son identifiant avec ses allergènes associés.
-        /// </summary>
-        public async Task<Client?> GetByIdWithAllergenesAsync(int id)
-        {
-            return await GetByIdAsync(id);
-        }
-        /// <summary>
         /// Recherche des clients par leur nom.
         /// </summary>
         public async Task<List<Client>> SearchByNomAsync(string nom)

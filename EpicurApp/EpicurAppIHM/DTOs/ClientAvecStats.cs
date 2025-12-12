@@ -1,9 +1,9 @@
 using EpicurAPP_Partage.Models;
 
-namespace EpicurAppIHM.ViewModels
+namespace EpicurAppIHM.DTOs
 {
     /// <summary>
-    /// ViewModel pour afficher un client avec ses statistiques de visites
+    /// DTO pour afficher un client avec ses statistiques de visites
     /// </summary>
     public class ClientAvecStats
     {

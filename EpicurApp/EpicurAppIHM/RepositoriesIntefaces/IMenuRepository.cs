@@ -40,11 +40,6 @@ namespace EpicurAppIHM.RepositoriesIntefaces
         Task<List<ElementListeCourse>> GetListeCoursesAsync(int menuId);
 
         /// <summary>
-        /// Récupère tous les menus avec leurs plats.
-        /// </summary>
-        Task<List<Menu>> GetAllWithPlatsAsync();
-
-        /// <summary>
         /// Récupère le menu brouillon.
         /// </summary>
         Task<Menu?> GetBrouillonAsync();

@@ -1,4 +1,5 @@
 ﻿using EpicurAPP_Partage.Models;
+using EpicurAppIHM.DTOs;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -11,30 +12,6 @@ using System.Windows.Media;
 
 namespace EpicurAppIHM.Views
 {
-    /// <summary>
-    /// Classe pour afficher un client avec son statut inactif
-    /// </summary>
-    public class ClientAffichage
-    {
-        public int Id { get; set; }
-        public string Nom { get; set; }
-        public string Prenom { get; set; }
-        public string Email { get; set; }
-        public string Telephone { get; set; }
-        public string Preferences { get; set; }
-        public List<Allergene> Allergenes { get; set; }
-        public bool EstInactif { get; set; }
-        public string IconeStatut => EstVIP ? "*" : (EstInactif ? "!" : "");
-
-        public string IconeInactif
-        {
-            get { return EstInactif ? "!" : ""; }
-        }
-
-        public bool EstVIP;
-        
-    }
-
     /// <summary>
     /// Page d'affichage client
     /// </summary>
@@ -112,13 +89,7 @@ namespace EpicurAppIHM.Views
                     {
                         ClientAffichage ca = new ClientAffichage
                         {
-                            Id = client.Id,
-                            Nom = client.Nom,
-                            Prenom = client.Prenom,
-                            Email = client.Email,
-                            Telephone = client.Telephone,
-                            Preferences = client.Preferences,
-                            Allergenes = client.Allergenes,
+                            Client = client,
                             EstInactif = idsClientsInactifs.Contains(client.Id),
                             EstVIP = idsClientsVIP.Contains(client.Id)
                         };
@@ -178,7 +149,7 @@ namespace EpicurAppIHM.Views
         {
             if (DataGridClients.SelectedItem is ClientAffichage clientSelectionne)
             {
-                FicheClient ficheClient = new FicheClient(clientSelectionne.Id);
+                FicheClient ficheClient = new FicheClient(clientSelectionne.Client.Id);
                 bool? result = ficheClient.ShowDialog();
 
                 if (result == true)
@@ -215,7 +186,7 @@ namespace EpicurAppIHM.Views
             }
 
             MessageBoxResult confirmation = MessageBox.Show(
-                $"Êtes-vous sûr de vouloir supprimer le client {clientSelectionne.Prenom} {clientSelectionne.Nom} ?\nCette action est irréversible.",
+                $"Êtes-vous sûr de vouloir supprimer le client {clientSelectionne.Client.Prenom} {clientSelectionne.Client.Nom} ?\nCette action est irréversible.",
                 "Confirmation de suppression",
                 MessageBoxButton.YesNo,
                 MessageBoxImage.Warning);
@@ -227,7 +198,7 @@ namespace EpicurAppIHM.Views
 
             try
             {
-                bool success = await App.ClientRepository.DeleteAsync(clientSelectionne.Id);
+                bool success = await App.ClientRepository.DeleteAsync(clientSelectionne.Client.Id);
 
                 if (success)
                 {

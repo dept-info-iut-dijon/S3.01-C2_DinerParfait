@@ -80,15 +80,6 @@ namespace EpicurAppIHM.Repositories
         }
 
         /// <summary>
-        /// Récupère tous les menus avec leurs plats associés.
-        /// </summary>
-        /// <returns>Liste des menus avec leurs plats</returns>
-        public async Task<List<Menu>> GetAllWithPlatsAsync()
-        {
-            return await GetAllAsync();
-        }
-
-        /// <summary>
         /// Récupère le menu brouillon en cours d'édition.
         /// </summary>
         public async Task<Menu?> GetBrouillonAsync()

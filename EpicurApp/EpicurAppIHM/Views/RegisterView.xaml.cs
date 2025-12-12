@@ -3,8 +3,10 @@ using System.Linq;
 using System.Net.Http;
 using System.Text;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Media;
 
 namespace EpicurAppIHM.Views
@@ -130,12 +132,71 @@ namespace EpicurAppIHM.Views
         }
 
         /// <summary>
+        /// Valide le format d'un email.
+        /// </summary>
+        private bool IsValidEmail(string email)
+        {
+            if (string.IsNullOrWhiteSpace(email))
+                return false;
+
+            try
+            {
+                // Pattern regex pour valider un email
+                string pattern = @"^[^@\s]+@[^@\s]+\.[^@\s]+$";
+                return Regex.IsMatch(email, pattern, RegexOptions.IgnoreCase);
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        /// <summary>
+        /// Affiche une erreur sur un champ spécifique.
+        /// </summary>
+        private void ShowFieldError(TextBlock errorLabel, Border border, string message)
+        {
+            errorLabel.Text = message;
+            errorLabel.Visibility = Visibility.Visible;
+            border.BorderBrush = new SolidColorBrush(Color.FromRgb(239, 68, 68)); // Rouge
+        }
+
+        /// <summary>
+        /// Réinitialise toutes les erreurs des champs.
+        /// </summary>
+        private void ClearAllErrors()
+        {
+            // Masquer le message d'erreur global
+            ErrorBorder.Visibility = Visibility.Collapsed;
+
+            // Réinitialiser l'email
+            EmailError.Visibility = Visibility.Collapsed;
+            EmailBorder.BorderBrush = new SolidColorBrush(Color.FromRgb(212, 175, 55)); // Or
+
+            // Réinitialiser le mot de passe
+            PasswordError.Visibility = Visibility.Collapsed;
+            PasswordBorder.BorderBrush = new SolidColorBrush(Color.FromRgb(212, 175, 55));
+
+            // Réinitialiser la confirmation
+            ConfirmPasswordError.Visibility = Visibility.Collapsed;
+            ConfirmPasswordBorder.BorderBrush = new SolidColorBrush(Color.FromRgb(212, 175, 55));
+
+            // Réinitialiser le nom du restaurant
+            RestaurantNomError.Visibility = Visibility.Collapsed;
+            RestaurantNomBorder.BorderBrush = new SolidColorBrush(Color.FromRgb(212, 175, 55));
+
+            // Réinitialiser la ville
+            RestaurantVilleError.Visibility = Visibility.Collapsed;
+            RestaurantVilleBorder.BorderBrush = new SolidColorBrush(Color.FromRgb(212, 175, 55));
+        }
+
+        /// <summary>
         /// Effectue l'inscription via l'API.
         /// </summary>
         private async Task RegisterAsync()
         {
-            // Masquer les messages d'erreur
-            ErrorBorder.Visibility = Visibility.Collapsed;
+            // Réinitialiser toutes les erreurs
+            ClearAllErrors();
 
             // Validation des champs
             string email = EmailTextBox.Text.Trim();
@@ -144,54 +205,74 @@ namespace EpicurAppIHM.Views
             string restaurantNom = RestaurantNomTextBox.Text.Trim();
             string restaurantVille = RestaurantVilleTextBox.Text.Trim();
 
+            bool hasError = false;
+
+            // Validation de l'email
             if (string.IsNullOrWhiteSpace(email))
             {
-                ShowError("Veuillez entrer votre email");
-                EmailTextBox.Focus();
-                return;
+                ShowFieldError(EmailError, EmailBorder, "L'email est obligatoire");
+                if (!hasError) EmailTextBox.Focus();
+                hasError = true;
+            }
+            else if (!IsValidEmail(email))
+            {
+                ShowFieldError(EmailError, EmailBorder, "Format d'email invalide (ex: nom@example.com)");
+                if (!hasError) EmailTextBox.Focus();
+                hasError = true;
             }
 
+            // Validation du mot de passe
             if (string.IsNullOrWhiteSpace(password))
             {
-                ShowError("Veuillez entrer un mot de passe");
-                PasswordBox.Focus();
-                return;
+                ShowFieldError(PasswordError, PasswordBorder, "Le mot de passe est obligatoire");
+                if (!hasError) PasswordBox.Focus();
+                hasError = true;
             }
-
-            // Vérifier la force du mot de passe
-            int strength = CalculatePasswordStrength(password);
-            if (strength < 4)
+            else
             {
-                ShowError("Le mot de passe doit contenir au moins 8 caractères, une majuscule, une minuscule, un chiffre et un caractère spécial");
-                PasswordBox.Focus();
-                return;
+                // Vérifier la force du mot de passe
+                int strength = CalculatePasswordStrength(password);
+                if (strength < 4)
+                {
+                    ShowFieldError(PasswordError, PasswordBorder, "Le mot de passe doit contenir : 8 caractères minimum, une majuscule, une minuscule, un chiffre et un caractère spécial");
+                    if (!hasError) PasswordBox.Focus();
+                    hasError = true;
+                }
             }
 
+            // Validation de la confirmation du mot de passe
             if (string.IsNullOrWhiteSpace(confirmPassword))
             {
-                ShowError("Veuillez confirmer votre mot de passe");
-                ConfirmPasswordBox.Focus();
-                return;
+                ShowFieldError(ConfirmPasswordError, ConfirmPasswordBorder, "Veuillez confirmer votre mot de passe");
+                if (!hasError) ConfirmPasswordBox.Focus();
+                hasError = true;
             }
-
-            if (password != confirmPassword)
+            else if (password != confirmPassword)
             {
-                ShowError("Les mots de passe ne correspondent pas");
-                ConfirmPasswordBox.Focus();
-                return;
+                ShowFieldError(ConfirmPasswordError, ConfirmPasswordBorder, "Les mots de passe ne correspondent pas");
+                if (!hasError) ConfirmPasswordBox.Focus();
+                hasError = true;
             }
 
+            // Validation du nom du restaurant
             if (string.IsNullOrWhiteSpace(restaurantNom))
             {
-                ShowError("Veuillez entrer le nom de votre restaurant");
-                RestaurantNomTextBox.Focus();
-                return;
+                ShowFieldError(RestaurantNomError, RestaurantNomBorder, "Le nom du restaurant est obligatoire");
+                if (!hasError) RestaurantNomTextBox.Focus();
+                hasError = true;
             }
 
+            // Validation de la ville
             if (string.IsNullOrWhiteSpace(restaurantVille))
             {
-                ShowError("Veuillez entrer la ville de votre restaurant");
-                RestaurantVilleTextBox.Focus();
+                ShowFieldError(RestaurantVilleError, RestaurantVilleBorder, "La ville du restaurant est obligatoire");
+                if (!hasError) RestaurantVilleTextBox.Focus();
+                hasError = true;
+            }
+
+            // Si erreur, arrêter ici
+            if (hasError)
+            {
                 return;
             }
 
@@ -252,21 +333,38 @@ namespace EpicurAppIHM.Views
                     try
                     {
                         var errorResponse = JsonSerializer.Deserialize<LoginResponse>(responseBody);
-                        ShowError(errorResponse?.Message ?? "Erreur lors de la création du compte");
+                        string errorMessage = errorResponse?.Message ?? "Erreur lors de la création du compte";
+
+                        // Gérer les erreurs spécifiques
+                        if (errorMessage.Contains("email", StringComparison.OrdinalIgnoreCase) ||
+                            errorMessage.Contains("existe déjà", StringComparison.OrdinalIgnoreCase))
+                        {
+                            ShowFieldError(EmailError, EmailBorder, "Cet email est déjà utilisé");
+                            EmailTextBox.Focus();
+                        }
+                        else if (errorMessage.Contains("mot de passe", StringComparison.OrdinalIgnoreCase))
+                        {
+                            ShowFieldError(PasswordError, PasswordBorder, errorMessage);
+                            PasswordBox.Focus();
+                        }
+                        else
+                        {
+                            ShowError(errorMessage);
+                        }
                     }
                     catch
                     {
-                        ShowError("Erreur lors de la création du compte");
+                        ShowError("Erreur lors de la création du compte. Vérifiez vos informations.");
                     }
                 }
             }
             catch (HttpRequestException)
             {
-                ShowError("Impossible de se connecter au serveur. Vérifiez que l'API est lancée.");
+                ShowError("❌ Impossible de se connecter au serveur. Vérifiez que l'API est lancée et accessible.");
             }
             catch (Exception ex)
             {
-                ShowError($"Erreur : {ex.Message}");
+                ShowError($"❌ Une erreur inattendue s'est produite : {ex.Message}");
             }
             finally
             {

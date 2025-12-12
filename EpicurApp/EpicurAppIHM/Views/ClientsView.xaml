@@ -107,9 +107,9 @@
                         <DataTemplate>
                             <StackPanel VerticalAlignment="Center" Margin="8,0">
                                 <TextBlock FontWeight="SemiBold" FontSize="14">
-                                    <Run Text="{Binding Prenom}"/>
+                                    <Run Text="{Binding Client.Prenom}"/>
                                     <Run Text=" "/>
-                                    <Run Text="{Binding Nom}"/>
+                                    <Run Text="{Binding Client.Nom}"/>
                                 </TextBlock>
                             </StackPanel>
                         </DataTemplate>
@@ -117,22 +117,22 @@
                 </DataGridTemplateColumn>
 
                 <!-- Email -->
-                <DataGridTextColumn Header="Email" 
-                                    Binding="{Binding Email}" 
-                                    Width="220" 
+                <DataGridTextColumn Header="Email"
+                                    Binding="{Binding Client.Email}"
+                                    Width="220"
                                     ElementStyle="{StaticResource DataGridCellPadding}"/>
 
                 <!-- Téléphone -->
-                <DataGridTextColumn Header="Téléphone" 
-                                    Binding="{Binding Telephone}" 
-                                    Width="130" 
+                <DataGridTextColumn Header="Téléphone"
+                                    Binding="{Binding Client.Telephone}"
+                                    Width="130"
                                     ElementStyle="{StaticResource DataGridCellPadding}"/>
 
                 <!-- Allergènes -->
                 <DataGridTemplateColumn Header="Allergènes" Width="250">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <ItemsControl ItemsSource="{Binding Allergenes}" 
+                            <ItemsControl ItemsSource="{Binding Client.Allergenes}" 
                                           VerticalAlignment="Center" 
                                           Margin="8,0">
                                 <ItemsControl.ItemsPanel>
@@ -162,13 +162,13 @@
                 <DataGridTemplateColumn Header="Préférences" Width="*" MinWidth="150">
                     <DataGridTemplateColumn.CellTemplate>
                         <DataTemplate>
-                            <TextBlock Text="{Binding Preferences}" 
+                            <TextBlock Text="{Binding Client.Preferences}"
                                        TextTrimming="CharacterEllipsis"
                                        VerticalAlignment="Center"
                                        Margin="8,0"
                                        FontSize="12"
                                        Foreground="#475569"
-                                       ToolTip="{Binding Preferences}"/>
+                                       ToolTip="{Binding Client.Preferences}"/>
                         </DataTemplate>
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>

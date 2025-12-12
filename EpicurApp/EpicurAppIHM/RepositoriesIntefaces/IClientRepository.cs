@@ -35,16 +35,6 @@ namespace EpicurAppIHM.RepositoriesIntefaces
         Task<bool> DeleteAsync(int id);
 
         /// <summary>
-        /// Récupère tous les clients avec leurs allergènes.
-        /// </summary>
-        Task<List<Client>> GetAllWithAllergenesAsync();
-
-        /// <summary>
-        /// Récupère un client par son identifiant avec ses allergènes.
-        /// </summary>
-        Task<Client?> GetByIdWithAllergenesAsync(int id);
-
-        /// <summary>
         /// Recherche des clients par nom.
         /// </summary>
         Task<List<Client>> SearchByNomAsync(string nom);

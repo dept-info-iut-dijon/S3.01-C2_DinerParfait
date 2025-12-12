@@ -1,5 +1,5 @@
 ﻿using EpicurAPP_Partage.Models;
-using EpicurAppIHM.ViewModels;
+using EpicurAppIHM.DTOs;
 using LiveCharts;
 using LiveCharts.Wpf;
 using System;

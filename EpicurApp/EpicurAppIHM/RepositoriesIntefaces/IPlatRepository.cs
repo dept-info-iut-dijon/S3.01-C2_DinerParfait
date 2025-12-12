@@ -33,15 +33,5 @@ namespace EpicurAppIHM.RepositoriesIntefaces
         /// Supprime un plat.
         /// </summary>
         Task<bool> DeleteAsync(int id);
-
-        /// <summary>
-        /// Récupère tous les plats avec leurs ingrédients.
-        /// </summary>
-        Task<List<Plat>> GetAllWithIngredientsAsync();
-
-        /// <summary>
-        /// Récupère un plat par son identifiant avec ses ingrédients.
-        /// </summary>
-        Task<Plat?> GetByIdWithIngredientsAsync(int id);
     }
 }

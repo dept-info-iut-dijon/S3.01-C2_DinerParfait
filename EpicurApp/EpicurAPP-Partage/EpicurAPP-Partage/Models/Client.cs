@@ -57,11 +57,6 @@ namespace EpicurAPP_Partage.Models
         /// Préférences alimentaires du client.
         /// </summary>
         public string Preferences { get; set; }
-
-        /// <summary>
-        /// Historique des repas du client
-        /// </summary>
-        public List<Menu> HistoriqueRepas { get; set; } = new List<Menu>();
     }
 }
 
