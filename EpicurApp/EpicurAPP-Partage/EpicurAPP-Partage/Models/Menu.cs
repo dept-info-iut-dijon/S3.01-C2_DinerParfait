@@ -11,14 +11,19 @@
         public int Id { get; set; }
 
         /// <summary>
-        /// Nom du menu.
+        /// Identifiant du restaurant auquel appartient ce menu
         /// </summary>
-        public string Nom {  get; set; }
+        public int RestaurantId { get; set; }
 
         /// <summary>
-        /// Date du menu.
+        /// Nom du menu.
         /// </summary>
-        public DateTime Date { get; set; }
+        public string Nom { get; set; } = string.Empty;
+
+        /// <summary>
+        /// Date de création du menu.
+        /// </summary>
+        public DateTime DateCreation { get; set; } = DateTime.Now;
 
         /// <summary>
         /// Statut du menu (Brouillon, Validé, etc.).
@@ -27,37 +32,40 @@
 
         /// <summary>
         /// Plat amuse-bouche du menu.
+        /// Liste des éléments (plats) du menu.
+        /// Permet d'avoir plusieurs plats de la même catégorie.
         /// </summary>
-        public Plat? AmuseBouche { get; set; }
+        
+        public List<ElementMenu> Elements { get; set; } = new List<ElementMenu>();
 
         /// <summary>
-        /// Boisson apéritive du menu.
+        /// Note sur 5 du menu.
         /// </summary>
-        public Plat? BoissonAperitif { get; set; }
+        public int? Note { get; set; }
+
+        public DateTime? Date { get; set; }
+
+        public bool EstVerrouille
+        {
+            get
+            {
+                bool res = false;
+                // Si le service est passé ou s'il reste moins de 48h
+                if (!Date.HasValue)
+                {
+                    res = false;
+                }
+                else
+                {
+                    res = (Date.Value - DateTime.Now).TotalHours < 48;
+                }
+                return res;
+            }
+        }
 
         /// <summary>
-        /// Entrée du menu.
+        /// Indique si le menu est utilisé dans au moins un service.
         /// </summary>
-        public Plat? Entree { get; set; }
-
-        /// <summary>
-        /// Plat principal du menu.
-        /// </summary>
-        public Plat? PlatPrincipal { get; set; }
-
-        /// <summary>
-        /// Vin du menu.
-        /// </summary>
-        public Plat? Vin { get; set; }
-
-        /// <summary>
-        /// Fromage du menu.
-        /// </summary>
-        public Plat? Fromage { get; set; }
-
-        /// <summary>
-        /// Dessert du menu.
-        /// </summary>
-        public Plat? Dessert { get; set; }
+        public bool EstUtilise { get; set; }
     }
 }

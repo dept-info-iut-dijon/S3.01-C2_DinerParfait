@@ -2,6 +2,7 @@
 using EpicurAPP_Partage.Exceptions;
 using Microsoft.AspNetCore.Mvc;
 using EpicurAppLogic.Interfaces;
+using System.Diagnostics;
 
 namespace EpicurApp_API.Controllers
 {
@@ -9,24 +10,45 @@ namespace EpicurApp_API.Controllers
     /// Controller pour gérer les menus.
     /// </summary>
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/menu")]
     public class MenuController : ControllerBase
     {
         /// <summary>
         /// Service permettant de gérer les opérations sur les menus.
         /// </summary>
         private readonly IMenuService _menuService;
+        private readonly IMenuDAO _menuDAO;
+
         /// <summary>
-        /// Constructeur : injection du service menu.
+        /// Constructeur : injection du service menu et du DAO.
         /// </summary>
         /// <param name="menuService">service du menu</param>
-        public MenuController(IMenuService menuService)
+        /// <param name="menuDAO">DAO du menu</param>
+        public MenuController(IMenuService menuService, IMenuDAO menuDAO)
         {
             _menuService = menuService;
+            _menuDAO = menuDAO;
+        }
+
+        /// <summary>
+        /// Helper pour récupérer le RestaurantId depuis le header X-Restaurant-Id.
+        /// </summary>
+        /// <returns>RestaurantId ou null si non fourni.</returns>
+        private int? GetRestaurantIdFromHeader()
+        {
+            if (Request.Headers.TryGetValue("X-Restaurant-Id", out var restaurantIdValue))
+            {
+                if (int.TryParse(restaurantIdValue, out int restaurantId))
+                {
+                    return restaurantId;
+                }
+            }
+            return null;
         }
 
         /// <summary>
         /// Méthode GET pour récupérer tous les menus.
+        /// Utilise le header X-Restaurant-Id pour filtrer par restaurant.
         /// </summary>
         /// <exception cref="Exception">Lance une exception en cas d'erreur lors de la récupération des menus.</exception>
         /// <returns>Promesse d'une liste de menu</returns>
@@ -35,7 +57,22 @@ namespace EpicurApp_API.Controllers
         {
             try
             {
-                List<Menu> menus = _menuService.GetAll();
+                // Récupération du RestaurantId depuis le header
+                int? restaurantId = GetRestaurantIdFromHeader();
+
+                List<Menu> menus;
+
+                if (restaurantId.HasValue)
+                {
+                    // Filtrage par restaurant
+                    menus = _menuDAO.GetAllByRestaurantId(restaurantId.Value);
+                }
+                else
+                {
+                    // Sans filtre (pour compatibilité)
+                    menus = _menuService.GetAll();
+                }
+
                 return Ok(menus);
             }
             catch (Exception ex)
@@ -46,15 +83,85 @@ namespace EpicurApp_API.Controllers
 
         /// <summary>
         /// Méthode GET pour récupérer un menu par son ID.
+        /// Vérifie que le menu appartient au restaurant de l'utilisateur via X-Restaurant-Id.
         /// </summary>
-        /// <param name="id">ID de la personne cible</param>
-        /// <returns>La personne avec l'ID correspondant</returns>
+        /// <param name="id">ID du menu cible</param>
+        /// <returns>Le menu avec l'ID correspondant</returns>
         [HttpGet("{id}")]
         public ActionResult<Menu> GetById(int id)
         {
-            Menu? menu = _menuService.GetById(id);
-            if (menu == null) return NotFound();
-            return Ok(menu);
+            try
+            {
+                Menu? menu = _menuService.GetById(id);
+                if (menu == null)
+                    return NotFound($"Menu avec l'ID {id} introuvable");
+
+                // Vérifier que le menu appartient au restaurant de l'utilisateur
+                int? restaurantId = GetRestaurantIdFromHeader();
+                if (restaurantId.HasValue && menu.RestaurantId != restaurantId.Value)
+                {
+                    return Forbid(); // 403 Forbidden - le menu existe mais n'appartient pas à ce restaurant
+                }
+
+                return Ok(menu);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Erreur lors de la récupération du menu : {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Méthode GET pour récupérer le dernier brouillon de menu du restaurant.
+        /// </summary>
+        /// <returns>Le dernier menu en statut Brouillon du restaurant ou NotFound</returns>
+        [HttpGet("brouillon")]
+        public ActionResult<Menu> GetBrouillon()
+        {
+            try
+            {
+                // Récupération du RestaurantId depuis le header
+                int? restaurantId = GetRestaurantIdFromHeader();
+
+                if (!restaurantId.HasValue)
+                {
+                    return BadRequest("Header X-Restaurant-Id requis.");
+                }
+
+                Menu? brouillon = _menuDAO.GetDernierBrouillon(restaurantId.Value);
+                if (brouillon == null) return NotFound("Aucun menu brouillon trouvé pour ce restaurant.");
+                return Ok(brouillon);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Erreur lors de la récupération du brouillon: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Méthode GET pour récupérer tous les menus validés du restaurant.
+        /// </summary>
+        /// <returns>Liste des menus validés du restaurant</returns>
+        [HttpGet("valides")]
+        public ActionResult<List<Menu>> GetMenusValides()
+        {
+            try
+            {
+                // Récupération du RestaurantId depuis le header
+                int? restaurantId = GetRestaurantIdFromHeader();
+
+                if (!restaurantId.HasValue)
+                {
+                    return BadRequest("Header X-Restaurant-Id requis.");
+                }
+
+                List<Menu> menusValides = _menuDAO.GetMenusValides(restaurantId.Value);
+                return Ok(menusValides);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest($"Erreur lors de la récupération des menus validés: {ex.Message}");
+            }
         }
 
         /// <summary>
@@ -64,7 +171,7 @@ namespace EpicurApp_API.Controllers
         /// <exception cref="EntityNotFoundException">Lance une exception si le menu n'est pas trouvé.</exception>
         /// <exception cref="Exception">Lance une exception en cas d'erreur lors de la génération de la liste de courses.</exception>
         /// <returns>Promesse d'une liste d'elements pour la liste de course</returns>
-        [HttpGet("{id}/courses")]
+        [HttpGet("{id}/listecourses")]
         public ActionResult<List<ElementListeCourse>> GetListeCourses(int id)
         {
             try
@@ -84,15 +191,23 @@ namespace EpicurApp_API.Controllers
 
         /// <summary>
         /// Méthode POST pour ajouter un nouveau menu.
+        /// Assigne automatiquement le RestaurantId depuis le header X-Restaurant-Id.
         /// </summary>
         /// <param name="menu">Menu a ajouter</param>
         /// <exception cref="ValidationException">Lance une exception en cas de validation échouée.</exception>
         /// <returns>Code201 sinon une exeption</returns>
-        [HttpPost] 
+        [HttpPost]
         public ActionResult Add([FromBody] Menu menu)
         {
             try
             {
+                // Assigner automatiquement le RestaurantId depuis le header
+                int? restaurantId = GetRestaurantIdFromHeader();
+                if (restaurantId.HasValue)
+                {
+                    menu.RestaurantId = restaurantId.Value;
+                }
+
                 _menuService.AjouterMenu(menu);
                 return CreatedAtAction(nameof(GetById), new { id = menu.Id }, menu);
             }
@@ -100,28 +215,60 @@ namespace EpicurApp_API.Controllers
             {
                 return BadRequest(ex.Message);
             }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Erreur lors de l'ajout du menu : {ex.Message}");
+            }
         }
 
         /// <summary>
         /// Méthode PUT pour mettre à jour un menu existant.
+        /// Vérifie que le menu appartient au restaurant de l'utilisateur.
         /// </summary>
         /// <param name="id">ID du menu</param>
-        /// <param name="menu">nm du menu</param>
+        /// <param name="menu">Menu mis à jour</param>
         /// <exception cref="ValidationException">Lance une exception en cas de validation échouée.</exception>
-        /// <returns>code 201 sinon exeption</returns>
+        /// <returns>code 204 NoContent sinon exeption</returns>
         [HttpPut("{id}")]
         public ActionResult Update(int id, [FromBody] Menu menu)
         {
-            if (id != menu.Id) return BadRequest("L'ID de l'URL ne correspond pas à l'ID du corps de la requête.");
+            if (id != menu.Id)
+                return BadRequest("L'ID de l'URL ne correspond pas à l'ID du corps de la requête.");
 
             try
             {
+                // Vérifier que le menu appartient au restaurant de l'utilisateur
+                Menu? existingMenu = _menuService.GetById(id);
+                if (existingMenu == null)
+                    return NotFound($"Menu avec l'ID {id} introuvable");
+
+                int? restaurantId = GetRestaurantIdFromHeader();
+                if (restaurantId.HasValue && existingMenu.RestaurantId != restaurantId.Value)
+                {
+                    return Forbid(); // 403 Forbidden
+                }
+
+                // S'assurer que le RestaurantId ne change pas
+                menu.RestaurantId = existingMenu.RestaurantId;
+
                 _menuService.MettreAJourMenu(menu);
                 return NoContent();
             }
             catch (ValidationException ex)
             {
                 return BadRequest(ex.Message);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Erreur lors de la mise à jour du menu : {ex.Message}");
             }
         }
 
@@ -147,6 +294,48 @@ namespace EpicurApp_API.Controllers
             catch (Exception ex)
             {
                 return StatusCode(500, $"Erreur lors de la suppression du menu: {ex.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Ajoute une note à un menu.
+        /// </summary>
+        /// <param name="menuId">Id du menu.</param>
+        /// <param name="note">Note à ajouter.</param>
+        /// <returns>Réponse HTTP.</returns>
+        [HttpPost("{menuId}/AddNote")]
+        public IActionResult AjouterNoteAuMenu(int menuId, [FromBody] int note)
+        {
+            try
+            {
+                _menuService.AjouterNoteAuMenu(menuId, note);
+                return Ok("Note ajoutée au menu avec succès.");
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex.ToString());
+                return StatusCode(StatusCodes.Status500InternalServerError, "Erreur lors de l'ajout de la note au menu.");
+            }
+        }
+
+        /// <summary>       
+        /// Met à jour une note d'un menu.
+        /// </summary>
+        /// <param name="menuId">Id du menu.</param>
+        /// <param name="note">Note à mettre à jour.</param>
+        /// <returns>Réponse HTTP.</returns>
+        [HttpPut("{menuId}/AddNote")]
+        public IActionResult MettreAJourNoteDuMenu(int menuId, [FromBody] int note)
+        {
+            try
+            {
+                _menuService.MettreAJourNoteDuMenu(menuId, note);
+                return Ok("Note mise à jour avec succès.");
+            }
+            catch (Exception ex)
+            {
+                Debug.WriteLine(ex.ToString());
+                return StatusCode(StatusCodes.Status500InternalServerError, "Erreur lors de la mise à jour de la note du menu.");
             }
         }
     }

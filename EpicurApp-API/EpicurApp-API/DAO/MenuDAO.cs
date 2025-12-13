@@ -1,4 +1,4 @@
-﻿using EpicurAPP_Partage.Models;
+using EpicurAPP_Partage.Models;
 using EpicurAppLogic.Interfaces;
 using Microsoft.Data.Sqlite;
 using EpicurApp_API.Configuration;
@@ -37,40 +37,74 @@ namespace EpicurApp_API.DAO
         /// <param name="menu">Le menu à ajouter.</param>
         public void AjouterMenu(Menu menu)
         {
-
             using (SqliteConnection connection = new SqliteConnection(_connectionString))
             {
                 connection.Open();
-
-                string query = @"INSERT INTO Menus 
-                    (Nom, Date, Statut, AmuseBoucheId, BoissonAperitifId, EntreeId, 
-                     PlatPrincipalId, VinId, FromageId, DessertId) 
-                    VALUES 
-                    (@Nom, @Date, @Statut, @AmuseBoucheId, @BoissonAperitifId, @EntreeId, 
-                     @PlatPrincipalId, @VinId, @FromageId, @DessertId)";
-
-                using (SqliteCommand command = new SqliteCommand(query, connection))
+                using (SqliteTransaction transaction = connection.BeginTransaction())
                 {
-                    command.Parameters.AddWithValue("@Nom", menu.Nom);
-                    command.Parameters.AddWithValue("@Date", menu.Date);
-                    command.Parameters.AddWithValue("@Statut", menu.Statut);
+                    try
+                    {
+                        // Insert menu into Menus table
+                        string menuQuery = @"INSERT INTO Menus (Nom, Statut, RestaurantId, DateCreation)
+                                           VALUES (@Nom, @Statut, @RestaurantId, @DateCreation);
+                                           SELECT last_insert_rowid();";
 
-                    command.Parameters.AddWithValue("@AmuseBoucheId",
-                        menu.AmuseBouche?.Id ?? (object)DBNull.Value);
-                    command.Parameters.AddWithValue("@BoissonAperitifId",
-                        menu.BoissonAperitif?.Id ?? (object)DBNull.Value);
-                    command.Parameters.AddWithValue("@EntreeId",
-                        menu.Entree?.Id ?? (object)DBNull.Value);
-                    command.Parameters.AddWithValue("@PlatPrincipalId",
-                        menu.PlatPrincipal?.Id ?? (object)DBNull.Value);
-                    command.Parameters.AddWithValue("@VinId",
-                        menu.Vin?.Id ?? (object)DBNull.Value);
-                    command.Parameters.AddWithValue("@FromageId",
-                        menu.Fromage?.Id ?? (object)DBNull.Value);
-                    command.Parameters.AddWithValue("@DessertId",
-                        menu.Dessert?.Id ?? (object)DBNull.Value);
+                        int menuId;
+                        using (SqliteCommand command = new SqliteCommand(menuQuery, connection, transaction))
+                        {
+                            command.Parameters.AddWithValue("@Nom", menu.Nom);
+                            command.Parameters.AddWithValue("@Statut", menu.Statut);
+                            command.Parameters.AddWithValue("@RestaurantId", menu.RestaurantId);
+                            command.Parameters.AddWithValue("@DateCreation", menu.DateCreation.ToString("yyyy-MM-dd HH:mm:ss"));
 
-                    command.ExecuteNonQuery();
+                            menuId = Convert.ToInt32(command.ExecuteScalar());
+                            menu.Id = menuId;
+                        }
+
+                        // Insert elements into ElementMenus table
+                        if (menu.Elements != null && menu.Elements.Count > 0)
+                        {
+                            // Valider que tous les plats existent et appartiennent au restaurant
+                            foreach (ElementMenu element in menu.Elements)
+                            {
+                                string checkPlatQuery = @"SELECT COUNT(*) FROM Plats WHERE Id = @PlatId AND RestaurantId = @RestaurantId";
+                                using (SqliteCommand checkCommand = new SqliteCommand(checkPlatQuery, connection, transaction))
+                                {
+                                    checkCommand.Parameters.AddWithValue("@PlatId", element.PlatId);
+                                    checkCommand.Parameters.AddWithValue("@RestaurantId", menu.RestaurantId);
+
+                                    long count = (long)(checkCommand.ExecuteScalar() ?? 0);
+                                    if (count == 0)
+                                    {
+                                        throw new InvalidOperationException($"Le plat avec l'ID {element.PlatId} n'existe pas ou n'appartient pas au restaurant {menu.RestaurantId}.");
+                                    }
+                                }
+                            }
+
+                            string elementQuery = @"INSERT INTO ElementMenus (MenuId, PlatId, Categorie, Ordre)
+                                                  VALUES (@MenuId, @PlatId, @Categorie, @Ordre)";
+
+                            foreach (ElementMenu element in menu.Elements)
+                            {
+                                using (SqliteCommand command = new SqliteCommand(elementQuery, connection, transaction))
+                                {
+                                    command.Parameters.AddWithValue("@MenuId", menuId);
+                                    command.Parameters.AddWithValue("@PlatId", element.PlatId);
+                                    command.Parameters.AddWithValue("@Categorie", (int)element.Categorie);
+                                    command.Parameters.AddWithValue("@Ordre", element.Ordre);
+
+                                    command.ExecuteNonQuery();
+                                }
+                            }
+                        }
+
+                        transaction.Commit();
+                    }
+                    catch
+                    {
+                        transaction.Rollback();
+                        throw;
+                    }
                 }
             }
         }
@@ -86,10 +120,9 @@ namespace EpicurApp_API.DAO
             {
                 connection.Open();
 
-                string query = @"SELECT Id, Nom, Date, Statut, 
-                    AmuseBoucheId, BoissonAperitifId, EntreeId, 
-                    PlatPrincipalId, VinId, FromageId, DessertId 
-                    FROM Menus WHERE Id=@Id";
+                string query = @"SELECT Id, Nom, Statut, RestaurantId, Note, DateCreation,
+                                (SELECT COUNT(*) FROM Services WHERE MenuId = Menus.Id) > 0 AS EstUtilise
+                                FROM Menus WHERE Id=@Id";
 
                 using (SqliteCommand command = new SqliteCommand(query, connection))
                 {
@@ -98,7 +131,7 @@ namespace EpicurApp_API.DAO
                     {
                         if (reader.Read())
                         {
-                            return AvoirMenu(reader);
+                            return AvoirMenu(reader, connection);
                         }
                     }
                 }
@@ -117,17 +150,16 @@ namespace EpicurApp_API.DAO
             {
                 connection.Open();
 
-                string query = @"SELECT Id, Nom, Date, Statut, 
-                    AmuseBoucheId, BoissonAperitifId, EntreeId, 
-                    PlatPrincipalId, VinId, FromageId, DessertId 
-                    FROM Menus";
+                string query = @"SELECT Id, Nom, Statut, RestaurantId, Note, DateCreation,
+                                (SELECT COUNT(*) FROM Services WHERE MenuId = Menus.Id) > 0 AS EstUtilise
+                                FROM Menus";
 
                 using (SqliteCommand command = new SqliteCommand(query, connection))
                 using (SqliteDataReader reader = command.ExecuteReader())
                 {
                     while (reader.Read())
                     {
-                        menus.Add(AvoirMenu(reader));
+                        menus.Add(AvoirMenu(reader, connection));
                     }
                 }
             }
@@ -135,38 +167,107 @@ namespace EpicurApp_API.DAO
         }
 
         /// <summary>
-        /// Récupère le dernier menu en statut "Brouillon".
+        /// Récupère tous les menus d'un restaurant spécifique.
         /// </summary>
-        /// <returns>Le dernier menu brouillon ou null.</returns>
-        public Menu? GetDernierBrouillon()
+        /// <param name="restaurantId">Identifiant du restaurant.</param>
+        /// <returns>Liste des menus du restaurant.</returns>
+        public List<Menu> GetAllByRestaurantId(int restaurantId)
+        {
+            List<Menu> menus = new List<Menu>();
+            using (SqliteConnection connection = new SqliteConnection(_connectionString))
+            {
+                connection.Open();
+
+                string query = @"SELECT Id, Nom, Statut, RestaurantId, Note, DateCreation,
+                                (SELECT COUNT(*) FROM Services WHERE MenuId = Menus.Id) > 0 AS EstUtilise
+                                FROM Menus
+                                WHERE RestaurantId = @RestaurantId";
+
+                using (SqliteCommand command = new SqliteCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@RestaurantId", restaurantId);
+
+                    using (SqliteDataReader reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            menus.Add(AvoirMenu(reader, connection));
+                        }
+                    }
+                }
+            }
+            return menus;
+        }
+
+        /// <summary>
+        /// Récupère le dernier menu en statut "Brouillon" pour un restaurant donné.
+        /// </summary>
+        /// <param name="restaurantId">Identifiant du restaurant.</param>
+        /// <returns>Le dernier menu brouillon du restaurant ou null.</returns>
+        public Menu? GetDernierBrouillon(int restaurantId)
         {
             using (SqliteConnection connection = new SqliteConnection(_connectionString))
             {
                 connection.Open();
 
-                string query = @"SELECT Id, Nom, Date, Statut,
-                    AmuseBoucheId, BoissonAperitifId, EntreeId,
-                    PlatPrincipalId, VinId, FromageId, DessertId
+                string query = @"SELECT Id, Nom, Statut, RestaurantId, Note, DateCreation,
+                    (SELECT COUNT(*) FROM Services WHERE MenuId = Menus.Id) > 0 AS EstUtilise
                     FROM Menus
-                    WHERE Statut = @Statut
-                    ORDER BY Date DESC
+                    WHERE Statut = @Statut AND RestaurantId = @RestaurantId
+                    ORDER BY Id DESC
                     LIMIT 1";
 
                 using (SqliteCommand command = new SqliteCommand(query, connection))
                 {
                     command.Parameters.AddWithValue("@Statut", "Brouillon");
+                    command.Parameters.AddWithValue("@RestaurantId", restaurantId);
 
                     using (SqliteDataReader reader = command.ExecuteReader())
                     {
                         if (reader.Read())
                         {
-                            return AvoirMenu(reader);
+                            return AvoirMenu(reader, connection);
                         }
                     }
                 }
             }
 
             return null;
+        }
+
+        /// <summary>
+        /// Récupère tous les menus validés d'un restaurant.
+        /// </summary>
+        /// <param name="restaurantId">Identifiant du restaurant.</param>
+        /// <returns>Liste des menus validés du restaurant.</returns>
+        public List<Menu> GetMenusValides(int restaurantId)
+        {
+            List<Menu> menus = new List<Menu>();
+            using (SqliteConnection connection = new SqliteConnection(_connectionString))
+            {
+                connection.Open();
+
+                string query = @"SELECT Id, Nom, Statut, RestaurantId, Note, DateCreation,
+                                (SELECT COUNT(*) FROM Services WHERE MenuId = Menus.Id) > 0 AS EstUtilise
+                                FROM Menus
+                                WHERE RestaurantId = @RestaurantId AND Statut = @Statut
+                                ORDER BY DateCreation DESC";
+
+                using (SqliteCommand command = new SqliteCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@RestaurantId", restaurantId);
+                    command.Parameters.AddWithValue("@Statut", "Validé");
+
+                    using (SqliteDataReader reader = command.ExecuteReader())
+                    {
+                        while (reader.Read())
+                        {
+                            menus.Add(AvoirMenu(reader, connection));
+                        }
+                    }
+                }
+            }
+            return menus;
         }
 
         /// <summary>
@@ -178,43 +279,80 @@ namespace EpicurApp_API.DAO
             using (SqliteConnection connection = new SqliteConnection(_connectionString))
             {
                 connection.Open();
-
-                string query = @"UPDATE Menus SET
-                    Nom = @Nom,
-                    Date = @Date,
-                    Statut = @Statut,
-                    AmuseBoucheId = @AmuseBoucheId,
-                    BoissonAperitifId = @BoissonAperitifId,
-                    EntreeId = @EntreeId,
-                    PlatPrincipalId = @PlatPrincipalId,
-                    VinId = @VinId,
-                    FromageId = @FromageId,
-                    DessertId = @DessertId
-                    WHERE Id = @Id";
-
-                using (SqliteCommand command = new SqliteCommand(query, connection))
+                using (SqliteTransaction transaction = connection.BeginTransaction())
                 {
-                    command.Parameters.AddWithValue("@Nom", menu.Nom);
-                    command.Parameters.AddWithValue("@Date", menu.Date);
-                    command.Parameters.AddWithValue("@Statut", menu.Statut);
-                    command.Parameters.AddWithValue("@Id", menu.Id);
+                    try
+                    {
+                        // Update Menus table
+                        string updateMenuQuery = @"UPDATE Menus SET
+                            Nom = @Nom,
+                            Statut = @Statut,
+                            Note = @Note
+                            WHERE Id = @Id";
 
-                    command.Parameters.AddWithValue("@AmuseBoucheId",
-                        menu.AmuseBouche?.Id ?? (object)DBNull.Value);
-                    command.Parameters.AddWithValue("@BoissonAperitifId",
-                        menu.BoissonAperitif?.Id ?? (object)DBNull.Value);
-                    command.Parameters.AddWithValue("@EntreeId",
-                        menu.Entree?.Id ?? (object)DBNull.Value);
-                    command.Parameters.AddWithValue("@PlatPrincipalId",
-                        menu.PlatPrincipal?.Id ?? (object)DBNull.Value);
-                    command.Parameters.AddWithValue("@VinId",
-                        menu.Vin?.Id ?? (object)DBNull.Value);
-                    command.Parameters.AddWithValue("@FromageId",
-                        menu.Fromage?.Id ?? (object)DBNull.Value);
-                    command.Parameters.AddWithValue("@DessertId",
-                        menu.Dessert?.Id ?? (object)DBNull.Value);
+                        using (SqliteCommand command = new SqliteCommand(updateMenuQuery, connection, transaction))
+                        {
+                            command.Parameters.AddWithValue("@Nom", menu.Nom);
+                            command.Parameters.AddWithValue("@Statut", menu.Statut);
+                            command.Parameters.AddWithValue("@Id", menu.Id);
+                            command.Parameters.AddWithValue("@Note",
+                                menu.Note.HasValue ? (object)menu.Note.Value : DBNull.Value);
 
-                    command.ExecuteNonQuery();
+                            command.ExecuteNonQuery();
+                        }
+
+                        // Delete existing elements
+                        string deleteQuery = "DELETE FROM ElementMenus WHERE MenuId=@MenuId";
+                        using (SqliteCommand command = new SqliteCommand(deleteQuery, connection, transaction))
+                        {
+                            command.Parameters.AddWithValue("@MenuId", menu.Id);
+                            command.ExecuteNonQuery();
+                        }
+
+                        // Insert new elements
+                        if (menu.Elements != null && menu.Elements.Count > 0)
+                        {
+                            // Valider que tous les plats existent et appartiennent au restaurant
+                            foreach (ElementMenu element in menu.Elements)
+                            {
+                                string checkPlatQuery = @"SELECT COUNT(*) FROM Plats WHERE Id = @PlatId AND RestaurantId = @RestaurantId";
+                                using (SqliteCommand checkCommand = new SqliteCommand(checkPlatQuery, connection, transaction))
+                                {
+                                    checkCommand.Parameters.AddWithValue("@PlatId", element.PlatId);
+                                    checkCommand.Parameters.AddWithValue("@RestaurantId", menu.RestaurantId);
+
+                                    long count = (long)(checkCommand.ExecuteScalar() ?? 0);
+                                    if (count == 0)
+                                    {
+                                        throw new InvalidOperationException($"Le plat avec l'ID {element.PlatId} n'existe pas ou n'appartient pas au restaurant {menu.RestaurantId}.");
+                                    }
+                                }
+                            }
+
+                            string insertElementQuery = @"INSERT INTO ElementMenus (MenuId, PlatId, Categorie, Ordre)
+                                                        VALUES (@MenuId, @PlatId, @Categorie, @Ordre)";
+
+                            foreach (ElementMenu element in menu.Elements)
+                            {
+                                using (SqliteCommand command = new SqliteCommand(insertElementQuery, connection, transaction))
+                                {
+                                    command.Parameters.AddWithValue("@MenuId", menu.Id);
+                                    command.Parameters.AddWithValue("@PlatId", element.PlatId);
+                                    command.Parameters.AddWithValue("@Categorie", (int)element.Categorie);
+                                    command.Parameters.AddWithValue("@Ordre", element.Ordre);
+
+                                    command.ExecuteNonQuery();
+                                }
+                            }
+                        }
+
+                        transaction.Commit();
+                    }
+                    catch
+                    {
+                        transaction.Rollback();
+                        throw;
+                    }
                 }
             }
         }
@@ -253,35 +391,64 @@ namespace EpicurApp_API.DAO
 
         /// <summary>
         /// Méthode privée pour construire un objet Menu à partir d'un SqliteDataReader.
-        /// Récupère les plats associés via leurs IDs.
+        /// Récupère les éléments associés depuis la table ElementMenus.
         /// </summary>
         /// <param name="reader">Le reader contenant les données du menu.</param>
+        /// <param name="connection">Connexion à la base de données pour charger les éléments.</param>
         /// <returns>Un objet Menu construit.</returns>
-        private Menu AvoirMenu(SqliteDataReader reader)
+        private Menu AvoirMenu(SqliteDataReader reader, SqliteConnection connection)
         {
             Menu menu = new Menu();
             menu.Id = reader.GetInt32(0);
             menu.Nom = reader.GetString(1);
-            menu.Date = reader.GetDateTime(2);
-            menu.Statut = reader.GetString(3);
+            menu.Statut = reader.GetString(2);
+            menu.RestaurantId = reader.GetInt32(3);
+            menu.Note = reader.IsDBNull(4) ? null : reader.GetInt32(4);
+            menu.DateCreation = reader.IsDBNull(5) ? DateTime.Now : DateTime.Parse(reader.GetString(5));
+            menu.EstUtilise = reader.GetBoolean(6);
 
-            // Récupération des plats via leurs IDs
-            int? amuseBoucheId = reader.IsDBNull(4) ? null : reader.GetInt32(4);
-            int? boissonAperitifId = reader.IsDBNull(5) ? null : reader.GetInt32(5);
-            int? entreeId = reader.IsDBNull(6) ? null : reader.GetInt32(6);
-            int? platPrincipalId = reader.IsDBNull(7) ? null : reader.GetInt32(7);
-            int? vinId = reader.IsDBNull(8) ? null : reader.GetInt32(8);
-            int? fromageId = reader.IsDBNull(9) ? null : reader.GetInt32(9);
-            int? dessertId = reader.IsDBNull(10) ? null : reader.GetInt32(10);
+            // Load elements from ElementMenus table
+            menu.Elements = new List<ElementMenu>();
 
-            // Chargement des plats
-            menu.AmuseBouche = amuseBoucheId.HasValue ? _platDAO.GetById(amuseBoucheId.Value) : null;
-            menu.BoissonAperitif = boissonAperitifId.HasValue ? _platDAO.GetById(boissonAperitifId.Value) : null;
-            menu.Entree = entreeId.HasValue ? _platDAO.GetById(entreeId.Value) : null;
-            menu.PlatPrincipal = platPrincipalId.HasValue ? _platDAO.GetById(platPrincipalId.Value) : null;
-            menu.Vin = vinId.HasValue ? _platDAO.GetById(vinId.Value) : null;
-            menu.Fromage = fromageId.HasValue ? _platDAO.GetById(fromageId.Value) : null;
-            menu.Dessert = dessertId.HasValue ? _platDAO.GetById(dessertId.Value) : null;
+            string elementQuery = @"SELECT Id, MenuId, PlatId, Categorie, Ordre
+                                  FROM ElementMenus
+                                  WHERE MenuId = @MenuId
+                                  ORDER BY Categorie, Ordre";
+
+            using (SqliteCommand elementCommand = new SqliteCommand(elementQuery, connection))
+            {
+                elementCommand.Parameters.AddWithValue("@MenuId", menu.Id);
+
+                using (SqliteDataReader elementReader = elementCommand.ExecuteReader())
+                {
+                    while (elementReader.Read())
+                    {
+                        int elementId = elementReader.GetInt32(0);
+                        int menuId = elementReader.GetInt32(1);
+                        int platId = elementReader.GetInt32(2);
+                        int categorieInt = elementReader.GetInt32(3);
+                        int ordre = elementReader.GetInt32(4);
+
+                        // Load the Plat
+                        Plat? plat = _platDAO.GetById(platId);
+
+                        if (plat != null)
+                        {
+                            ElementMenu element = new ElementMenu
+                            {
+                                Id = elementId,
+                                MenuId = menuId,
+                                PlatId = platId,
+                                Plat = plat,
+                                Categorie = (CategoriePlat)categorieInt,
+                                Ordre = ordre
+                            };
+
+                            menu.Elements.Add(element);
+                        }
+                    }
+                }
+            }
 
             return menu;
         }
@@ -302,6 +469,53 @@ namespace EpicurApp_API.DAO
                 {
                     command.Parameters.AddWithValue("@Id", id);
                     command.ExecuteNonQuery();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Vérifie si un menu est associé à un service dans les prochaines 24 heures.
+        /// </summary>
+        /// <param name="menuId">Identifiant du menu à vérifier.</param>
+        /// <returns>True si le menu a un service dans les 24h, False sinon.</returns>
+        public bool AServiceDansLes24Heures(int menuId)
+        {
+            using (SqliteConnection connection = new SqliteConnection(_connectionString))
+            {
+                connection.Open();
+
+                string query = @"SELECT COUNT(*) FROM Services
+                                WHERE MenuId = @MenuId
+                                AND datetime(Date) >= datetime('now')
+                                AND datetime(Date) <= datetime('now', '+24 hours')";
+
+                using (SqliteCommand command = new SqliteCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@MenuId", menuId);
+                    long count = (long)(command.ExecuteScalar() ?? 0);
+                    return count > 0;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Vérifie si un menu est utilisé dans un service.
+        /// </summary>
+        /// <param name="menuId">Id du menu à vérifier.</param>
+        /// <returns>True si le menu est assigné à au moins un service.</returns>
+        public bool EstUtilise(int menuId)
+        {
+            using (SqliteConnection connection = new SqliteConnection(_connectionString))
+            {
+                connection.Open();
+
+                string query = "SELECT COUNT(*) FROM Services WHERE MenuId = @MenuId";
+
+                using (SqliteCommand command = new SqliteCommand(query, connection))
+                {
+                    command.Parameters.AddWithValue("@MenuId", menuId);
+                    long count = (long)(command.ExecuteScalar() ?? 0);
+                    return count > 0;
                 }
             }
         }

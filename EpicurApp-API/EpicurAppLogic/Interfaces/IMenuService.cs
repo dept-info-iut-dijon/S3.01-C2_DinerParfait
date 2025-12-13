@@ -28,12 +28,6 @@ namespace EpicurAppLogic.Interfaces
         List<Menu> GetAll();
 
         /// <summary>
-        /// Récupère le dernier menu en statut brouillon.
-        /// </summary>
-        /// <returns>Menu en brouillon ou null.</returns>
-        Menu? GetDernierBrouillon();
-
-        /// <summary>
         /// Met à jour un menu existant.
         /// </summary>
         /// <param name="menu">Menu à mettre à jour.</param>
@@ -54,10 +48,30 @@ namespace EpicurAppLogic.Interfaces
         List<ElementListeCourse> GenererListeCourses(int menuId);
 
         /// <summary>
+        /// Récupère le dernier menu en statut brouillon pour un restaurant donné.
+        /// </summary>
+        /// <param name="restaurantId">Identifiant du restaurant.</param>
+        /// <returns>Menu en brouillon ou null.</returns>
+        Menu? GetDernierBrouillon(int restaurantId);
+
+        /// <summary>
         /// Supprime un menu par son Id.
         /// </summary>
         /// <param name="id">Id du menu à supprimer.</param>
         void SupprimerMenu(int id);
+
+        /// <summary>
+        /// Met à jour la note d'un menu.
+        /// </summary>
+        /// <param name="menuId">Id du menu a update</param>
+        /// <param name="note">Note attribué</param>
+        void MettreAJourNoteDuMenu(int menuId, int note);
+        /// <summary>
+        /// Ajoute une note à un menu.
+        /// </summary>
+        /// <param name="menuId">Id du menu avec la note</param>
+        /// <param name="note">Note attribué</param>
+        void AjouterNoteAuMenu(int menuId, int note);
     }
 }
 

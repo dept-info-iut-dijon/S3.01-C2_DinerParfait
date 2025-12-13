@@ -35,6 +35,21 @@ namespace EpicurAppLogic.Interfaces
         /// </summary>
         /// <param name="allergene">allergene a ajouter</param>
         void AjouterAllergene(Allergene allergene);
+
+        /// <summary>
+        /// Récupère les allergènes présents dans les ingrédients d'un menu.
+        /// </summary>
+        /// <param name="menuId">Identifiant du menu.</param>
+        /// <returns>Liste des allergènes présents dans le menu.</returns>
+        List<Allergene> GetAllergenesParMenu(int menuId);
+
+        /// <summary>
+        /// Récupère les ingrédients d'un menu qui contiennent un allergène spécifique.
+        /// </summary>
+        /// <param name="menuId">Identifiant du menu.</param>
+        /// <param name="allergeneId">Identifiant de l'allergène.</param>
+        /// <returns>Liste des ingrédients concernés.</returns>
+        List<Ingredient> GetIngredientsByMenuAndAllergene(int menuId, int allergeneId);
     }
 }
 

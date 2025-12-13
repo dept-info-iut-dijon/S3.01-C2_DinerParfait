@@ -11,7 +11,6 @@
         FontFamily="./Police/#Playfair Display">
 
     <Window.Resources>
-
         <Style x:Key="DarkComboBoxItemStyle" TargetType="ComboBoxItem">
             <Setter Property="Background" Value="#2a2a2a"/>
             <Setter Property="Foreground" Value="White"/>
@@ -29,7 +28,6 @@
             <Setter Property="Foreground" Value="White"/>
             <Setter Property="VerticalContentAlignment" Value="Center"/>
             <Setter Property="ItemContainerStyle" Value="{StaticResource DarkComboBoxItemStyle}"/>
-
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="ComboBox">
@@ -46,43 +44,15 @@
                                                 <ColumnDefinition Width="*"/>
                                                 <ColumnDefinition Width="30"/>
                                             </Grid.ColumnDefinitions>
-
-                                            <Border Grid.ColumnSpan="2"
-                                                    Background="#2a2a2a"
-                                                    BorderBrush="#D4AF37"
-                                                    BorderThickness="2"
-                                                    CornerRadius="8"/>
-
-                                            <Path Grid.Column="1"
-                                                  Fill="#D4AF37"
-                                                  Data="M 0 0 L 4 4 L 8 0 Z"
-                                                  HorizontalAlignment="Center"
-                                                  VerticalAlignment="Center"
-                                                  Width="10" Height="6"/>
+                                            <Border Grid.ColumnSpan="2" Background="#2a2a2a" BorderBrush="#D4AF37" BorderThickness="2" CornerRadius="8"/>
+                                            <Path Grid.Column="1" Fill="#D4AF37" Data="M 0 0 L 4 4 L 8 0 Z" HorizontalAlignment="Center" VerticalAlignment="Center" Width="10" Height="6"/>
                                         </Grid>
                                     </ControlTemplate>
                                 </ToggleButton.Template>
                             </ToggleButton>
-
-                            <ContentPresenter x:Name="ContentSite"
-                                              IsHitTestVisible="False"
-                                              Content="{TemplateBinding SelectionBoxItem}"
-                                              ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}"
-                                              ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}"
-                                              VerticalAlignment="Center"
-                                              HorizontalAlignment="Left"
-                                              Margin="10,0,30,0"/>
-
-                            <Popup x:Name="PART_Popup"
-                                   AllowsTransparency="True"
-                                   Placement="Bottom"
-                                   IsOpen="{Binding IsDropDownOpen, RelativeSource={RelativeSource TemplatedParent}}"
-                                   PopupAnimation="Slide">
-                                <Border Background="#2a2a2a"
-                                        BorderBrush="#D4AF37"
-                                        BorderThickness="1"
-                                        CornerRadius="4"
-                                        MaxHeight="{TemplateBinding MaxDropDownHeight}">
+                            <ContentPresenter x:Name="ContentSite" IsHitTestVisible="False" Content="{TemplateBinding SelectionBoxItem}" ContentTemplate="{TemplateBinding SelectionBoxItemTemplate}" ContentTemplateSelector="{TemplateBinding ItemTemplateSelector}" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="10,0,30,0"/>
+                            <Popup x:Name="PART_Popup" AllowsTransparency="True" Placement="Bottom" IsOpen="{Binding IsDropDownOpen, RelativeSource={RelativeSource TemplatedParent}}" PopupAnimation="Slide">
+                                <Border Background="#2a2a2a" BorderBrush="#D4AF37" BorderThickness="1" CornerRadius="4" MaxHeight="{TemplateBinding MaxDropDownHeight}">
                                     <ScrollViewer>
                                         <ItemsPresenter KeyboardNavigation.DirectionalNavigation="Contained" />
                                     </ScrollViewer>
@@ -93,16 +63,12 @@
                 </Setter.Value>
             </Setter>
         </Style>
-
     </Window.Resources>
 
-    <Border BorderBrush="#8B1538" 
-            BorderThickness="3" 
-            CornerRadius="10"
-            Margin="15">
-
+    <Border BorderBrush="#8B1538" BorderThickness="3" CornerRadius="10" Margin="15">
         <Grid Margin="30">
             <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
@@ -114,9 +80,18 @@
                 <TextBlock FontSize="14" Foreground="#D4AF37" HorizontalAlignment="Center" FontStyle="Italic" Margin="0,5,0,0"><Run Text="Nouv"/><Run Language="fr-fr" Text="eau Menu"/></TextBlock>
             </StackPanel>
 
-            <Rectangle Grid.Row="1" Height="2" Fill="#8B1538" Margin="0,20,0,20"/>
+            <Border x:Name="bdAlerteVerrouillage" Grid.Row="1" Visibility="Collapsed"
+                    Background="#FFE4E4" BorderBrush="#EF4444" BorderThickness="1" CornerRadius="5" 
+                    Margin="0,15,0,0" Padding="10">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                    <TextBlock Text="Modifications impossibles : délai de 48 h dépassé." 
+                               Foreground="#EF4444" FontWeight="Bold" VerticalAlignment="Center"/>
+                </StackPanel>
+            </Border>
 
-            <ScrollViewer Grid.Row="2" VerticalScrollBarVisibility="Hidden" Padding="5">
+            <Rectangle Grid.Row="2" Height="2" Fill="#8B1538" Margin="0,20,0,20"/>
+
+            <ScrollViewer Grid.Row="3" VerticalScrollBarVisibility="Hidden" Padding="5">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
@@ -135,74 +110,46 @@
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
-                    <Label Grid.Row="0" Grid.Column="0" Content="Nom du Menu" Foreground="#475569" FontWeight="SemiBold" FontSize="13" VerticalAlignment="Center" Margin="0,0,10,10"/>
+                    <Label Grid.Row="0" Grid.Column="0" Content="Nom du menu" Foreground="#475569" FontWeight="SemiBold" FontSize="13" VerticalAlignment="Center" Margin="0,0,10,10"/>
 
-                    <TextBox Grid.Row="0" Grid.Column="1"
-                             x:Name="txtNomMenu"
-                             Height="40"
-                             FontSize="14"
-                             Padding="10,0,0,0"
-                             VerticalContentAlignment="Center"
-                             Background="#2a2a2a"
-                             Foreground="White"
-                             BorderBrush="#D4AF37"
-                             BorderThickness="2"
-                             Margin="0,0,0,10"
-                             Text="Nouveau menu"/>
+                    <TextBox Grid.Row="0" Grid.Column="1" x:Name="txtNomMenu"
+                             Height="40" FontSize="14" Padding="10,0,0,0" VerticalContentAlignment="Center"
+                             Background="#2a2a2a" Foreground="White" BorderBrush="#D4AF37" BorderThickness="2"
+                             Margin="0,0,0,10" Text="Nouveau menu"/>
 
                     <TextBlock Grid.Row="1" Grid.ColumnSpan="2" Text="Apéritif" FontSize="16" FontWeight="Bold" Foreground="#8B1538" Margin="0,15,0,5" TextAlignment="Center"/>
 
                     <Label Grid.Row="2" Grid.Column="0" Content="Amuse Bouche" Foreground="#475569" FontWeight="SemiBold" FontSize="13" VerticalAlignment="Center" Margin="0,0,10,0"/>
-
-                    <ComboBox Grid.Row="2" Grid.Column="1" Margin="0,5"
-                              x:Name="cmbAmuseGueule"
-                              Style="{StaticResource DarkRoundedComboBoxStyle}"/>
+                    <ComboBox Grid.Row="2" Grid.Column="1" Margin="0,5" x:Name="cmbAmuseGueule" Style="{StaticResource DarkRoundedComboBoxStyle}"/>
 
                     <Label Grid.Row="3" Grid.Column="0" Content="Boisson Apéritif" Foreground="#475569" FontWeight="SemiBold" FontSize="13" VerticalAlignment="Center" Margin="0,0,10,0"/>
-
-                    <ComboBox Grid.Row="3" Grid.Column="1" Margin="0,5"
-                              x:Name="cmbBoissonAperitif"
-                              Style="{StaticResource DarkRoundedComboBoxStyle}"/>
+                    <ComboBox Grid.Row="3" Grid.Column="1" Margin="0,5" x:Name="cmbBoissonAperitif" Style="{StaticResource DarkRoundedComboBoxStyle}"/>
 
                     <TextBlock Grid.Row="4" Grid.ColumnSpan="2" Text="Repas" FontSize="16" FontWeight="Bold" Foreground="#8B1538" Margin="0,20,0,5" TextAlignment="Center"/>
 
                     <Label Grid.Row="5" Grid.Column="0" Content="Entrée" Foreground="#475569" FontWeight="SemiBold" FontSize="13" VerticalAlignment="Center" Margin="0,0,10,0"/>
-
-                    <ComboBox Grid.Row="5" Grid.Column="1" Margin="0,5"
-                              x:Name="cmbEntree"
-                              Style="{StaticResource DarkRoundedComboBoxStyle}"/>
+                    <ComboBox Grid.Row="5" Grid.Column="1" Margin="0,5" x:Name="cmbEntree" Style="{StaticResource DarkRoundedComboBoxStyle}"/>
 
                     <Label Grid.Row="6" Grid.Column="0" Content="Plat Principal" Foreground="#475569" FontWeight="SemiBold" FontSize="13" VerticalAlignment="Center" Margin="0,0,10,0"/>
-
-                    <ComboBox Grid.Row="6" Grid.Column="1" Margin="0,5"
-                              x:Name="cmbPlat"
-                              Style="{StaticResource DarkRoundedComboBoxStyle}"/>
+                    <ComboBox Grid.Row="6" Grid.Column="1" Margin="0,5" x:Name="cmbPlat" Style="{StaticResource DarkRoundedComboBoxStyle}"/>
 
                     <Label Grid.Row="7" Grid.Column="0" Content="Vin" Foreground="#475569" FontWeight="SemiBold" FontSize="13" VerticalAlignment="Center" Margin="0,0,10,0"/>
-
-                    <ComboBox Grid.Row="7" Grid.Column="1" Margin="0,5"
-                              x:Name="cmbVin"
-                              Style="{StaticResource DarkRoundedComboBoxStyle}"/>
+                    <ComboBox Grid.Row="7" Grid.Column="1" Margin="0,5" x:Name="cmbVin" Style="{StaticResource DarkRoundedComboBoxStyle}"/>
 
                     <TextBlock Grid.Row="8" Grid.ColumnSpan="2" Text="Fin du Repas" FontSize="16" FontWeight="Bold" Foreground="#8B1538" Margin="0,20,0,5" TextAlignment="Center"/>
 
                     <Label Grid.Row="9" Grid.Column="0" Content="Fromage" Foreground="#475569" FontWeight="SemiBold" FontSize="13" VerticalAlignment="Center" Margin="0,0,10,0"/>
-
-                    <ComboBox Grid.Row="9" Grid.Column="1" Margin="0,5"
-                              x:Name="cmbFromage"
-                              Style="{StaticResource DarkRoundedComboBoxStyle}"/>
+                    <ComboBox Grid.Row="9" Grid.Column="1" Margin="0,5" x:Name="cmbFromage" Style="{StaticResource DarkRoundedComboBoxStyle}"/>
 
                     <Label Grid.Row="10" Grid.Column="0" Content="Dessert" Foreground="#475569" FontWeight="SemiBold" FontSize="13" VerticalAlignment="Center" Margin="0,0,10,0"/>
-
-                    <ComboBox Grid.Row="10" Grid.Column="1" Margin="0,5"
-                              x:Name="cmbDessert"
-                              Style="{StaticResource DarkRoundedComboBoxStyle}"/>
+                    <ComboBox Grid.Row="10" Grid.Column="1" Margin="0,5" x:Name="cmbDessert" Style="{StaticResource DarkRoundedComboBoxStyle}"/>
                 </Grid>
             </ScrollViewer>
 
-            <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,20,0,0">
+            <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Center" Margin="0,20,0,0">
                 <Button x:Name="btnAnnuler" Content="Annuler" Width="110" Height="45" Margin="0,0,10,0"
                         Background="Transparent" Foreground="#D4AF37" BorderBrush="#D4AF37" BorderThickness="2"
                         FontSize="14" FontWeight="SemiBold" Cursor="Hand" />

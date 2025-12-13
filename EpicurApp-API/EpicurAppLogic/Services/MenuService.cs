@@ -64,22 +64,6 @@ namespace EpicurAppLogic.Services
             }
         }
 
-        /// <summary>
-        /// Donne le dernier menu brouillon
-        /// </summary>
-        /// <returns>Le dernier menu en statut brouillon</returns>
-        /// <exception cref="ApplicationException">Impossible de récupérer le brouillon</exception>
-        public Menu? GetDernierBrouillon()
-        {
-            try
-            {
-                return _menuDAO.GetDernierBrouillon();
-            }
-            catch (Exception ex)
-            {
-                throw new ApplicationException("Erreur lors de la récupération du brouillon de menu.", ex);
-            }
-        }
 
         /// <summary>
         /// Ajoute un nouveau menu
@@ -109,16 +93,21 @@ namespace EpicurAppLogic.Services
         /// </summary>
         /// <param name="menu">Menu a mettre à jour</param>
         /// <exception cref="InvalidFieldException">Informations du menu insuffisantes id,nom</exception>
+        /// <exception cref="InvalidOperationException">Le menu ne peut pas être modifié car il est associé à un service dans les 24 heures</exception>
         /// <exception cref="ApplicationException">Impossible de mettre à jour le menu</exception>
         public void MettreAJourMenu(Menu menu)
         {
             if (menu.Id <= 0)
-                throw new InvalidFieldException("L'identifiant du menu est obligatoire pour la mise à jour.");
+                throw new InvalidFieldException("L'identifiant du menu est obligatoire.");
 
             if (string.IsNullOrWhiteSpace(menu.Nom))
                 throw new InvalidFieldException("Le nom du menu est obligatoire.");
 
             ValiderStatut(menu.Statut);
+
+            // Vérifier si le menu est associé à un service (passé ou futur)
+            if (_menuDAO.EstUtilise(menu.Id))
+                throw new InvalidOperationException("Le menu ne peut pas être modifié car il est utilisé dans un service.");
 
             try
             {
@@ -164,16 +153,11 @@ namespace EpicurAppLogic.Services
             if (menu == null)
                 throw new InvalidFieldException($"Menu {menuId} introuvable.");
 
-            List<int> idsPlats = new List<int?>
-            {
-                menu.AmuseBouche?.Id,
-                menu.BoissonAperitif?.Id,
-                menu.Entree?.Id,
-                menu.PlatPrincipal?.Id,
-                menu.Vin?.Id,
-                menu.Fromage?.Id,
-                menu.Dessert?.Id
-            }.Where(id => id.HasValue).Select(id => id!.Value).ToList();
+            // Récupérer tous les IDs de plats depuis les éléments du menu
+            List<int> idsPlats = menu.Elements
+                .Select(e => e.PlatId)
+                .Distinct()
+                .ToList();
 
             List<Ingredient> tousLesIngredients = new List<Ingredient>();
 
@@ -188,7 +172,7 @@ namespace EpicurAppLogic.Services
 
             return tousLesIngredients
                 .GroupBy(ing => ing.Id)
-                .Select(g => new ElementListeCourse 
+                .Select(g => new ElementListeCourse
                 {
                     Ingredient = g.First(),
                     Quantite = g.Count()
@@ -196,6 +180,23 @@ namespace EpicurAppLogic.Services
                 .OrderBy(e => e.Ingredient.Categorie)
                 .ThenBy(e => e.Ingredient.Nom)
                 .ToList();
+        }
+
+        /// <summary>
+        /// Récupère le dernier menu en statut brouillon pour un restaurant donné.
+        /// </summary>
+        /// <param name="restaurantId">Identifiant du restaurant.</param>
+        /// <returns>Menu en brouillon ou null.</returns>
+        public Menu? GetDernierBrouillon(int restaurantId)
+        {
+            try
+            {
+                return _menuDAO.GetDernierBrouillon(restaurantId);
+            }
+            catch (Exception ex)
+            {
+                throw new ApplicationException("Erreur lors de la récupération du dernier brouillon.", ex);
+            }
         }
 
         /// <summary>
@@ -234,6 +235,42 @@ namespace EpicurAppLogic.Services
             catch (Exception ex)
             {
                 throw new ApplicationException("Erreur lors de la suppression du menu.", ex);
+            }
+        }
+
+        /// <summary>
+        /// Met à jour une note d'un menu.
+        /// </summary>
+        public void MettreAJourNoteDuMenu(int menuId, int note)
+        {
+            AjouterNoteAuMenu(menuId, note);
+        }
+
+        /// <summary>
+        /// Ajoute ou modifie une note à un menu.
+        /// </summary>
+        public void AjouterNoteAuMenu(int menuId, int note)
+        {
+            if (note < 0 || note > 5)
+            {
+                throw new InvalidFieldException("La note doit être comprise entre 0 et 5.");
+            }
+
+            Menu? menu = _menuDAO.GetById(menuId);
+            if (menu == null)
+            {
+                throw new EntityNotFoundException("Le menu",menuId);
+            }
+
+            menu.Note = note;
+
+            try
+            {
+                _menuDAO.MettreAJourMenu(menu);
+            }
+            catch (Exception ex)
+            {
+                throw new ApplicationException("Erreur lors de la sauvegarde de la note.", ex);
             }
         }
     }

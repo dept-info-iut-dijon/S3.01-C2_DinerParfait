@@ -1,6 +1,4 @@
 ﻿using EpicurAPP_Partage.Models;
-using System.Net.Http;
-using System.Net.Http.Json;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
@@ -14,13 +12,13 @@ namespace EpicurAppIHM.Views
     public partial class FicheClient : Window
     {
         /// <summary>
-        /// L'instance HttpClient pour les appels API
-        /// </summary>
-        private HttpClient _httpClient;
-        /// <summary>
         /// Liste des allergènes disponibles
         /// </summary>
-        private List<Allergene> allergenes;
+        private List<Allergene> allergenes = new List<Allergene>();
+        /// <summary>
+        /// Dictionnaire pour tracker les allergènes sélectionnés (ID -> IsSelected)
+        /// </summary>
+        private Dictionary<int, bool> _allergenesSelectionnes = new Dictionary<int, bool>();
         /// <summary>
         /// L'ID du client en consultation/modification
         /// </summary>
@@ -37,7 +35,6 @@ namespace EpicurAppIHM.Views
         public FicheClient()
         {
             InitializeComponent();
-            _httpClient = App.ApiClient.HttpClient;
             _modeModification = false;
             ChargerAllergenes();
         }
@@ -50,7 +47,6 @@ namespace EpicurAppIHM.Views
         public FicheClient(int clientId, bool modeConsultation = true)
         {
             InitializeComponent();
-            _httpClient = App.ApiClient.HttpClient;
             _clientId = clientId;
             _modeModification = true;
 
@@ -68,8 +64,17 @@ namespace EpicurAppIHM.Views
                 btnCreer.Content = "Enregistrer";
                 btnCreer.Visibility = Visibility.Visible;
             }
+            // Charger d'abord le client pour obtenir ses allergènes, puis charger la liste des allergènes
+            ChargerClientPuisAllergenes();
+        }
+
+        /// <summary>
+        /// Charge le client puis les allergènes (nécessaire pour avoir _allergenesClient avant de charger la liste)
+        /// </summary>
+        private async void ChargerClientPuisAllergenes()
+        {
+            await ChargerClientAsync();
             ChargerAllergenes();
-            ChargerClient();
         }
 
         /// <summary>
@@ -80,12 +85,20 @@ namespace EpicurAppIHM.Views
         {
             try
             {
-                List<Allergene> listeAllergenes = await _httpClient.GetFromJsonAsync<List<Allergene>>("Allergenes");
-                allergenes = listeAllergenes;
+                allergenes = await App.AllergeneRepository.GetAllAsync();
+
+                // Initialiser le dictionnaire de sélection
+                _allergenesSelectionnes.Clear();
+                foreach (Allergene allergene in allergenes)
+                {
+                    _allergenesSelectionnes[allergene.Id] = _allergenesClient.Contains(allergene.Id);
+                }
+
                 lstAllergenes.ItemsSource = allergenes;
             }
             catch (Exception ex)
             {
+
                 MessageBox.Show("Impossible de charger les allergènes : " + ex.Message,
                                 "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
             }
@@ -97,11 +110,21 @@ namespace EpicurAppIHM.Views
         /// <exception cref="Exception">Erreur de chargement du client</exception>
         private async void ChargerClient()
         {
+            await ChargerClientAsync();
+            ChargerAllergenes();
+        }
+
+        /// <summary>
+        /// Charge les données du client de manière asynchrone
+        /// </summary>
+        /// <exception cref="Exception">Erreur de chargement du client</exception>
+        private async Task ChargerClientAsync()
+        {
             if (!_clientId.HasValue) return;
 
             try
             {
-                Client client = await _httpClient.GetFromJsonAsync<Client>($"Client/{_clientId.Value}");
+                Client? client = await App.ClientRepository.GetByIdAsync(_clientId.Value);
 
                 if (client == null)
                 {
@@ -157,45 +180,43 @@ namespace EpicurAppIHM.Views
         }
 
         /// <summary>
-        /// Trouve la CheckBox dans un élément de liste
-        /// </summary>
-        /// <returns>CheckBox trouvée ou null</returns>
-        private CheckBox TrouverCheckBox(DependencyObject parent)
-        {
-            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(parent); i++)
-            {
-                DependencyObject child = VisualTreeHelper.GetChild(parent, i);
-                if (child is CheckBox checkBox)
-                    return checkBox;
-
-                CheckBox result = TrouverCheckBox(child);
-                if (result != null)
-                    return result;
-            }
-            return null;
-        }
-
-        /// <summary>
-        /// Gère l'expansion de l'Expander pour cocher les allergènes du client
+        /// Gère l'expansion de l'Expander
         /// </summary>
         private void ExpanderAllergenes_Expanded(object sender, RoutedEventArgs e)
         {
-            // Forcer la génération des conteneurs
-            lstAllergenes.UpdateLayout();
+            // Les événements des CheckBox gèrent maintenant la sélection
+        }
 
-            // Cocher les allergènes correspondants
-            foreach (object item in lstAllergenes.Items)
+        /// <summary>
+        /// Initialise l'état de la CheckBox lors du chargement
+        /// </summary>
+        private void CheckBoxAllergene_Loaded(object sender, RoutedEventArgs e)
+        {
+            if (sender is CheckBox checkBox && checkBox.Tag is int id)
             {
-                ContentPresenter container = lstAllergenes.ItemContainerGenerator.ContainerFromItem(item) as ContentPresenter;
-                if (container != null)
-                {
-                    CheckBox checkBox = TrouverCheckBox(container);
-                    if (checkBox != null && checkBox.Tag != null)
-                    {
-                        int allergeneId = (int)checkBox.Tag;
-                        checkBox.IsChecked = _allergenesClient.Contains(allergeneId);
-                    }
-                }
+                checkBox.IsChecked = _allergenesSelectionnes.ContainsKey(id) && _allergenesSelectionnes[id];
+            }
+        }
+
+        /// <summary>
+        /// Met à jour le dictionnaire quand une CheckBox est cochée
+        /// </summary>
+        private void CheckBoxAllergene_Checked(object sender, RoutedEventArgs e)
+        {
+            if (sender is CheckBox checkBox && checkBox.Tag is int id)
+            {
+                _allergenesSelectionnes[id] = true;
+            }
+        }
+
+        /// <summary>
+        /// Met à jour le dictionnaire quand une CheckBox est décochée
+        /// </summary>
+        private void CheckBoxAllergene_Unchecked(object sender, RoutedEventArgs e)
+        {
+            if (sender is CheckBox checkBox && checkBox.Tag is int id)
+            {
+                _allergenesSelectionnes[id] = false;
             }
         }
 
@@ -205,22 +226,10 @@ namespace EpicurAppIHM.Views
         /// <returns>Liste des IDs cochés</returns>
         private List<int> GetAllergenesCoches()
         {
-            List<int> ids = new List<int>();
-
-            foreach (object item in lstAllergenes.Items)
-            {
-                ContentPresenter container = lstAllergenes.ItemContainerGenerator.ContainerFromItem(item) as ContentPresenter;
-                if (container != null)
-                {
-                    CheckBox checkBox = TrouverCheckBox(container);
-                    if (checkBox != null && checkBox.IsChecked == true)
-                    {
-                        ids.Add((int)checkBox.Tag);
-                    }
-                }
-            }
-
-            return ids;
+            return _allergenesSelectionnes
+                .Where(kvp => kvp.Value)
+                .Select(kvp => kvp.Key)
+                .ToList();
         }
 
         /// <summary>
@@ -455,6 +464,8 @@ namespace EpicurAppIHM.Views
             // MODE MODIFICATION
             if (_modeModification)
             {
+                if (!_clientId.HasValue) return;
+
                 MessageBoxResult confirmation = MessageBox.Show("Voulez-vous enregistrer les modifications ?",
                                                  "Confirmation", MessageBoxButton.YesNo, MessageBoxImage.Question);
 
@@ -476,12 +487,12 @@ namespace EpicurAppIHM.Views
                         Preferences = txtPreferences.Text.Trim()
                     };
 
-                    HttpResponseMessage response = await _httpClient.PutAsJsonAsync($"Client/{_clientId.Value}", clientModifie);
+                    bool success = await App.ClientRepository.UpdateAsync(clientModifie);
 
-                    if (response.IsSuccessStatusCode)
+                    if (success)
                     {
                         List<int> allergenesCoches = GetAllergenesCoches();
-                        await _httpClient.PostAsJsonAsync($"Client/{_clientId.Value}/allergenes", allergenesCoches);
+                        await App.ClientRepository.UpdateAllergenesAsync(_clientId.Value, allergenesCoches);
 
                         MessageBox.Show("Modifications enregistrées",
                                         "Succès", MessageBoxButton.OK, MessageBoxImage.Information);
@@ -490,14 +501,8 @@ namespace EpicurAppIHM.Views
                     }
                     else
                     {
-                        string errorContent = await response.Content.ReadAsStringAsync();
-                        MessageBox.Show($"Erreur : {errorContent}", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
+                        MessageBox.Show("Erreur lors de la modification du client.", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
                     }
-                }
-                catch (HttpRequestException)
-                {
-                    MessageBox.Show("Impossible de contacter l'API.\nVérifiez qu'elle est bien lancée",
-                                    "Erreur de connexion", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
                 catch (Exception ex)
                 {
@@ -526,33 +531,18 @@ namespace EpicurAppIHM.Views
                         Preferences = txtPreferences.Text.Trim()
                     };
 
-                    HttpResponseMessage response = await _httpClient.PostAsJsonAsync("Client", client);
+                    Client clientCree = await App.ClientRepository.CreateAsync(client);
 
-                    if (response.IsSuccessStatusCode)
+                    List<int> allergenesCoches = GetAllergenesCoches();
+                    if (clientCree != null && allergenesCoches.Count > 0)
                     {
-                        Client clientCree = await response.Content.ReadFromJsonAsync<Client>();
-
-                        List<int> allergenesCoches = GetAllergenesCoches();
-                        if (clientCree != null && allergenesCoches.Count > 0)
-                        {
-                            await _httpClient.PostAsJsonAsync($"Client/{clientCree.Id}/allergenes", allergenesCoches);
-                        }
-
-                        MessageBox.Show($"Client {client.Prenom} {client.Nom} créé avec succès !",
-                                        "Succès", MessageBoxButton.OK, MessageBoxImage.Information);
-                        this.DialogResult = true;
-                        this.Close();
+                        await App.ClientRepository.UpdateAllergenesAsync(clientCree.Id, allergenesCoches);
                     }
-                    else
-                    {
-                        string errorContent = await response.Content.ReadAsStringAsync();
-                        MessageBox.Show($"Erreur : {errorContent}", "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
-                    }
-                }
-                catch (HttpRequestException)
-                {
-                    MessageBox.Show("Impossible de contacter l'API.\nVérifiez qu'elle est bien lancée",
-                                    "Erreur de connexion", MessageBoxButton.OK, MessageBoxImage.Error);
+
+                    MessageBox.Show($"Client {client.Prenom} {client.Nom} créé avec succès !",
+                                    "Succès", MessageBoxButton.OK, MessageBoxImage.Information);
+                    this.DialogResult = true;
+                    this.Close();
                 }
                 catch (Exception ex)
                 {
@@ -567,7 +557,7 @@ namespace EpicurAppIHM.Views
         }
 
         /// <summary>
-        /// Supprime le client actuel 
+        /// Supprime le client actuel
         /// </summary>
         /// <exception cref="Exception">Erreur lors de la suppression du client</exception>
         private async void SupprimerClient(object sender, RoutedEventArgs e)
@@ -581,9 +571,9 @@ namespace EpicurAppIHM.Views
 
             try
             {
-                HttpResponseMessage response = await _httpClient.DeleteAsync($"Client/{_clientId}");
+                bool success = await App.ClientRepository.DeleteAsync(_clientId.Value);
 
-                if (response.IsSuccessStatusCode)
+                if (success)
                 {
                     MessageBox.Show("Client supprimé avec succès.", "Succès", MessageBoxButton.OK, MessageBoxImage.Information);
                     this.DialogResult = true;
@@ -591,8 +581,7 @@ namespace EpicurAppIHM.Views
                 }
                 else
                 {
-                    string error = await response.Content.ReadAsStringAsync();
-                    MessageBox.Show($"Erreur lors de la suppression : {error}", "Erreur API", MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show("Erreur lors de la suppression du client.", "Erreur API", MessageBoxButton.OK, MessageBoxImage.Error);
                 }
             }
             catch (Exception ex)

@@ -28,10 +28,25 @@ namespace EpicurAppLogic.Interfaces
         List<Menu> GetAll();
 
         /// <summary>
-        /// Récupère le dernier menu en statut brouillon.
+        /// Récupère tous les menus d'un restaurant spécifique.
         /// </summary>
+        /// <param name="restaurantId">Identifiant du restaurant.</param>
+        /// <returns>Liste des menus du restaurant.</returns>
+        List<Menu> GetAllByRestaurantId(int restaurantId);
+
+        /// <summary>
+        /// Récupère le dernier menu en statut brouillon pour un restaurant donné.
+        /// </summary>
+        /// <param name="restaurantId">Identifiant du restaurant.</param>
         /// <returns>Menu en brouillon ou null.</returns>
-        Menu? GetDernierBrouillon();
+        Menu? GetDernierBrouillon(int restaurantId);
+
+        /// <summary>
+        /// Récupère tous les menus validés d'un restaurant.
+        /// </summary>
+        /// <param name="restaurantId">Identifiant du restaurant.</param>
+        /// <returns>Liste des menus validés du restaurant.</returns>
+        List<Menu> GetMenusValides(int restaurantId);
 
         /// <summary>
         /// Met à jour un menu existant.
@@ -51,6 +66,20 @@ namespace EpicurAppLogic.Interfaces
         /// </summary>
         /// <param name="id">Id du menu à supprimer.</param>
         void SupprimerMenu(int id);
+
+        /// <summary>
+        /// Vérifie si un menu est associé à un service dans les prochaines 24 heures.
+        /// </summary>
+        /// <param name="menuId">Id du menu à vérifier.</param>
+        /// <returns>True si le menu a un service dans les 24h, False sinon.</returns>
+        bool AServiceDansLes24Heures(int menuId);
+        
+        /// <summary>
+        /// Vérifie si un menu est utilisé dans un service.
+        /// </summary>
+        /// <param name="menuId">Id du menu.</param>
+        /// <returns>True si le menu est assigné à au moins un service.</returns>
+        bool EstUtilise(int menuId);
     }
 }
 

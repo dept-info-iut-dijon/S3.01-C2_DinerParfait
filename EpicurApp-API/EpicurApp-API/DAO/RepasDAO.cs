@@ -32,6 +32,7 @@ namespace EpicurApp_API.DAO
 
         /// <summary>
         /// Récupère tous les repas d'un client spécifique avec leurs menus, triés par date décroissante.
+        /// Basé sur les réservations passées (services passés).
         /// </summary>
         /// <param name="clientId">Identifiant du client.</param>
         /// <returns>Liste des repas du client avec leurs menus associés.</returns>
@@ -43,11 +44,25 @@ namespace EpicurApp_API.DAO
             {
                 connection.Open();
 
+                // Nouvelle requête basée sur Reservations + Services + Menus
+                // On récupère uniquement les services passés (Date < maintenant)
                 string query = @"
-                    SELECT r.Id, r.ClientId, r.MenuId, r.Date, r.Retours
-                    FROM Repas r
-                    WHERE r.ClientId = @ClientId
-                    ORDER BY r.Date DESC";
+                    SELECT
+                        res.Id AS Reservation_Id,
+                        res.ClientId,
+                        s.MenuId,
+                        s.Date,
+                        m.Id AS Menu_Id,
+                        m.Nom AS Menu_Nom,
+                        m.Note AS Menu_Note,
+                        m.RestaurantId,
+                        res.NbCouverts
+                    FROM Reservations res
+                    INNER JOIN Services s ON res.ServiceId = s.Id
+                    INNER JOIN Menus m ON s.MenuId = m.Id
+                    WHERE res.ClientId = @ClientId
+                    AND s.Date < datetime('now')
+                    ORDER BY s.Date DESC";
 
                 using (var command = new SqliteCommand(query, connection))
                 {
@@ -57,18 +72,29 @@ namespace EpicurApp_API.DAO
                     {
                         while (reader.Read())
                         {
-                            int menuId = reader.GetInt32(2);
-                            Menu? menu = _menuDAO.GetById(menuId);
-
-                            repas.Add(new Repas
+                            Menu menu = new Menu
                             {
-                                Id = reader.GetInt32(0),
-                                ClientId = reader.GetInt32(1),
-                                MenuId = menuId,
-                                Date = DateTime.Parse(reader.GetString(3)),
-                                Retours = reader.IsDBNull(4) ? null : reader.GetString(4),
-                                Menu = menu
-                            });
+                                Id = reader.GetInt32(reader.GetOrdinal("Menu_Id")),
+                                Nom = reader.GetString(reader.GetOrdinal("Menu_Nom")),
+                                Note = reader.IsDBNull(reader.GetOrdinal("Menu_Note"))
+                                       ? null
+                                       : reader.GetInt32(reader.GetOrdinal("Menu_Note"))
+                            };
+
+                            var nouveauRepas = new Repas
+                            {
+                                // Utiliser l'ID de la réservation comme ID du repas
+                                Id = reader.GetInt32(reader.GetOrdinal("Reservation_Id")),
+                                ClientId = reader.GetInt32(reader.GetOrdinal("ClientId")),
+                                MenuId = reader.GetInt32(reader.GetOrdinal("MenuId")),
+                                Date = DateTime.Parse(reader.GetString(reader.GetOrdinal("Date"))),
+                                Retours = null, // Les retours ne sont pas encore implémentés via réservations
+                                RestaurantId = reader.GetInt32(reader.GetOrdinal("RestaurantId")),
+                                Menu = menu,
+                                Note = menu.Note
+                            };
+
+                            repas.Add(nouveauRepas);
                         }
                     }
                 }
@@ -87,9 +113,36 @@ namespace EpicurApp_API.DAO
             {
                 connection.Open();
 
+                // Vérifier que le client existe
+                string checkClientQuery = @"SELECT COUNT(*) FROM Clients WHERE Id = @ClientId";
+                using (var checkClientCommand = new SqliteCommand(checkClientQuery, connection))
+                {
+                    checkClientCommand.Parameters.AddWithValue("@ClientId", repas.ClientId);
+
+                    long clientCount = (long)(checkClientCommand.ExecuteScalar() ?? 0);
+                    if (clientCount == 0)
+                    {
+                        throw new InvalidOperationException($"Le client avec l'ID {repas.ClientId} n'existe pas.");
+                    }
+                }
+
+                // Vérifier que le menu existe et appartient au restaurant
+                string checkMenuQuery = @"SELECT COUNT(*) FROM Menus WHERE Id = @MenuId AND RestaurantId = @RestaurantId";
+                using (var checkMenuCommand = new SqliteCommand(checkMenuQuery, connection))
+                {
+                    checkMenuCommand.Parameters.AddWithValue("@MenuId", repas.MenuId);
+                    checkMenuCommand.Parameters.AddWithValue("@RestaurantId", repas.RestaurantId);
+
+                    long menuCount = (long)(checkMenuCommand.ExecuteScalar() ?? 0);
+                    if (menuCount == 0)
+                    {
+                        throw new InvalidOperationException($"Le menu avec l'ID {repas.MenuId} n'existe pas ou n'appartient pas au restaurant {repas.RestaurantId}.");
+                    }
+                }
+
                 string query = @"
-                    INSERT INTO Repas (ClientId, MenuId, Date, Retours)
-                    VALUES (@ClientId, @MenuId, @Date, @Retours);
+                    INSERT INTO Repas (ClientId, MenuId, Date, Retours, RestaurantId)
+                    VALUES (@ClientId, @MenuId, @Date, @Retours, @RestaurantId);
                     SELECT last_insert_rowid();";
 
                 using (var command = new SqliteCommand(query, connection))
@@ -98,6 +151,7 @@ namespace EpicurApp_API.DAO
                     command.Parameters.AddWithValue("@MenuId", repas.MenuId);
                     command.Parameters.AddWithValue("@Date", repas.Date.ToString("yyyy-MM-dd HH:mm:ss"));
                     command.Parameters.AddWithValue("@Retours", repas.Retours ?? (object)DBNull.Value);
+                    command.Parameters.AddWithValue("@RestaurantId", repas.RestaurantId);
 
                     var result = command.ExecuteScalar();
                     if (result != null)

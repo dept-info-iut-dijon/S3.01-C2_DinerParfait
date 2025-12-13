@@ -1,8 +1,8 @@
 ﻿using System.Collections.ObjectModel;
-using System.Net.Http.Json;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
 using MenuModel = EpicurAPP_Partage.Models.Menu;
 
 namespace EpicurAppIHM.Views
@@ -35,7 +35,14 @@ namespace EpicurAppIHM.Views
         {
             try
             {
-                List<MenuModel> menus = await App.ApiClient.HttpClient.GetFromJsonAsync<List<MenuModel>>("Menu");
+                // Assurer que le header X-Restaurant-Id est défini
+                if (App.CurrentRestaurant != null)
+                {
+                    App.ApiClient.SetRestaurantId(App.CurrentRestaurant.Id);
+                }
+
+                List<MenuModel> menus = await App.MenuRepository.GetAllAsync();
+
                 if (menus != null)
                 {
                     Menus.Clear();
@@ -50,6 +57,7 @@ namespace EpicurAppIHM.Views
             }
         }
 
+
         /// <summary>
         /// Consulte le menu sélectionné en double-cliquant dessus
         /// </summary>
@@ -57,22 +65,11 @@ namespace EpicurAppIHM.Views
         {
             if (ListBoxMenus.SelectedItem is MenuModel menuSelectionne)
             {
-                // Si c'est un brouillon, ouvrir en mode édition
-                if (menuSelectionne.Statut == "Brouillon")
-                {
-                    CreationMenu creationMenu = new CreationMenu(menuSelectionne.Id);
-                    creationMenu.Closed += (s, args) => ChargerMenus();
-                    creationMenu.ShowDialog();
-                }
-                else
-                {
-                    // Sinon, ouvrir la fenêtre de consultation du menu (lecture seule)
-                    ConsultationMenu ficheMenu = new ConsultationMenu(menuSelectionne.Id);
-                    ficheMenu.ShowDialog();
-
-                    // Recharger la liste après fermeture
-                    ChargerMenus();
-                }
+                // Toujours ouvrir la fenêtre de consultation (lecture seule)
+                // La fenêtre ConsultationMenu aura un bouton "Modifier" pour les brouillons
+                ConsultationMenu ficheMenu = new ConsultationMenu(menuSelectionne.Id);
+                ficheMenu.Closed += (s, args) => ChargerMenus();
+                ficheMenu.ShowDialog();
             }
         }
 
@@ -85,5 +82,23 @@ namespace EpicurAppIHM.Views
             creationMenu.Closed += (s, args) => ChargerMenus(); // Recharger quand la fenêtre se ferme
             creationMenu.ShowDialog();
         }
+
+        /// <summary>
+        /// Retour à la page d'accueil (Dashboard)
+        /// </summary>
+        private void RetourAccueil_Click(object sender, RoutedEventArgs e)
+        {
+            DependencyObject parent = VisualTreeHelper.GetParent(this);
+            while (parent != null && !(parent is MainView))
+            {
+                parent = VisualTreeHelper.GetParent(parent);
+            }
+
+            if (parent is MainView mainView)
+            {
+                mainView.AfficherDashboard();
+            }
+        }
     }
+
 }

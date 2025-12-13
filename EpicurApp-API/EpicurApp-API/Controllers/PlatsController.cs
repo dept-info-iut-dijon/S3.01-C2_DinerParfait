@@ -8,7 +8,7 @@ namespace EpicurApp_API.Controllers
     /// Controller pour gérer les plats.
     /// </summary>
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/plats")]
     public class PlatsController : Controller
     {
         /// <summary>
@@ -25,7 +25,24 @@ namespace EpicurApp_API.Controllers
         }
 
         /// <summary>
+        /// Helper pour récupérer le RestaurantId depuis le header X-Restaurant-Id.
+        /// </summary>
+        /// <returns>RestaurantId ou null si non fourni.</returns>
+        private int? GetRestaurantIdFromHeader()
+        {
+            if (Request.Headers.TryGetValue("X-Restaurant-Id", out var restaurantIdValue))
+            {
+                if (int.TryParse(restaurantIdValue, out int restaurantId))
+                {
+                    return restaurantId;
+                }
+            }
+            return null;
+        }
+
+        /// <summary>
         /// Récupère l'ensemble des plats.
+        /// Utilise le header X-Restaurant-Id pour filtrer par restaurant.
         /// </summary>
         /// <exception cref="Exception">En cas d'erreur lors de la récupération</exception>
         /// <returns>Liste des plats</returns>
@@ -34,8 +51,21 @@ namespace EpicurApp_API.Controllers
         {
             try
             {
-                // Récupération de tous les plats
-                List<Plat> plats = _platDAO.GetAll();
+                // Récupération du RestaurantId depuis le header
+                int? restaurantId = GetRestaurantIdFromHeader();
+
+                List<Plat> plats;
+
+                if (restaurantId.HasValue)
+                {
+                    // Filtrage par restaurant
+                    plats = _platDAO.GetAllByRestaurantId(restaurantId.Value);
+                }
+                else
+                {
+                    // Sans filtre (pour compatibilité)
+                    plats = _platDAO.GetAll();
+                }
 
                 // Si aucun plat on renvoie une liste vide pour éviter null
                 if (plats == null || plats.Count == 0)
@@ -53,6 +83,7 @@ namespace EpicurApp_API.Controllers
 
         /// <summary>
         /// Récupère un plat via son identifiant.
+        /// Vérifie que le plat appartient au restaurant de l'utilisateur via X-Restaurant-Id.
         /// <param name="id">Identifiant du plat</param>
         /// <exception cref="Exception">En cas d'erreur lors de la récupération</exception>
         /// <returns>Le plat correspondant</returns>
@@ -69,6 +100,13 @@ namespace EpicurApp_API.Controllers
                     return NotFound("Aucun plat trouvé avec l'identifiant " + id);
                 }
 
+                // Vérifier que le plat appartient au restaurant de l'utilisateur
+                int? restaurantId = GetRestaurantIdFromHeader();
+                if (restaurantId.HasValue && plat.RestaurantId != restaurantId.Value)
+                {
+                    return Forbid(); // 403 Forbidden - le plat existe mais n'appartient pas à ce restaurant
+                }
+
                 return Ok(plat);
             }
             catch (Exception exception)
@@ -79,6 +117,7 @@ namespace EpicurApp_API.Controllers
 
         /// <summary>
         /// Récupère la liste des plats appartenant à une catégorie donnée.
+        /// Utilise le header X-Restaurant-Id pour filtrer par restaurant.
         /// <param name="categorie">Catégorie des plats à récupérer</param>
         /// <exception cref="Exception">En cas d'erreur lors de la récupération</exception>
         /// <returns>Liste des plats correspondant à la catégorie</returns>
@@ -97,8 +136,21 @@ namespace EpicurApp_API.Controllers
                     return BadRequest("Catégorie invalide : " + categorie);
                 }
 
-                // Filtrer manuellement pour éviter LINQ complexe
-                List<Plat> tousLesPlats = _platDAO.GetAll();
+                // Récupération du RestaurantId depuis le header
+                int? restaurantId = GetRestaurantIdFromHeader();
+
+                // Filtrer par restaurant d'abord
+                List<Plat> tousLesPlats;
+                if (restaurantId.HasValue)
+                {
+                    tousLesPlats = _platDAO.GetAllByRestaurantId(restaurantId.Value);
+                }
+                else
+                {
+                    tousLesPlats = _platDAO.GetAll();
+                }
+
+                // Puis filtrer manuellement par catégorie
                 List<Plat> platsFiltres = new List<Plat>();
 
                 for (int i = 0; i < tousLesPlats.Count; i++)
@@ -119,6 +171,7 @@ namespace EpicurApp_API.Controllers
 
         /// <summary>
         /// Crée un nouveau plat.
+        /// Assigne automatiquement le RestaurantId depuis le header X-Restaurant-Id.
         /// <param name="plat">Plat à créer</param>
         /// <exception cref="Exception">En cas d'erreur lors de la création</exception>
         /// <returns>Le plat créé</returns>
@@ -134,10 +187,17 @@ namespace EpicurApp_API.Controllers
 
             try
             {
+                // Assigner automatiquement le RestaurantId depuis le header
+                int? restaurantId = GetRestaurantIdFromHeader();
+                if (restaurantId.HasValue)
+                {
+                    plat.RestaurantId = restaurantId.Value;
+                }
+
                 // Ajout en base
                 _platDAO.Add(plat);
 
-                // Retourne le plat créé 
+                // Retourne le plat créé
                 return Ok(plat);
             }
             catch (Exception exception)

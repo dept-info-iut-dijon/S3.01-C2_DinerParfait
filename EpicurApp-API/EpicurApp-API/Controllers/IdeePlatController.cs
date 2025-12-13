@@ -15,18 +15,41 @@ namespace EpicurApp_API.Controllers
         /// IService pour gérer les idées de plats.
         /// </summary>
         private readonly IIdeePlatService _ideePlatService;
+        private readonly IIdeePlatDAO _ideePlatDAO;
 
         /// <summary>
-        /// Constructeur : injection du service des idées de plats.
+        /// Constructeur : injection du service et du DAO des idées de plats.
         /// </summary>
         /// <param name="ideePlatService">idée des plats a servir</param>
-        public IdeePlatController(IIdeePlatService ideePlatService)
+        /// <param name="ideePlatDAO">DAO des idées de plats</param>
+        public IdeePlatController(IIdeePlatService ideePlatService, IIdeePlatDAO ideePlatDAO)
         {
             _ideePlatService = ideePlatService;
+            _ideePlatDAO = ideePlatDAO;
+        }
+
+        /// <summary>
+        /// Helper pour récupérer le RestaurantId depuis le header X-Restaurant-Id.
+        /// </summary>
+        /// <returns>RestaurantId ou null si non fourni.</returns>
+        private int? GetRestaurantIdFromHeader()
+        {
+            Microsoft.Extensions.Primitives.StringValues restaurantIdValue;
+
+            if (Request.Headers.TryGetValue("X-Restaurant-Id", out restaurantIdValue))
+            {
+                int restaurantId;
+                if (int.TryParse(restaurantIdValue, out restaurantId))
+                {
+                    return restaurantId;
+                }
+            }
+            return null;
         }
 
         /// <summary>
         /// Récupère toutes les idées de plats.
+        /// Utilise le header X-Restaurant-Id pour filtrer par restaurant.
         /// </summary>
         /// <exception cref="Exception">En cas d'erreur lors de la récupération</exception>
         [HttpGet]
@@ -34,7 +57,22 @@ namespace EpicurApp_API.Controllers
         {
             try
             {
-                var idees = _ideePlatService.ObtenirToutesLesIdees();
+                // Récupération du RestaurantId depuis le header
+                int? restaurantId = GetRestaurantIdFromHeader();
+
+                List<IdeePlat> idees;
+
+                if (restaurantId.HasValue)
+                {
+                    // Filtrage par restaurant
+                    idees = _ideePlatDAO.GetAllByRestaurantId(restaurantId.Value);
+                }
+                else
+                {
+                    // Sans filtre (pour compatibilité)
+                    idees = _ideePlatService.ObtenirToutesLesIdees();
+                }
+
                 return Ok(idees);
             }
             catch (Exception ex)
@@ -44,7 +82,40 @@ namespace EpicurApp_API.Controllers
         }
 
         /// <summary>
+        /// Récupère une idée de plat par son ID.
+        /// Vérifie que l'idée appartient au restaurant de l'utilisateur via X-Restaurant-Id.
+        /// </summary>
+        /// <param name="id">ID de l'idée à récupérer</param>
+        /// <exception cref="Exception">En cas d'erreur lors de la récupération</exception>
+        [HttpGet("{id}")]
+        public IActionResult GetById(int id)
+        {
+            try
+            {
+                IdeePlat? idee = _ideePlatService.ObtenirIdeeParId(id);
+                if (idee == null)
+                {
+                    return NotFound($"Aucune idée de plat trouvée avec l'ID {id}");
+                }
+
+                // Vérifier que l'idée appartient au restaurant de l'utilisateur
+                int? restaurantId = GetRestaurantIdFromHeader();
+                if (restaurantId.HasValue && idee.RestaurantId != restaurantId.Value)
+                {
+                    return Forbid(); // 403 Forbidden
+                }
+
+                return Ok(idee);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Erreur lors de la récupération de l'idée : {ex.Message}");
+            }
+        }
+
+        /// <summary>
         /// Ajoute une nouvelle idée de plat.
+        /// Assigne automatiquement le RestaurantId depuis le header X-Restaurant-Id.
         /// </summary>
         /// <exception cref="Exception">En cas d'erreur lors de l'ajout</exception>
         [HttpPost]
@@ -52,6 +123,13 @@ namespace EpicurApp_API.Controllers
         {
             try
             {
+                // Assigner automatiquement le RestaurantId depuis le header
+                int? restaurantId = GetRestaurantIdFromHeader();
+                if (restaurantId.HasValue)
+                {
+                    idee.RestaurantId = restaurantId.Value;
+                }
+
                 _ideePlatService.AjouterIdee(idee);
                 return Ok(idee);
             }
@@ -67,6 +145,7 @@ namespace EpicurApp_API.Controllers
 
         /// <summary>
         /// Modifie une idée de plat.
+        /// Vérifie que l'idée appartient au restaurant de l'utilisateur.
         /// </summary>
         /// <param name="id">Identifiant de l'idée à modifier</param>
         /// <exception cref="Exception">En cas d'erreur lors de la modification</exception>
@@ -75,7 +154,23 @@ namespace EpicurApp_API.Controllers
         {
             try
             {
+                // Vérifier que l'idée appartient au restaurant de l'utilisateur
+                IdeePlat? existingIdee = _ideePlatService.ObtenirIdeeParId(id);
+                if (existingIdee == null)
+                {
+                    return NotFound($"Aucune idée de plat trouvée avec l'ID {id}");
+                }
+
+                int? restaurantId = GetRestaurantIdFromHeader();
+                if (restaurantId.HasValue && existingIdee.RestaurantId != restaurantId.Value)
+                {
+                    return Forbid(); // 403 Forbidden
+                }
+
+                // S'assurer que le RestaurantId ne change pas
                 idee.Id = id;
+                idee.RestaurantId = existingIdee.RestaurantId;
+
                 _ideePlatService.ModifierIdee(idee);
                 return Ok(idee);
             }
@@ -92,7 +187,7 @@ namespace EpicurApp_API.Controllers
         /// <summary>
         /// Supprime une idée de plat.
         /// </summary>
-        /// <param> name="id">Identifiant de l'idée à supprimer</param>
+        /// <param name="id">Identifiant de l'idée à supprimer</param>
         /// <exception cref="Exception">En cas d'erreur lors de la suppression</exception>
         [HttpDelete("{id}")]
         public IActionResult Supprimer(int id)

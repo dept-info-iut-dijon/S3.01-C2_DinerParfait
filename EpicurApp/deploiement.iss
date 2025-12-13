@@ -22,7 +22,7 @@ DefaultGroupName={#MyAppName}
 ; --- Configuration de l'installeur ---
 OutputDir=.\Output
 OutputBaseFilename=Install_EpicurApp_
-SetupIconFile=.\Images\logo.ico
+SetupIconFile= EpicurAppIHM\Logo\logoappli.ico
 
 Compression=lzma
 SolidCompression=yes

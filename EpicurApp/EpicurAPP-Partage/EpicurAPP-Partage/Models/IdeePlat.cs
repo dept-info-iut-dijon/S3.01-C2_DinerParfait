@@ -17,6 +17,11 @@ namespace EpicurAPP_Partage.Models
         public int Id { get; set; }
 
         /// <summary>
+        /// Identifiant du restaurant auquel appartient cette idée de plat
+        /// </summary>
+        public int RestaurantId { get; set; }
+
+        /// <summary>
         /// Titre de plat
         /// </summary>
         public string Titre { get; set; } = "";

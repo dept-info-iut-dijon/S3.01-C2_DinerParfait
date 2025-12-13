@@ -143,9 +143,9 @@ public class MenuServiceTests
     public void GetDernierBrouillon_DoitRetournerMenu()
     {
         Menu brouillon = new Menu { Id = 2, Nom = "Brouillon" };
-        _mockMenuDAO.Setup(dao => dao.GetDernierBrouillon()).Returns(brouillon);
+        _mockMenuDAO.Setup(dao => dao.GetDernierBrouillon(It.IsAny<int>())).Returns(brouillon);
 
-        Menu? resultat = _menuService.GetDernierBrouillon();
+        Menu? resultat = _menuService.GetDernierBrouillon(1);
 
         Assert.Equal(brouillon, resultat);
     }
@@ -166,7 +166,7 @@ public class MenuServiceTests
         }
 
         Assert.NotNull(exceptionVoulue);
-        Assert.Equal("L'identifiant du menu est obligatoire pour la mise à jour.", exceptionVoulue.Message);
+        Assert.Equal("L'identifiant du menu est obligatoire.", exceptionVoulue.Message);
     }
 
     [Fact]

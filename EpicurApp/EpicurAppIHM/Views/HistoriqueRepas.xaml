@@ -5,10 +5,21 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:EpicurAppIHM.Views"
         mc:Ignorable="d"
-        Title="Historique des repas" Height="600" Width="900"
+        Title="Historique des repas" Width="950" Height="600"
         WindowStartupLocation="CenterScreen"
         Background="#FDF6E3"
         FontFamily="./Police/#Playfair Display">
+
+    <Window.Resources>
+        <Style x:Key="StarIcon" TargetType="Path">
+            <Setter Property="Width" Value="14"/>
+            <Setter Property="Height" Value="14"/>
+            <Setter Property="Stretch" Value="Uniform"/>
+            <Setter Property="Margin" Value="1"/>
+            <Setter Property="Fill" Value="#CBD5E1"/>
+            <Setter Property="Data" Value="M12,17.27L18.18,21L16.54,13.97L22,9.24L14.81,8.62L12,2L9.19,8.62L2,9.24L7.45,13.97L5.82,21L12,17.27Z"/>
+        </Style>
+    </Window.Resources>
 
     <Border BorderBrush="#8B1538" BorderThickness="3" CornerRadius="10" Margin="15">
         <Grid Margin="30">
@@ -65,6 +76,17 @@
                             </Style>
                         </DataGrid.ColumnHeaderStyle>
 
+                        <DataGrid.ItemContainerStyle>
+                            <Style TargetType="DataGridRow">
+                                <Style.Triggers>
+                                    <Trigger Property="IsMouseOver" Value="True">
+                                        <Setter Property="Background" Value="#FDF6E3"/>
+                                        <Setter Property="Cursor" Value="Hand"/>
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </DataGrid.ItemContainerStyle>
+
                         <DataGrid.Columns>
                             <DataGridTextColumn Header="Date" Binding="{Binding Date, StringFormat='{}{0:dd/MM/yyyy HH:mm}'}" Width="150">
                                 <DataGridTextColumn.ElementStyle>
@@ -88,6 +110,116 @@
                                 </DataGridTextColumn.ElementStyle>
                             </DataGridTextColumn>
 
+                            <DataGridTemplateColumn Header="Avis" Width="130">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+
+                                            <Border Tag="1" MouseLeftButtonUp="Star_Click_Handler" Cursor="Hand" Width="20" HorizontalAlignment="Center">
+                                                <Path>
+                                                    <Path.Style>
+                                                        <Style TargetType="Path" BasedOn="{StaticResource StarIcon}">
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding Menu.Note}" Value="1">
+                                                                    <Setter Property="Fill" Value="#D4AF37"/>
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding Menu.Note}" Value="2">
+                                                                    <Setter Property="Fill" Value="#D4AF37"/>
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding Menu.Note}" Value="3">
+                                                                    <Setter Property="Fill" Value="#D4AF37"/>
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding Menu.Note}" Value="4">
+                                                                    <Setter Property="Fill" Value="#D4AF37"/>
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding Menu.Note}" Value="5">
+                                                                    <Setter Property="Fill" Value="#D4AF37"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </Path.Style>
+                                                </Path>
+                                            </Border>
+
+                                            <Border Tag="2" MouseLeftButtonUp="Star_Click_Handler" Cursor="Hand" Width="20" HorizontalAlignment="Center">
+                                                <Path>
+                                                    <Path.Style>
+                                                        <Style TargetType="Path" BasedOn="{StaticResource StarIcon}">
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding Menu.Note}" Value="2">
+                                                                    <Setter Property="Fill" Value="#D4AF37"/>
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding Menu.Note}" Value="3">
+                                                                    <Setter Property="Fill" Value="#D4AF37"/>
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding Menu.Note}" Value="4">
+                                                                    <Setter Property="Fill" Value="#D4AF37"/>
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding Menu.Note}" Value="5">
+                                                                    <Setter Property="Fill" Value="#D4AF37"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </Path.Style>
+                                                </Path>
+                                            </Border>
+
+                                            <Border Tag="3" MouseLeftButtonUp="Star_Click_Handler" Cursor="Hand" Width="20" HorizontalAlignment="Center">
+                                                <Path>
+                                                    <Path.Style>
+                                                        <Style TargetType="Path" BasedOn="{StaticResource StarIcon}">
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding Menu.Note}" Value="3">
+                                                                    <Setter Property="Fill" Value="#D4AF37"/>
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding Menu.Note}" Value="4">
+                                                                    <Setter Property="Fill" Value="#D4AF37"/>
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding Menu.Note}" Value="5">
+                                                                    <Setter Property="Fill" Value="#D4AF37"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </Path.Style>
+                                                </Path>
+                                            </Border>
+
+                                            <Border Tag="4" MouseLeftButtonUp="Star_Click_Handler" Cursor="Hand" Width="20" HorizontalAlignment="Center">
+                                                <Path>
+                                                    <Path.Style>
+                                                        <Style TargetType="Path" BasedOn="{StaticResource StarIcon}">
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding Menu.Note}" Value="4">
+                                                                    <Setter Property="Fill" Value="#D4AF37"/>
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding Menu.Note}" Value="5">
+                                                                    <Setter Property="Fill" Value="#D4AF37"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </Path.Style>
+                                                </Path>
+                                            </Border>
+
+                                            <Border Tag="5" MouseLeftButtonUp="Star_Click_Handler" Cursor="Hand" Width="20" HorizontalAlignment="Center">
+                                                <Path>
+                                                    <Path.Style>
+                                                        <Style TargetType="Path" BasedOn="{StaticResource StarIcon}">
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding Menu.Note}" Value="5">
+                                                                    <Setter Property="Fill" Value="#D4AF37"/>
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </Path.Style>
+                                                </Path>
+                                            </Border>
+
+                                        </StackPanel>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                    
                             <DataGridTextColumn Header="Retours" Binding="{Binding Retours}" Width="*" MinWidth="250">
                                 <DataGridTextColumn.ElementStyle>
                                     <Style TargetType="TextBlock">

@@ -31,6 +31,13 @@ namespace EpicurAppLogic.Interfaces
         List<Client> GetAll();
 
         /// <summary>
+        /// Récupère tous les clients d'un restaurant spécifique.
+        /// </summary>
+        /// <param name="restaurantId">Identifiant du restaurant.</param>
+        /// <returns>Liste des clients du restaurant.</returns>
+        List<Client> GetAllByRestaurantId(int restaurantId);
+
+        /// <summary>
         /// Ajoute un nouveau client dans la base de données.
         /// </summary>
         /// <param name="client">Le client à ajouter.</param>
@@ -60,6 +67,23 @@ namespace EpicurAppLogic.Interfaces
         /// <param name="id">Identifiant du client.</param> 
         /// <returns>Le client trouvé ou null si non trouvé.</returns>
         Client? RechercherClientParId(int id);
+
+        /// <summary>
+        /// Récupère les clients réguliers
+        /// </summary>
+        /// <returns>Liste des clients réguliers avec leur nombre de visites.</returns>
+        List<Client> GetClientsReguliers(int? restaurantId = null);
+
+        /// <summary>
+        /// clients inactifs
+        /// </summary>
+        /// <returns>Liste des clients inactifs.</returns>
+        List<Client> GetClientsInactifs(int? restaurantId = null);
+
+        /// <summary>
+        /// clients vip
+        /// </summary>
+        List<Client> GetClientsVIP(int? restaurantId = null);
     }
 }
 

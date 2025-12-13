@@ -1,5 +1,4 @@
 ﻿using EpicurAPP_Partage.Models;
-using System.Net.Http.Json;
 using System.Windows;
 
 namespace EpicurAppIHM.Views
@@ -7,6 +6,7 @@ namespace EpicurAppIHM.Views
     public partial class ConsultationMenu : Window
     {
         private int _menuId;
+        private string _menuStatut = "";
 
         /// <summary>
         /// Intancie la fenetre avec les menus
@@ -27,8 +27,14 @@ namespace EpicurAppIHM.Views
         {
             try
             {
+                // S'assurer que le header X-Restaurant-Id est défini
+                if (App.CurrentRestaurant != null)
+                {
+                    App.ApiClient.SetRestaurantId(App.CurrentRestaurant.Id);
+                }
+
                 // Récupérer le menu depuis l'API
-                Menu menu = await App.ApiClient.HttpClient.GetFromJsonAsync<Menu>($"Menu/{_menuId}");
+                Menu? menu = await App.MenuRepository.GetByIdAsync(_menuId);
 
                 if (menu == null)
                 {
@@ -38,25 +44,65 @@ namespace EpicurAppIHM.Views
                 }
 
                 // Récupérer tous les plats pour afficher les noms
-                List<Plat> plats = await App.ApiClient.HttpClient.GetFromJsonAsync<List<Plat>>("Plats");
+                List<Plat> plats = await App.PlatRepository.GetAllAsync();
 
                 // Afficher les informations générales
                 txtNom.Text = menu.Nom;
-                txtDate.Text = menu.Date.ToString("dd/MM/yyyy");
                 txtStatut.Text = menu.Statut;
+                _menuStatut = menu.Statut;
 
-                // Afficher les plats (avec vérification pour les IDs null)
-                txtAmuseBouche.Text = ObtenirNomPlat(plats, menu.AmuseBouche?.Id);
-                txtBoissonAperitif.Text = ObtenirNomPlat(plats, menu.BoissonAperitif?.Id);
-                txtEntree.Text = ObtenirNomPlat(plats, menu.Entree?.Id);
-                txtPlatPrincipal.Text = ObtenirNomPlat(plats, menu.PlatPrincipal?.Id);
-                txtVin.Text = ObtenirNomPlat(plats, menu.Vin?.Id);
-                txtFromage.Text = ObtenirNomPlat(plats, menu.Fromage?.Id);
-                txtDessert.Text = ObtenirNomPlat(plats, menu.Dessert?.Id);
+                // Afficher le bouton modifier pour les brouillons
+                if (menu.Statut == "Brouillon")
+                {
+                    btnModifier.Visibility = Visibility.Visible;
+
+                    // Désactiver si le menu est utilisé dans un service
+                    if (menu.EstUtilise)
+                    {
+                        btnModifier.IsEnabled = false;
+                        btnModifier.ToolTip = "Ce menu est utilisé dans un service et ne peut pas être modifié.";
+                        btnModifier.Opacity = 0.5;
+                    }
+                    else
+                    {
+                        btnModifier.IsEnabled = true;
+                        btnModifier.ToolTip = "Modifier ce menu brouillon.";
+                        btnModifier.Opacity = 1.0;
+                    }
+                }
+
+                // Récupérer le premier plat de chaque catégorie et afficher son nom
+                ElementMenu? amuseBouche = menu.Elements.FirstOrDefault(e => e.Categorie == CategoriePlat.AmuseBouche);
+                txtAmuseBouche.Text = ObtenirNomPlat(plats, amuseBouche?.PlatId);
+
+                ElementMenu? boissonAperitif = menu.Elements.FirstOrDefault(e => e.Categorie == CategoriePlat.BoissonAperitif);
+                txtBoissonAperitif.Text = ObtenirNomPlat(plats, boissonAperitif?.PlatId);
+
+                ElementMenu? entree = menu.Elements.FirstOrDefault(e => e.Categorie == CategoriePlat.Entree);
+                txtEntree.Text = ObtenirNomPlat(plats, entree?.PlatId);
+
+                ElementMenu? platPrincipal = menu.Elements.FirstOrDefault(e => e.Categorie == CategoriePlat.PlatPrincipal);
+                txtPlatPrincipal.Text = ObtenirNomPlat(plats, platPrincipal?.PlatId);
+
+                ElementMenu? vin = menu.Elements.FirstOrDefault(e => e.Categorie == CategoriePlat.Vin);
+                txtVin.Text = ObtenirNomPlat(plats, vin?.PlatId);
+
+                ElementMenu? fromage = menu.Elements.FirstOrDefault(e => e.Categorie == CategoriePlat.Fromage);
+                txtFromage.Text = ObtenirNomPlat(plats, fromage?.PlatId);
+
+                ElementMenu? dessert = menu.Elements.FirstOrDefault(e => e.Categorie == CategoriePlat.Dessert);
+                txtDessert.Text = ObtenirNomPlat(plats, dessert?.PlatId);
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Erreur lors du chargement du menu : {ex.Message}",
+                string detailErreur = $"Erreur : {ex.Message}";
+                if (ex.InnerException != null)
+                {
+                    detailErreur += $"\n\nInner Exception: {ex.InnerException.Message}";
+                }
+                detailErreur += $"\n\nStack Trace: {ex.StackTrace}";
+
+                MessageBox.Show($"Erreur lors du chargement du menu :\n\n{detailErreur}",
                                 "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
                 this.Close();
             }
@@ -73,7 +119,7 @@ namespace EpicurAppIHM.Views
             if (platId == null || plats == null)
                 return "-";
 
-            Plat plat = plats.Find(p => p.Id == platId.Value);
+            Plat? plat = plats.Find(p => p.Id == platId.Value);
             return plat?.Nom ?? "-";
         }
 
@@ -89,34 +135,24 @@ namespace EpicurAppIHM.Views
                 btnGenererListeCourses.IsEnabled = false;
                 btnGenererListeCourses.Content = "Génération en cours...";
 
-                // Appeler l'API pour générer la liste de courses
-                var response = await App.ApiClient.HttpClient.GetAsync($"Menu/{_menuId}/courses");
-                
-                if (response.IsSuccessStatusCode)
+                // Appeler le repository pour générer la liste de courses
+                var listeCourses = await App.MenuRepository.GetListeCoursesAsync(_menuId);
+
+                if (listeCourses != null && listeCourses.Any())
                 {
-                    var listeCourses = await response.Content.ReadFromJsonAsync<List<ElementListeCourse>>();
-                    
-                    if (listeCourses != null && listeCourses.Any())
-                    {
-                        // Ouvrir la fenêtre d'affichage de la liste de courses
-                        var fenetreListeCourses = new AffichageListeCourses(listeCourses, txtNom.Text);
-                        fenetreListeCourses.ShowDialog();
-                    }
-                    else
-                    {
-                        MessageBox.Show("Aucun ingrédient trouvé pour ce menu.", "Information", 
-                            MessageBoxButton.OK, MessageBoxImage.Information);
-                    }
+                    // Ouvrir la fenêtre d'affichage de la liste de courses
+                    var fenetreListeCourses = new AffichageListeCourses(listeCourses, txtNom.Text);
+                    fenetreListeCourses.ShowDialog();
                 }
                 else
                 {
-                    MessageBox.Show("Erreur lors de la génération de la liste de courses.", "Erreur", 
-                        MessageBoxButton.OK, MessageBoxImage.Error);
+                    MessageBox.Show("Aucun ingrédient trouvé pour ce menu.", "Information",
+                        MessageBoxButton.OK, MessageBoxImage.Information);
                 }
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Erreur lors de la génération de la liste de courses : {ex.Message}", 
+                MessageBox.Show($"Erreur lors de la génération de la liste de courses : {ex.Message}",
                     "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
             }
             finally
@@ -145,9 +181,9 @@ namespace EpicurAppIHM.Views
                     btnSupprimer.IsEnabled = false;
                     btnSupprimer.Content = "Suppression...";
 
-                    var response = await App.ApiClient.HttpClient.DeleteAsync($"Menu/{_menuId}");
+                    bool success = await App.MenuRepository.DeleteAsync(_menuId);
 
-                    if (response.IsSuccessStatusCode)
+                    if (success)
                     {
                         MessageBox.Show("Menu supprimé avec succès.", "Succès",
                             MessageBoxButton.OK, MessageBoxImage.Information);
@@ -155,8 +191,7 @@ namespace EpicurAppIHM.Views
                     }
                     else
                     {
-                        string errorDetails = await response.Content.ReadAsStringAsync();
-                        MessageBox.Show($"Erreur lors de la suppression du menu :\n{errorDetails}",
+                        MessageBox.Show("Erreur lors de la suppression du menu.",
                             "Erreur", MessageBoxButton.OK, MessageBoxImage.Error);
                         btnSupprimer.IsEnabled = true;
                         btnSupprimer.Content = "Supprimer";
@@ -177,6 +212,19 @@ namespace EpicurAppIHM.Views
         /// </summary>
         private void Fermer_Click(object sender, RoutedEventArgs e)
         {
+            this.Close();
+        }
+
+        /// <summary>
+        /// Ouvre la fenêtre d'édition pour modifier le brouillon
+        /// </summary>
+        private void Modifier_Click(object sender, RoutedEventArgs e)
+        {
+            // Ouvrir la fenêtre de création en mode édition
+            CreationMenu creationMenu = new CreationMenu(_menuId);
+            creationMenu.ShowDialog();
+
+            // Fermer la fenêtre de consultation
             this.Close();
         }
     }
